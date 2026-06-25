@@ -35,3 +35,12 @@ npm run preview  # serve o build
 
 O site e bilingue. O idioma e trocado in-place (sem reload) pelo seletor na stat "Idiomas".
 Strings de UI em `src/app/i18n.js`; traducoes dos projetos em `src/modules/projects/data/projects.en.js`.
+
+## Deploy
+
+Cloudflare Pages (projeto `helioportifolio`):
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name=helioportifolio
+```
