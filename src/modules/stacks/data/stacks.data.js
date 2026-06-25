@@ -1,0 +1,23 @@
+// Stacks dominadas (fonte: currículo do Helio). Exibidas no carrossel/marquee.
+export const stacks = [
+  'Next.js',
+  'Astro',
+  'React',
+  'TypeScript',
+  'Tailwind CSS',
+  'Node.js',
+  'PostgreSQL',
+  'Drizzle ORM',
+  'Supabase',
+  'n8n',
+  'OpenAI',
+  'Claude',
+  'Gemini',
+  'Cloudflare Workers',
+  'WhatsApp API',
+  'Evolution API',
+  'Stripe',
+  'Asaas',
+  'Docker',
+  'Vite',
+];
