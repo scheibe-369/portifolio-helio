@@ -11,3 +11,13 @@ Online: https://helioportifolio.methodgrowthhub.com.br
 - JavaScript (vanilla, sem framework)
 - Lucide (icones)
 - Deploy: Cloudflare Pages
+
+## Estrutura
+
+Arquitetura modular (Feature-Sliced):
+
+- `src/app/` — composicao da pagina e i18n
+- `src/modules/profile/` — perfil
+- `src/modules/projects/` — projetos (filtro, paginacao e modal)
+- `src/modules/stacks/` — carrossel de stacks
+- `src/styles/global.css` — estilos globais
