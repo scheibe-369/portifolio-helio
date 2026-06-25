@@ -21,3 +21,12 @@ Arquitetura modular (Feature-Sliced):
 - `src/modules/projects/` — projetos (filtro, paginacao e modal)
 - `src/modules/stacks/` — carrossel de stacks
 - `src/styles/global.css` — estilos globais
+
+## Como rodar
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # gera dist/
+npm run preview  # serve o build
+```
