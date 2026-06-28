@@ -24,7 +24,7 @@ const feature = (f, accent) => `
 
 const block = (title, text) => `
           <div>
-            <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1.5">${title}</h3>
+            <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1.5 metallic-silver w-fit">${title}</h3>
             <p class="text-sm text-white/70 leading-relaxed">${text}</p>
           </div>`;
 
@@ -64,7 +64,7 @@ function modalContent(p) {
               <img src="${p.image}" alt="${p.name}" class="w-full h-full ${chipImgClass}">
             </div>
             <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">${p.name}</h2>
+              <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${p.name}</h2>
               <p class="text-[11px] uppercase tracking-widest text-white/40 mt-1">${px(p, 'category')} · ${p.year} · ${p.client}</p>
             </div>
           </div>
@@ -77,12 +77,12 @@ function modalContent(p) {
             ${block(tui('challenge'), px(p, 'problem'))}
             ${block(tui('solution'), px(p, 'solution'))}
             <div>
-              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5">${tui('features')}</h3>
+              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${tui('features')}</h3>
               <ul class="flex flex-col gap-2">${px(p, 'features').map((f) => feature(f, p.accent)).join('')}
               </ul>
             </div>
             <div>
-              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5">${tui('stackLabel')}</h3>
+              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${tui('stackLabel')}</h3>
               <div class="flex flex-wrap gap-2">${px(p, 'stack').map(chip).join('')}
               </div>
             </div>
