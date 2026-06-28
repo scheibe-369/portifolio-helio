@@ -11,7 +11,7 @@ export function renderStacksMarquee() {
   return `
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4"
       style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent); --border-radius-before: 24px">
-      <span class="text-[10px] font-bold uppercase tracking-widest text-white/30">${tui('stacks')}</span>
+      <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${tui('stacks')}</span>
       <div class="stacks-marquee">
         <div class="stacks-track">${row}${row}</div>
       </div>
