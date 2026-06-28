@@ -27,7 +27,7 @@ const card = (p) => {
             </span>${p.video ? PLAY_BADGE : ''}
           </div>
           <div class="p-3 flex items-center justify-between">
-            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%]">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
               ${p.name}
             </p>
             <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
@@ -46,7 +46,7 @@ export function renderProjectsSection() {
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-white/30">${tui('projects')}</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">${tui('projects')}</span>
           <i data-lucide="arrow-right" class="h-3 w-3 text-white/20"></i>
         </div>
         <div class="flex items-center gap-3">
