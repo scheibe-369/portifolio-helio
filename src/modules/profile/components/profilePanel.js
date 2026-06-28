@@ -7,7 +7,7 @@ const statItem = (s) => {
     const lang = getLang();
     return `
             <button id="lang-toggle" type="button" class="flex flex-col text-center cursor-pointer" aria-label="${tui('langAria')}">
-              <span class="text-[10px] uppercase tracking-widest text-white/30">${t(s.label)}</span>
+              <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">${t(s.label)}</span>
               <span class="mt-1 font-bold text-base">
                 <span class="${lang === 'pt' ? 'text-white' : 'text-white/35'}">PT</span><span class="text-white/20">/</span><span class="${lang === 'en' ? 'text-white' : 'text-white/35'}">EN</span>
               </span>
@@ -15,7 +15,7 @@ const statItem = (s) => {
   }
   return `
             <div class="flex flex-col text-center">
-              <span class="text-[10px] uppercase tracking-widest text-white/30">${t(s.label)}</span>
+              <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">${t(s.label)}</span>
               <span class="mt-1 font-bold text-base">${t(s.value)}</span>
             </div>`;
 };
@@ -38,7 +38,7 @@ export function renderProfilePanel() {
         </div>
         <div>
           <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${profile.name}</h1>
-          <p class="text-xs font-medium text-white/40">${t(profile.role)}</p>
+          <p class="text-xs font-medium text-white/40 metallic-silver">${t(profile.role)}</p>
         </div>
       </div>
       <div class="flex flex-col sm:items-end sm:justify-between gap-3">
@@ -55,7 +55,7 @@ export function renderProfilePanel() {
     <!-- Bio + Sociais -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
-        <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30">${tui('about')}</h3>
+        <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${tui('about')}</h3>
         <p class="text-sm text-white/80 leading-relaxed font-medium">${t(profile.bio)}</p>
       </div>
 
