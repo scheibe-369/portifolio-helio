@@ -241,6 +241,32 @@ body {
   .stacks-track { animation: none; }
 }
 
+/* ===== Metal Shine — texto prateado animado (só em títulos/labels) ===== */
+.metallic-silver {
+  /* prata claro + feixe MÉDIO (44/50/56) que percorre a frase inteira como UM feixe só */
+  background: linear-gradient(120deg, #9ca3af 44%, #ffffff 50%, #9ca3af 56%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  /* mais lento; aplicado por palavra (cada span tem o seu, com delay em cascata) */
+  animation: metallic-silver-shine 7s linear infinite;
+}
+
+@keyframes metallic-silver-shine {
+  0% { background-position: 100% 0%; }
+  100% { background-position: -100% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metallic-silver { animation: none; }
+}
+
+@media (max-width: 1024px) {
+  .metallic-silver { animation-duration: 12s; }
+}
+
 /* ===== Fix mobile: desliga o backdrop-filter (blur empilhado glitcha a pintura no celular).
    O fundo translúcido + bordas/gradientes mantêm o visual glass; o blur não agrega sobre o preto. ===== */
 @media (max-width: 768px) {
