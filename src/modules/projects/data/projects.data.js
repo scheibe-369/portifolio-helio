@@ -447,6 +447,34 @@ export const projects = [
     ],
     stack: ['Next.js', 'TypeScript', 'Framer Motion', 'Tailwind CSS'],
   },
+  {
+    slug: 'brasil-dtf-impressoras',
+    name: 'Brasil DTF Impressoras',
+    client: 'Brasil DTF',
+    category: 'Landing Page',
+    year: '2026',
+    accent: '#F2B705',
+    plateBg: '#0B1220',
+    image: '/projects/brasildtf-impressoras.png',
+    tagline:
+      'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF — da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
+    summary:
+      'Página de conversão que funciona como um menu das máquinas da Brasil DTF: apresenta as 7 impressoras segmentadas por perfil de comprador, com um guia "qual máquina é pra você?", seção de parceria (garantia, treinamento, suporte e insumos), FAQ e CTAs diretos para o WhatsApp.',
+    problem:
+      'A Brasil DTF precisava de uma vitrine única para sua linha de impressoras DTF e UV-DTF: um lugar onde o comprador entende as diferenças entre os modelos, encontra a máquina certa para o seu momento e fala com a equipe sem fricção, em vez de tirar dúvidas espalhadas.',
+    solution:
+      'Construímos uma landing page focada em conversão: um catálogo das 7 máquinas segmentado por perfil (começando agora, pequeno negócio, produção 60cm, alto volume e UV/rótulos), um guia interativo que recomenda a máquina ideal, seção de parceria (garantia, treinamento, suporte por WhatsApp, insumos abertos e condições facilitadas), FAQ e CTAs diretos para o WhatsApp. Visual forte com tipografia Bebas Neue, efeito metal-shine e cards com brilho no hover, mobile-first.',
+    features: [
+      'Catálogo das 7 impressoras DTF e UV-DTF',
+      'Segmentação por perfil de comprador',
+      'Guia interativo "qual máquina é pra você?"',
+      'Seção de parceria: garantia, treinamento, suporte e insumos',
+      'FAQ e CTAs diretos para o WhatsApp',
+      'Visual com Bebas Neue, efeito metal-shine e cards com glow',
+    ],
+    stack: ['Astro', 'TypeScript', 'Tailwind CSS', 'Sharp'],
+    link: 'https://brasildtfimpressoras.com.br',
+  },
 ];
 
 // Grupos do filtro (chave estável + label traduzível). Um projeto pode estar em vários.
@@ -459,6 +487,7 @@ export const FILTER_GROUPS = [
 
 export const projectGroups = {
   brasildtf: ['sistemas'],
+  'brasil-dtf-impressoras': ['websites'],
   porceli: ['sistemas', 'agentes-ia'],
   'manhattan-hotel': ['sistemas', 'agentes-ia'],
   newcar: ['agentes-ia'],

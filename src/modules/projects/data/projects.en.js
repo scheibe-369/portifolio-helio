@@ -21,6 +21,25 @@ export const projectsEn = {
     stack: ['Stripe (subscriptions)', 'Image processing', 'Generative AI', 'User authentication', 'Web app'],
     linkNote: 'Provisional link',
   },
+  'brasil-dtf-impressoras': {
+    category: 'Landing Page',
+    tagline: 'A catalog landing page for the Brasil DTF DTF and UV-DTF printer line — from the entry-level A3 to the 5-head industrial model, with a selection guide and direct WhatsApp contact.',
+    summary:
+      'A conversion page that works as a menu of the Brasil DTF machines: it presents the 7 printers segmented by buyer profile, with a "which machine is right for you?" guide, a partnership section (warranty, training, support and supplies), FAQ and direct WhatsApp CTAs.',
+    problem:
+      'Brasil DTF needed a single showcase for its DTF and UV-DTF printer line: a place where the buyer understands the differences between models, finds the right machine for the moment and talks to the team without friction, instead of chasing scattered answers.',
+    solution:
+      'We built a conversion-focused landing page: a catalog of the 7 machines segmented by profile (just starting out, small business, 60cm production, high volume and UV/labels), an interactive guide that recommends the ideal machine, a partnership section (warranty, training, WhatsApp support, open supplies and easy terms), FAQ and direct WhatsApp CTAs. Bold visuals with Bebas Neue typography, a metal-shine effect and hover-glow cards, mobile-first.',
+    features: [
+      'Catalog of the 7 DTF and UV-DTF printers',
+      'Segmentation by buyer profile',
+      'Interactive "which machine is right for you?" guide',
+      'Partnership section: warranty, training, support and supplies',
+      'FAQ and direct WhatsApp CTAs',
+      'Visuals with Bebas Neue, metal-shine effect and glow cards',
+    ],
+    stack: ['Astro', 'TypeScript', 'Tailwind CSS', 'Sharp'],
+  },
   porceli: {
     category: 'CRM',
     tagline: 'Multi-login CRM for a marketing agency: prospecting, pipeline, AI agent, finance and contracts.',
