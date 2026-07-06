@@ -12,7 +12,7 @@ export const projects = [
     year: '2025',
     accent: '#F2B705',
     plateBg: '#ffffff',
-    image: '/projects/brasildtf.png',
+    image: '/projects/brasildtf.webp',
     video: 'https://youtu.be/Rj3TplIKEho',
     tagline:
       'SaaS de edição de imagem para o mercado DTF: halftone, remoção de fundo e geração por IA, via assinatura.',
@@ -42,7 +42,7 @@ export const projects = [
     year: '2025',
     accent: '#8B73FF',
     plateBg: '#0d0d0d',
-    image: '/projects/porceli.png',
+    image: '/projects/porceli.webp',
     tagline:
       'CRM multilogin para agência de marketing: prospecção, pipeline, agente de IA, financeiro e contratos.',
     summary:
@@ -70,7 +70,7 @@ export const projects = [
     year: '2025',
     accent: '#7E9CD8',
     plateBg: '#020028',
-    image: '/projects/hotel.png',
+    image: '/projects/hotel.webp',
     tagline:
       'CRM hoteleiro com pipeline, financeiro e um agente de IA que atende leads no Instagram e WhatsApp.',
     summary:
@@ -97,7 +97,7 @@ export const projects = [
     year: '2024',
     accent: '#E5362F',
     plateBg: '#00192a',
-    image: '/projects/newcar.png',
+    image: '/projects/newcar.webp',
     tagline:
       'Agente de IA que atende, qualifica e distribui leads de uma revenda de carros, direto no WhatsApp.',
     summary:
@@ -124,7 +124,7 @@ export const projects = [
     year: '2025',
     accent: '#C96A41',
     plateBg: '#fdf4ef',
-    image: '/projects/maternaforte.png',
+    image: '/projects/maternaforte.webp',
     video: 'https://youtu.be/jwuYRA94UuU',
     tagline: 'Site e área de membros multiprofissional para o programa MaternaForte.',
     summary:
@@ -153,7 +153,7 @@ export const projects = [
     year: '2025',
     accent: '#D11F36',
     plateBg: '#ffffff',
-    image: '/projects/previa.png',
+    image: '/projects/previa.webp',
     video: 'https://youtu.be/nE1K4U8VSBQ',
     tagline: 'Geração e disparo automático de boletos via WhatsApp e e-mail, sem intervenção manual.',
     summary:
@@ -180,7 +180,7 @@ export const projects = [
     year: '2025',
     accent: '#7C5CFC',
     fit: 'cover',
-    image: '/projects/agents.jpg',
+    image: '/projects/agents.webp',
     video: 'https://youtu.be/lB_ZH0cKZf8',
     link: 'https://agentes.methodgrowthhub.com.br',
     tagline: 'Sandbox online para testar 6 agentes de IA de nível produção, cada um especializado em um nicho.',
@@ -208,7 +208,7 @@ export const projects = [
     year: '2025',
     accent: '#8B5CF6',
     fit: 'cover',
-    image: '/projects/growth-hub-cover.png',
+    image: '/projects/growth-hub-cover.webp',
     video: 'https://youtu.be/ZWsXiQ96Rlw',
     link: 'https://methodgrowthhub.com.br',
     tagline: 'Site institucional de uma agência de tecnologia, do zero, com foco em impacto visual e credibilidade técnica.',
@@ -236,7 +236,7 @@ export const projects = [
     year: '2025',
     accent: '#7C5CFC',
     fit: 'cover',
-    image: '/projects/token.jpg',
+    image: '/projects/token.webp',
     video: 'https://youtu.be/hUPErH-prS0',
     link: 'https://contagem-tokens.methodgrowthhub.com.br',
     tagline: 'Simule o custo de agentes de IA antes de colocar em produção, saiba o preço por conversa antes da fatura chegar.',
@@ -264,7 +264,7 @@ export const projects = [
     year: '2025',
     accent: '#7C5CFC',
     fit: 'cover',
-    image: '/projects/goat.jpg',
+    image: '/projects/goat.webp',
     video: 'https://youtu.be/kj62cah0MFU',
     link: 'https://sistemagoat.methodgrowthhub.com.br',
     linkNote: 'Demo com dados fictícios',
@@ -295,7 +295,7 @@ export const projects = [
     year: '2025',
     accent: '#7C5CFC',
     fit: 'cover',
-    image: '/projects/pipeline-video-ia.png',
+    image: '/projects/pipeline-video-ia.webp',
     tagline: 'Manda a ideia no Telegram e o vídeo é criado por IA e publicado sozinho.',
     summary:
       'Você envia uma ideia de vídeo com uma imagem de referência no Telegram. Um agente monta o prompt mestre, o Google Veo gera o vídeo, e o fluxo publica nas redes, te devolve o vídeo pronto no Telegram e registra tudo num dashboard.',
@@ -321,7 +321,7 @@ export const projects = [
     year: '2024',
     accent: '#2563EB',
     fit: 'cover',
-    image: '/projects/chatbot-clinicas.png',
+    image: '/projects/chatbot-clinicas.webp',
     tagline: 'Chatbot de IA que atende e agenda no WhatsApp, Instagram e Facebook, tudo num fluxo só.',
     summary:
       'Chatbot para clínicas de saúde e estética que junta o atendimento das três redes num lugar só: responde de forma personalizada, agenda consultas com lembrete no calendário, envia vídeos, imagens e documentos para o paciente, contorna objeções e ainda captura e qualifica leads.',
@@ -347,7 +347,7 @@ export const projects = [
     year: '2025',
     accent: '#10B981',
     fit: 'cover',
-    image: '/projects/automacao-financeira-asaas.png',
+    image: '/projects/automacao-financeira-asaas.webp',
     tagline: 'Lembrete de pagamento automático por WhatsApp e e-mail, integrado ao Asaas.',
     summary:
       'Automação financeira ligada ao Asaas que roda dois fluxos: um se antecipa avisando das contas perto de vencer, e outro corre atrás das vencidas com uma cadência de follow-up inteligente. Toda mensagem é montada na hora, conforme o contexto.',
@@ -372,7 +372,7 @@ export const projects = [
     year: '2025',
     accent: '#06B6D4',
     fit: 'cover',
-    image: '/projects/infra-agentes-ia.png',
+    image: '/projects/infra-agentes-ia.webp',
     tagline: 'Base para rodar agentes de IA com roteamento inteligente e camada anti-alucinação.',
     summary:
       'Uma infraestrutura central de agentes de IA para a operação interna e para clientes que exigem controle e confiabilidade altos. Tem gestão de estado robusta e um roteador inteligente que distribui e orquestra os fluxos, com o foco em prevenir alucinação e proteger a informação.',
@@ -397,7 +397,7 @@ export const projects = [
     year: '2026',
     accent: '#2F6BFF',
     fit: 'cover',
-    image: '/projects/damascena-films.png',
+    image: '/projects/damascena-films.webp',
     video: 'https://youtu.be/_LGj734-vew',
     link: 'https://damascenafilms.com.br',
     linkNote: 'Em finalização (aguardando os ajustes finais do cliente)',
@@ -426,7 +426,7 @@ export const projects = [
     year: '2026',
     accent: '#7C5CFC',
     fit: 'cover',
-    image: '/projects/indicacao-marcos.jpg',
+    image: '/projects/indicacao-marcos.webp',
     video: 'https://youtu.be/rItFfYZCH_k',
     link: 'https://indicacaomarcos.methodgrowthhub.com.br',
     tagline: 'Landing de indicação só por convite, com captura de leads que converte mais que formulário comum.',
@@ -455,7 +455,7 @@ export const projects = [
     year: '2026',
     accent: '#F2B705',
     plateBg: '#0B1220',
-    image: '/projects/brasildtf-impressoras.png',
+    image: '/projects/brasildtf-impressoras.webp',
     tagline:
       'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF — da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
     summary:

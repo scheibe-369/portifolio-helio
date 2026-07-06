@@ -5,8 +5,8 @@ export const profile = {
     pt: 'Automação com IA · Dev SaaS · Sistemas · Rio das Ostras, RJ',
     en: 'AI Automation · SaaS Dev · Systems · Rio das Ostras, RJ',
   },
-  avatar: '/avatar.png',
-  mainImage: '/hero.png',
+  avatar: '/avatar.webp',
+  mainImage: '/hero.webp',
   bio: {
     pt: 'Especialista em automação com IA e desenvolvedor full-stack com 3+ anos de experiência construindo agentes de IA, automações e plataformas SaaS de ponta a ponta. Lidero a frente técnica de uma agência de IA e automação, de SaaS multi-tenant a CRMs com IA, e formo uma comunidade de 30+ alunos na ION Academy. Autodidata e movido a resultado, estou aberto a novas oportunidades.',
     en: 'AI automation specialist and full-stack developer with 3+ years of experience building AI agents, automations and SaaS platforms end to end. I lead the technical side of an AI and automation agency, from multi-tenant SaaS to AI-powered CRMs, and I teach a community of 30+ students at ION Academy. Self-taught and results-driven, I am open to new opportunities.',
