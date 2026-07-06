@@ -6,7 +6,7 @@ const statItem = (s) => {
   if (s.lang) {
     const lang = getLang();
     return `
-            <button id="lang-toggle" type="button" class="flex flex-col text-center cursor-pointer" aria-label="${tui('langAria')}">
+            <button id="lang-toggle" type="button" class="flex flex-col text-center cursor-pointer" title="${tui('langAria')}">
               <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">${t(s.label)}</span>
               <span class="mt-1 font-bold text-base">
                 <span class="${lang === 'pt' ? 'text-white' : 'text-white/35'}">PT</span><span class="text-white/20">/</span><span class="${lang === 'en' ? 'text-white' : 'text-white/35'}">EN</span>
@@ -55,7 +55,7 @@ export function renderProfilePanel() {
     <!-- Bio + Sociais -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
-        <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${tui('about')}</h3>
+        <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${tui('about')}</h2>
         <p class="text-sm text-white/80 leading-relaxed font-medium">${t(profile.bio)}</p>
       </div>
 
