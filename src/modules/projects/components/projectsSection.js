@@ -21,14 +21,14 @@ const card = (p) => {
   return `
         <div data-slug="${p.slug}" data-groups="${groups}" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
           <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center"${bg}>
-            <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105">
+            <img src="${p.image}" alt="${px(p, 'name')}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105">
             <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
               ${px(p, 'category')}
             </span>${p.video ? PLAY_BADGE : ''}
           </div>
           <div class="p-3 flex items-center justify-between">
             <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
-              ${p.name}
+              ${px(p, 'name')}
             </p>
             <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
           </div>

@@ -46,14 +46,14 @@ function modalContent(p) {
   const videoHtml = vid
     ? `
           <div class="mt-5 aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black">
-            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${vid}?rel=0" title="${p.name}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+            <iframe class="w-full h-full" src="https://www.youtube.com/embed/${vid}?rel=0" title="${px(p, 'name')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
           </div>`
     : '';
 
   // Painel externo arredondado que RECORTA (overflow-hidden) + wrapper interno que rola.
   // Assim a scrollbar fica dentro do card e não vaza os cantos arredondados.
   return `
-      <div class="glass-card relative rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden" role="dialog" aria-modal="true" aria-label="${p.name}" tabindex="-1"
+      <div class="glass-card relative rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden" role="dialog" aria-modal="true" aria-label="${px(p, 'name')}" tabindex="-1"
         style="border-top: 2px solid ${p.accent};">
         <button data-modal-close aria-label="${tui('closeAria')}" class="absolute right-4 top-4 z-10 w-9 h-9 rounded-full glass-button flex items-center justify-center text-white/70 hover:text-white transition">
           ${CLOSE_SVG}
@@ -61,10 +61,10 @@ function modalContent(p) {
         <div class="max-h-[85vh] overflow-y-auto p-7 sm:p-8">
           <div class="flex items-center gap-4 pr-10">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 border border-white/10" style="${chipBg}">
-              <img src="${p.image}" alt="${p.name}" class="w-full h-full ${chipImgClass}">
+              <img src="${p.image}" alt="${px(p, 'name')}" class="w-full h-full ${chipImgClass}">
             </div>
             <div>
-              <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${p.name}</h2>
+              <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${px(p, 'name')}</h2>
               <p class="text-[11px] uppercase tracking-widest text-white/40 mt-1">${px(p, 'category')} · ${p.year} · ${p.client}</p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 // Traduções EN dos projetos (por slug). Resolvidas por px() em projects.data.js.
-// Só os campos traduzíveis; name/year/client/stack/accent/image/video/link reaproveitam o PT.
+// Campos traduzíveis; year/client/stack/accent/image/video/link reaproveitam o PT.
+// `name` só precisa de entrada aqui quando NÃO for nome próprio/marca (ex.: "Sistema GOAT").
 export const projectsEn = {
   brasildtf: {
     category: 'SaaS',
@@ -22,6 +23,7 @@ export const projectsEn = {
     linkNote: 'Provisional link',
   },
   'brasil-dtf-impressoras': {
+    name: 'Brasil DTF Printers',
     category: 'Landing Page',
     tagline: 'A catalog landing page for the Brasil DTF DTF and UV-DTF printer line: from the entry-level A3 to the 5-head industrial model, with a selection guide and direct WhatsApp contact.',
     summary:
@@ -155,6 +157,7 @@ export const projectsEn = {
     ],
   },
   'growth-hub-site': {
+    name: 'Growth Hub Site',
     category: 'Website',
     tagline: 'Institutional website for a technology agency, from scratch, focused on visual impact and technical credibility.',
     summary:
@@ -191,6 +194,7 @@ export const projectsEn = {
     ],
   },
   'sistema-goat': {
+    name: 'GOAT System',
     category: 'Platform / CRM',
     tagline: 'An all-in-one agency management platform: replaces several disconnected tools with one system.',
     summary:
@@ -212,6 +216,7 @@ export const projectsEn = {
     linkNote: 'Demo with sample data',
   },
   'pipeline-video-ia': {
+    name: 'AI Video Pipeline',
     category: 'Automation / AI',
     tagline: 'Send the idea on Telegram and the video is created by AI and published on its own.',
     summary:
@@ -231,6 +236,7 @@ export const projectsEn = {
     stack: ['n8n', 'Telegram API', 'Google Veo', 'LLM (prompt generation)'],
   },
   'chatbot-clinicas': {
+    name: 'Chatbot for Clinics',
     category: 'Chatbot / Automation',
     tagline: 'An AI chatbot that serves and books on WhatsApp, Instagram and Facebook, all in one flow.',
     summary:
@@ -250,6 +256,7 @@ export const projectsEn = {
     stack: ['ManyChat', 'WhatsApp API', 'Calendar integration'],
   },
   'automacao-financeira-asaas': {
+    name: 'Financial Automation (Asaas)',
     category: 'Automation / Billing',
     tagline: 'Automatic payment reminders via WhatsApp and email, integrated with Asaas.',
     summary:
@@ -268,6 +275,7 @@ export const projectsEn = {
     stack: ['n8n', 'Asaas API', 'WhatsApp Business API', 'Email'],
   },
   'infra-agentes-ia': {
+    name: 'AI Agent Infrastructure',
     category: 'Infrastructure / AI',
     tagline: 'A foundation to run AI agents with intelligent routing and an anti-hallucination layer.',
     summary:
@@ -305,6 +313,7 @@ export const projectsEn = {
     linkNote: 'Being finalized (awaiting the client final tweaks)',
   },
   'deck-proposta-fidc': {
+    name: 'Proposal Deck · AI for FIDCs',
     category: 'Sales Presentation',
     tagline: 'A navigable commercial presentation that replaces the proposal PDF with a "site" that adapts to each client.',
     summary:
@@ -325,6 +334,7 @@ export const projectsEn = {
     linkNote: 'Sample proposal (placeholder data)',
   },
   'indicacao-marcos': {
+    name: 'Referral Landing Page',
     category: 'Landing Page',
     tagline: 'An invite-only referral landing page, with lead capture that converts better than a plain form.',
     summary:
