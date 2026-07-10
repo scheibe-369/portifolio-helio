@@ -476,6 +476,36 @@ export const projects = [
     stack: ['Astro', 'TypeScript', 'Tailwind CSS', 'Sharp'],
     link: 'https://brasildtfimpressoras.com.br',
   },
+  {
+    slug: 'deck-proposta-fidc',
+    name: 'Deck de Proposta · IA para FIDCs',
+    client: 'Growth Hub',
+    category: 'Apresentação Comercial',
+    year: '2026',
+    accent: '#7C5CFC',
+    plateBg: '#000000',
+    image: '/projects/deck-proposta-fidc.webp',
+    video: 'https://youtu.be/NZ5FrQ2-RTo',
+    tagline: 'Apresentação comercial navegável que substitui o PDF de proposta por um "site" que se adapta a cada cliente.',
+    summary:
+      'Deck web para vender um programa de formação em IA a FIDCs, securitizadoras e gestoras: motor único de 11 slides com dados isolados por proposta (nome, empresa, valor, prazo), resolvidos pela URL, sem tocar nas propostas já prontas.',
+    problem:
+      'Proposta comercial em PDF é estática e não passa a mesma credibilidade técnica do produto vendido, e criar uma versão por prospect costuma significar duplicar o arquivo inteiro — risco de inconsistência e retrabalho, e sem controle de quem acessa o quê.',
+    solution:
+      'Construí uma apresentação web navegável (não um PDF): motor único de 11 slides e um arquivo de dados isolado por proposta (cliente, empresa, valor, prazo), resolvido pela URL (?p=slug) e mesclado sobre uma base fixa de contatos, assinatura e ancoragem de preço — sem tocar nas propostas já prontas de outros clientes. A identidade visual foi clonada do meu portfólio (preto, glassmorphism, roxo #7C5CFC, metallic-silver) para reforçar a mesma autoridade técnica na venda.',
+    features: [
+      'Motor único de slides com dados isolados por proposta (nome, empresa, valor, prazo)',
+      'Proposta ativa resolvida pela URL (?p=slug), mesclada sobre uma base compartilhada',
+      'Deep-link direto por slide (?p=cliente#investimento)',
+      'Navegação por teclado, setas na tela, dots, índice e swipe no mobile',
+      'Slugs não óbvios por proposta, para não expor o preço de outro cliente',
+      '11 slides cobrindo dor, posicionamento, autoridade, programa, diferenciais, investimento e cronograma',
+      'Identidade visual clonada do portfólio: preto, glassmorphism, roxo #7C5CFC, metallic-silver',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Cloudflare Pages'],
+    link: 'https://apresentacao.methodgrowthhub.com.br',
+    linkNote: 'Proposta modelo (dados fictícios)',
+  },
 ];
 
 // Grupos do filtro (chave estável + label traduzível). Um projeto pode estar em vários.
@@ -504,6 +534,7 @@ export const projectGroups = {
   'infra-agentes-ia': ['agentes-ia', 'sistemas'],
   'damascena-films': ['websites'],
   'indicacao-marcos': ['websites'],
+  'deck-proposta-fidc': ['websites'],
 };
 
 // Resolve um campo traduzível do projeto (EN via projects.en.js quando o idioma é EN).

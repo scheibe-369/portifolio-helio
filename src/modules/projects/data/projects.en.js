@@ -304,6 +304,26 @@ export const projectsEn = {
     ],
     linkNote: 'Being finalized (awaiting the client final tweaks)',
   },
+  'deck-proposta-fidc': {
+    category: 'Sales Presentation',
+    tagline: 'A navigable commercial presentation that replaces the proposal PDF with a "site" that adapts to each client.',
+    summary:
+      'A web deck for selling an AI training program to FIDCs, securitizadoras and asset managers: a single 11-slide engine with data isolated per proposal (name, company, value, timeline), resolved from the URL, without touching proposals already sent.',
+    problem:
+      'A PDF proposal is static and does not convey the same technical credibility as the product being sold, and creating a version per prospect usually meant duplicating the whole file — a risk of inconsistency and rework, with no control over who can access what.',
+    solution:
+      'I built a navigable web presentation (not a PDF): a single 11-slide engine with an isolated data file per proposal (client, company, value, timeline), resolved from the URL (?p=slug) and merged over a fixed base of contacts, signature and price anchoring — without touching other clients proposals already sent. The visual identity was cloned from my portfolio (black, glassmorphism, purple #7C5CFC, metallic-silver) to reinforce the same technical authority in the sale.',
+    features: [
+      'Single slide engine with data isolated per proposal (name, company, value, timeline)',
+      'Active proposal resolved from the URL (?p=slug), merged over a shared base',
+      'Direct deep-link per slide (?p=client#investment)',
+      'Keyboard navigation, on-screen arrows, dots, index and mobile swipe',
+      'Non-obvious per-proposal slugs, so no client can guess another one price',
+      '11 slides covering pain, positioning, authority, program, edge, investment and timeline',
+      'Visual identity cloned from the portfolio: black, glassmorphism, purple #7C5CFC, metallic-silver',
+    ],
+    linkNote: 'Sample proposal (placeholder data)',
+  },
   'indicacao-marcos': {
     category: 'Landing Page',
     tagline: 'An invite-only referral landing page, with lead capture that converts better than a plain form.',
