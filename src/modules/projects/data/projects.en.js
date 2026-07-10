@@ -23,7 +23,7 @@ export const projectsEn = {
   },
   'brasil-dtf-impressoras': {
     category: 'Landing Page',
-    tagline: 'A catalog landing page for the Brasil DTF DTF and UV-DTF printer line — from the entry-level A3 to the 5-head industrial model, with a selection guide and direct WhatsApp contact.',
+    tagline: 'A catalog landing page for the Brasil DTF DTF and UV-DTF printer line: from the entry-level A3 to the 5-head industrial model, with a selection guide and direct WhatsApp contact.',
     summary:
       'A conversion page that works as a menu of the Brasil DTF machines: it presents the 7 printers segmented by buyer profile, with a "which machine is right for you?" guide, a partnership section (warranty, training, support and supplies), FAQ and direct WhatsApp CTAs.',
     problem:
@@ -310,9 +310,9 @@ export const projectsEn = {
     summary:
       'A web deck for selling an AI training program to FIDCs, securitizadoras and asset managers: a single 11-slide engine with data isolated per proposal (name, company, value, timeline), resolved from the URL, without touching proposals already sent.',
     problem:
-      'A PDF proposal is static and does not convey the same technical credibility as the product being sold, and creating a version per prospect usually meant duplicating the whole file — a risk of inconsistency and rework, with no control over who can access what.',
+      'A PDF proposal is static and does not convey the same technical credibility as the product being sold, and creating a version per prospect usually meant duplicating the whole file, with a risk of inconsistency, rework and no control over who could access what.',
     solution:
-      'I built a navigable web presentation (not a PDF): a single 11-slide engine with an isolated data file per proposal (client, company, value, timeline), resolved from the URL (?p=slug) and merged over a fixed base of contacts, signature and price anchoring — without touching other clients proposals already sent. The visual identity was cloned from my portfolio (black, glassmorphism, purple #7C5CFC, metallic-silver) to reinforce the same technical authority in the sale.',
+      'I built a navigable web presentation (not a PDF): a single 11-slide engine with an isolated data file per proposal (client, company, value, timeline), resolved from the URL (?p=slug) and merged over a fixed base of contacts, signature and price anchoring, without touching other clients proposals already sent. The visual identity was cloned from my portfolio (black, glassmorphism, purple #7C5CFC, metallic-silver) to reinforce the same technical authority in the sale.',
     features: [
       'Single slide engine with data isolated per proposal (name, company, value, timeline)',
       'Active proposal resolved from the URL (?p=slug), merged over a shared base',

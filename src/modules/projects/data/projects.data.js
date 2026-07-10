@@ -35,88 +35,6 @@ export const projects = [
     linkNote: 'Link provisório',
   },
   {
-    slug: 'porceli',
-    name: 'Porceli Co.',
-    client: 'Porceli Co.',
-    category: 'CRM',
-    year: '2025',
-    accent: '#8B73FF',
-    plateBg: '#0d0d0d',
-    image: '/projects/porceli.webp',
-    tagline:
-      'CRM multilogin para agência de marketing: prospecção, pipeline, agente de IA, financeiro e contratos.',
-    summary:
-      'Plataforma de gestão completa para agência: pipeline e kanban, agente de IA com métricas avançadas, prospecção ativa, financeiro, gestão de atividades e de contratos, integrada a Asaas e WhatsApp.',
-    problem:
-      'A agência operava com ferramentas desconectadas para prospecção, vendas, financeiro e contratos. Sem uma visão única, faltavam métricas confiáveis, cobranças escapavam e cada equipe trabalhava em silo.',
-    solution:
-      'Construímos um CRM multilogin sob medida que une prospecção, pipeline/kanban de vendas, gestão de atividades e de contratos, financeiro integrado ao Asaas e um agente de IA que apoia o atendimento e gera métricas avançadas, tudo conectado ao WhatsApp.',
-    features: [
-      'Multilogin com papéis e permissões',
-      'Pipeline e kanban de vendas',
-      'Sistema de prospecção ativa',
-      'Agente de IA com métricas avançadas',
-      'Financeiro integrado ao Asaas',
-      'Gestão de atividades e de contratos',
-      'Integração com WhatsApp',
-    ],
-    stack: ['CRM multi-tenant', 'Asaas API', 'WhatsApp API', 'Agente de IA', 'Dashboard de métricas', 'Gestão de contratos'],
-  },
-  {
-    slug: 'manhattan-hotel',
-    name: 'Manhattan Hotel',
-    client: 'Manhattan Hotel',
-    category: 'CRM',
-    year: '2025',
-    accent: '#7E9CD8',
-    plateBg: '#020028',
-    image: '/projects/hotel.webp',
-    tagline:
-      'CRM hoteleiro com pipeline, financeiro e um agente de IA que atende leads no Instagram e WhatsApp.',
-    summary:
-      'Sistema de gestão comercial para hotelaria: kanban de reservas, pipeline de vendas, financeiro e um agente de IA que conversa com hóspedes nas redes e consulta a disponibilidade de quartos em tempo real.',
-    problem:
-      'A operação comercial vivia espalhada: mensagens no Instagram e WhatsApp sem registro, reservas em planilhas e nenhuma visão de funil ou financeiro. Leads esfriavam pela demora na resposta e a equipe não sabia a real disponibilidade de quartos na hora de fechar.',
-    solution:
-      'Centralizamos tudo em um CRM com kanban e pipeline, módulo financeiro e um agente de IA integrado ao Instagram e ao WhatsApp, que atende e qualifica o lead e consulta, via API, o sistema de gestão de quartos e suítes para responder disponibilidade e fechar reservas.',
-    features: [
-      'Kanban de reservas e atendimento',
-      'Pipeline de vendas por etapas',
-      'Módulo financeiro',
-      'Agente de IA no Instagram e WhatsApp',
-      'Integração via API com a gestão de quartos/suítes',
-      'Consulta de disponibilidade em tempo real',
-    ],
-    stack: ['Agente de IA', 'WhatsApp API', 'Instagram API', 'Integração com PMS', 'CRM / Pipeline', 'Módulo financeiro'],
-  },
-  {
-    slug: 'newcar',
-    name: 'NewCar',
-    client: 'NewCar Automóveis',
-    category: 'Agente de IA',
-    year: '2024',
-    accent: '#E5362F',
-    plateBg: '#00192a',
-    image: '/projects/newcar.webp',
-    tagline:
-      'Agente de IA que atende, qualifica e distribui leads de uma revenda de carros, direto no WhatsApp.',
-    summary:
-      'Atendente virtual no WhatsApp que conversa com o interessado, consulta o estoque real de veículos, envia fotos, entende áudios e só repassa para o vendedor os leads realmente qualificados.',
-    problem:
-      'A revenda recebia um volume alto de contatos no WhatsApp, a maioria desqualificada. Vendedores gastavam tempo respondendo curiosos e procurando fotos no estoque, enquanto os bons leads esperavam.',
-    solution:
-      'Criamos um agente de IA que atende 24/7 no WhatsApp: entende texto e áudio, consulta o banco de dados de veículos para saber o que há em estoque, envia fotos do carro certo, qualifica o interesse e descarta quem não é lead, repassando ao vendedor humano apenas as oportunidades quentes.',
-    features: [
-      'Atendimento 24/7 no WhatsApp',
-      'Consulta ao banco de dados de veículos em estoque',
-      'Envio automático de fotos dos carros',
-      'Transcrição e entendimento de áudios',
-      'Qualificação e descarte automático de leads',
-      'Repasse de leads quentes para o vendedor',
-    ],
-    stack: ['Agente de IA (LLM)', 'WhatsApp API', 'Transcrição de áudio (STT)', 'Banco de dados de estoque', 'Qualificação de leads'],
-  },
-  {
     slug: 'maternaforte',
     name: 'MaternaForte',
     client: 'MaternaForte',
@@ -288,6 +206,205 @@ export const projects = [
     stack: ['Next.js', 'TypeScript', 'PostgreSQL', 'WhatsApp API'],
   },
   {
+    slug: 'damascena-films',
+    name: 'Damascena Films',
+    client: 'Damascena Films',
+    category: 'Landing Page',
+    year: '2026',
+    accent: '#2F6BFF',
+    fit: 'cover',
+    image: '/projects/damascena-films.webp',
+    video: 'https://youtu.be/_LGj734-vew',
+    link: 'https://damascenafilms.com.br',
+    linkNote: 'Em finalização (aguardando os ajustes finais do cliente)',
+    tagline: 'Landing de um filmmaker da Região dos Lagos: vídeo com estética de cinema e cabeça de estratégia.',
+    summary:
+      'Página para o Marcos, filmmaker por trás da Damascena Films, apresentar e vender o trabalho de forma elegante e profissional: a ideia de "imagem com intenção", os serviços, os cases e o contato. Vídeo que vira posicionamento, autoridade e venda, não vídeo bonito que não leva a lugar nenhum.',
+    problem:
+      'O Marcos precisava de uma vitrine à altura do trabalho dele: algo que vendesse a produção audiovisual de forma elegante e mostrasse os projetos, sem parecer mais um portfólio genérico.',
+    solution:
+      'Construí a landing com a linguagem da marca e estética de cinema: hero forte, serviços (conteúdo para redes, institucional e branded, cobertura de evento e edição estratégica), seção de cases com lightbox, processo, FAQ e contato direto por WhatsApp. Ainda está em finalização, esperando o cliente fechar os textos e números finais.',
+    features: [
+      'Hero com a proposta da marca ("imagem com intenção")',
+      'Serviços: conteúdo para redes, institucional/branded, evento e edição',
+      'Seção de cases com lightbox',
+      'Processo e FAQ',
+      'Contato direto por WhatsApp e Cal.com',
+      'Estética de cinema, mobile-first',
+    ],
+    stack: ['Astro', 'TypeScript', 'Tailwind CSS'],
+  },
+  {
+    slug: 'indicacao-marcos',
+    name: 'Landing de Indicação',
+    client: 'Growth Hub',
+    category: 'Landing Page',
+    year: '2026',
+    accent: '#7C5CFC',
+    fit: 'cover',
+    image: '/projects/indicacao-marcos.webp',
+    video: 'https://youtu.be/rItFfYZCH_k',
+    link: 'https://indicacaomarcos.methodgrowthhub.com.br',
+    tagline: 'Landing de indicação só por convite, com captura de leads que converte mais que formulário comum.',
+    summary:
+      'Uma página premium e só por convite para o cliente indicar novos negócios: ele compartilha o link com os prospects e cria um ponto de entrada de alta confiança, que converte muito mais que um formulário genérico.',
+    problem:
+      'Formulário de indicação genérico não passa confiança e converte pouco, e o lead indicado não chega qualificado nem vai direto pro time de vendas.',
+    solution:
+      'Desenhei e construí a página inteira, as animações e a integração do formulário: visual dark com partículas animadas, transições no scroll e prova social (depoimentos e números). Um formulário multi-etapas embutido captura o lead qualificado e o manda direto pro time de vendas, tudo mobile-first e rápido.',
+    features: [
+      'Página só por convite, de alta confiança',
+      'Visual dark com partículas animadas',
+      'Transições disparadas no scroll',
+      'Prova social: depoimentos e métricas',
+      'Formulário multi-etapas que captura leads qualificados',
+      'Roteia o lead direto pro time de vendas',
+      'Mobile-first e carregamento rápido',
+    ],
+    stack: ['Next.js', 'TypeScript', 'Framer Motion', 'Tailwind CSS'],
+  },
+  {
+    slug: 'brasil-dtf-impressoras',
+    name: 'Brasil DTF Impressoras',
+    client: 'Brasil DTF',
+    category: 'Landing Page',
+    year: '2026',
+    accent: '#F2B705',
+    plateBg: '#0B1220',
+    image: '/projects/brasildtf-impressoras.webp',
+    video: 'https://youtu.be/iS_OtZVSeWE',
+    tagline:
+      'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF: da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
+    summary:
+      'Página de conversão que funciona como um menu das máquinas da Brasil DTF: apresenta as 7 impressoras segmentadas por perfil de comprador, com um guia "qual máquina é pra você?", seção de parceria (garantia, treinamento, suporte e insumos), FAQ e CTAs diretos para o WhatsApp.',
+    problem:
+      'A Brasil DTF precisava de uma vitrine única para sua linha de impressoras DTF e UV-DTF: um lugar onde o comprador entende as diferenças entre os modelos, encontra a máquina certa para o seu momento e fala com a equipe sem fricção, em vez de tirar dúvidas espalhadas.',
+    solution:
+      'Construímos uma landing page focada em conversão: um catálogo das 7 máquinas segmentado por perfil (começando agora, pequeno negócio, produção 60cm, alto volume e UV/rótulos), um guia interativo que recomenda a máquina ideal, seção de parceria (garantia, treinamento, suporte por WhatsApp, insumos abertos e condições facilitadas), FAQ e CTAs diretos para o WhatsApp. Visual forte com tipografia Bebas Neue, efeito metal-shine e cards com brilho no hover, mobile-first.',
+    features: [
+      'Catálogo das 7 impressoras DTF e UV-DTF',
+      'Segmentação por perfil de comprador',
+      'Guia interativo "qual máquina é pra você?"',
+      'Seção de parceria: garantia, treinamento, suporte e insumos',
+      'FAQ e CTAs diretos para o WhatsApp',
+      'Visual com Bebas Neue, efeito metal-shine e cards com glow',
+    ],
+    stack: ['Astro', 'TypeScript', 'Tailwind CSS', 'Sharp'],
+    link: 'https://brasildtfimpressoras.com.br',
+  },
+  {
+    slug: 'deck-proposta-fidc',
+    name: 'Deck de Proposta · IA para FIDCs',
+    client: 'Growth Hub',
+    category: 'Apresentação Comercial',
+    year: '2026',
+    accent: '#7C5CFC',
+    plateBg: '#000000',
+    image: '/projects/deck-proposta-fidc.webp',
+    video: 'https://youtu.be/NZ5FrQ2-RTo',
+    tagline: 'Apresentação comercial navegável que substitui o PDF de proposta por um "site" que se adapta a cada cliente.',
+    summary:
+      'Deck web para vender um programa de formação em IA a FIDCs, securitizadoras e gestoras: motor único de 11 slides com dados isolados por proposta (nome, empresa, valor, prazo), resolvidos pela URL, sem tocar nas propostas já prontas.',
+    problem:
+      'Proposta comercial em PDF é estática e não passa a mesma credibilidade técnica do produto vendido, e criar uma versão por prospect costuma significar duplicar o arquivo inteiro, com risco de inconsistência, retrabalho e nenhum controle de quem acessa o quê.',
+    solution:
+      'Construí uma apresentação web navegável (não um PDF): motor único de 11 slides e um arquivo de dados isolado por proposta (cliente, empresa, valor, prazo), resolvido pela URL (?p=slug) e mesclado sobre uma base fixa de contatos, assinatura e ancoragem de preço, sem tocar nas propostas já prontas de outros clientes. A identidade visual foi clonada do meu portfólio (preto, glassmorphism, roxo #7C5CFC, metallic-silver) para reforçar a mesma autoridade técnica na venda.',
+    features: [
+      'Motor único de slides com dados isolados por proposta (nome, empresa, valor, prazo)',
+      'Proposta ativa resolvida pela URL (?p=slug), mesclada sobre uma base compartilhada',
+      'Deep-link direto por slide (?p=cliente#investimento)',
+      'Navegação por teclado, setas na tela, dots, índice e swipe no mobile',
+      'Slugs não óbvios por proposta, para não expor o preço de outro cliente',
+      '11 slides cobrindo dor, posicionamento, autoridade, programa, diferenciais, investimento e cronograma',
+      'Identidade visual clonada do portfólio: preto, glassmorphism, roxo #7C5CFC, metallic-silver',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Cloudflare Pages'],
+    link: 'https://apresentacao.methodgrowthhub.com.br',
+    linkNote: 'Proposta modelo (dados fictícios)',
+  },
+  {
+    slug: 'porceli',
+    name: 'Porceli Co.',
+    client: 'Porceli Co.',
+    category: 'CRM',
+    year: '2025',
+    accent: '#8B73FF',
+    plateBg: '#0d0d0d',
+    image: '/projects/porceli.webp',
+    tagline:
+      'CRM multilogin para agência de marketing: prospecção, pipeline, agente de IA, financeiro e contratos.',
+    summary:
+      'Plataforma de gestão completa para agência: pipeline e kanban, agente de IA com métricas avançadas, prospecção ativa, financeiro, gestão de atividades e de contratos, integrada a Asaas e WhatsApp.',
+    problem:
+      'A agência operava com ferramentas desconectadas para prospecção, vendas, financeiro e contratos. Sem uma visão única, faltavam métricas confiáveis, cobranças escapavam e cada equipe trabalhava em silo.',
+    solution:
+      'Construímos um CRM multilogin sob medida que une prospecção, pipeline/kanban de vendas, gestão de atividades e de contratos, financeiro integrado ao Asaas e um agente de IA que apoia o atendimento e gera métricas avançadas, tudo conectado ao WhatsApp.',
+    features: [
+      'Multilogin com papéis e permissões',
+      'Pipeline e kanban de vendas',
+      'Sistema de prospecção ativa',
+      'Agente de IA com métricas avançadas',
+      'Financeiro integrado ao Asaas',
+      'Gestão de atividades e de contratos',
+      'Integração com WhatsApp',
+    ],
+    stack: ['CRM multi-tenant', 'Asaas API', 'WhatsApp API', 'Agente de IA', 'Dashboard de métricas', 'Gestão de contratos'],
+  },
+  {
+    slug: 'manhattan-hotel',
+    name: 'Manhattan Hotel',
+    client: 'Manhattan Hotel',
+    category: 'CRM',
+    year: '2025',
+    accent: '#7E9CD8',
+    plateBg: '#020028',
+    image: '/projects/hotel.webp',
+    tagline:
+      'CRM hoteleiro com pipeline, financeiro e um agente de IA que atende leads no Instagram e WhatsApp.',
+    summary:
+      'Sistema de gestão comercial para hotelaria: kanban de reservas, pipeline de vendas, financeiro e um agente de IA que conversa com hóspedes nas redes e consulta a disponibilidade de quartos em tempo real.',
+    problem:
+      'A operação comercial vivia espalhada: mensagens no Instagram e WhatsApp sem registro, reservas em planilhas e nenhuma visão de funil ou financeiro. Leads esfriavam pela demora na resposta e a equipe não sabia a real disponibilidade de quartos na hora de fechar.',
+    solution:
+      'Centralizamos tudo em um CRM com kanban e pipeline, módulo financeiro e um agente de IA integrado ao Instagram e ao WhatsApp, que atende e qualifica o lead e consulta, via API, o sistema de gestão de quartos e suítes para responder disponibilidade e fechar reservas.',
+    features: [
+      'Kanban de reservas e atendimento',
+      'Pipeline de vendas por etapas',
+      'Módulo financeiro',
+      'Agente de IA no Instagram e WhatsApp',
+      'Integração via API com a gestão de quartos/suítes',
+      'Consulta de disponibilidade em tempo real',
+    ],
+    stack: ['Agente de IA', 'WhatsApp API', 'Instagram API', 'Integração com PMS', 'CRM / Pipeline', 'Módulo financeiro'],
+  },
+  {
+    slug: 'newcar',
+    name: 'NewCar',
+    client: 'NewCar Automóveis',
+    category: 'Agente de IA',
+    year: '2024',
+    accent: '#E5362F',
+    plateBg: '#00192a',
+    image: '/projects/newcar.webp',
+    tagline:
+      'Agente de IA que atende, qualifica e distribui leads de uma revenda de carros, direto no WhatsApp.',
+    summary:
+      'Atendente virtual no WhatsApp que conversa com o interessado, consulta o estoque real de veículos, envia fotos, entende áudios e só repassa para o vendedor os leads realmente qualificados.',
+    problem:
+      'A revenda recebia um volume alto de contatos no WhatsApp, a maioria desqualificada. Vendedores gastavam tempo respondendo curiosos e procurando fotos no estoque, enquanto os bons leads esperavam.',
+    solution:
+      'Criamos um agente de IA que atende 24/7 no WhatsApp: entende texto e áudio, consulta o banco de dados de veículos para saber o que há em estoque, envia fotos do carro certo, qualifica o interesse e descarta quem não é lead, repassando ao vendedor humano apenas as oportunidades quentes.',
+    features: [
+      'Atendimento 24/7 no WhatsApp',
+      'Consulta ao banco de dados de veículos em estoque',
+      'Envio automático de fotos dos carros',
+      'Transcrição e entendimento de áudios',
+      'Qualificação e descarte automático de leads',
+      'Repasse de leads quentes para o vendedor',
+    ],
+    stack: ['Agente de IA (LLM)', 'WhatsApp API', 'Transcrição de áudio (STT)', 'Banco de dados de estoque', 'Qualificação de leads'],
+  },
+  {
     slug: 'pipeline-video-ia',
     name: 'Pipeline de Vídeo com IA',
     client: 'Growth Hub',
@@ -388,123 +505,6 @@ export const projects = [
       'Base confiável para ambientes críticos',
     ],
     stack: ['Cloudflare Workers', 'TypeScript', 'n8n', 'Orquestração de agentes própria'],
-  },
-  {
-    slug: 'damascena-films',
-    name: 'Damascena Films',
-    client: 'Damascena Films',
-    category: 'Landing Page',
-    year: '2026',
-    accent: '#2F6BFF',
-    fit: 'cover',
-    image: '/projects/damascena-films.webp',
-    video: 'https://youtu.be/_LGj734-vew',
-    link: 'https://damascenafilms.com.br',
-    linkNote: 'Em finalização (aguardando os ajustes finais do cliente)',
-    tagline: 'Landing de um filmmaker da Região dos Lagos: vídeo com estética de cinema e cabeça de estratégia.',
-    summary:
-      'Página para o Marcos, filmmaker por trás da Damascena Films, apresentar e vender o trabalho de forma elegante e profissional: a ideia de "imagem com intenção", os serviços, os cases e o contato. Vídeo que vira posicionamento, autoridade e venda, não vídeo bonito que não leva a lugar nenhum.',
-    problem:
-      'O Marcos precisava de uma vitrine à altura do trabalho dele: algo que vendesse a produção audiovisual de forma elegante e mostrasse os projetos, sem parecer mais um portfólio genérico.',
-    solution:
-      'Construí a landing com a linguagem da marca e estética de cinema: hero forte, serviços (conteúdo para redes, institucional e branded, cobertura de evento e edição estratégica), seção de cases com lightbox, processo, FAQ e contato direto por WhatsApp. Ainda está em finalização, esperando o cliente fechar os textos e números finais.',
-    features: [
-      'Hero com a proposta da marca ("imagem com intenção")',
-      'Serviços: conteúdo para redes, institucional/branded, evento e edição',
-      'Seção de cases com lightbox',
-      'Processo e FAQ',
-      'Contato direto por WhatsApp e Cal.com',
-      'Estética de cinema, mobile-first',
-    ],
-    stack: ['Astro', 'TypeScript', 'Tailwind CSS'],
-  },
-  {
-    slug: 'indicacao-marcos',
-    name: 'Landing de Indicação',
-    client: 'Growth Hub',
-    category: 'Landing Page',
-    year: '2026',
-    accent: '#7C5CFC',
-    fit: 'cover',
-    image: '/projects/indicacao-marcos.webp',
-    video: 'https://youtu.be/rItFfYZCH_k',
-    link: 'https://indicacaomarcos.methodgrowthhub.com.br',
-    tagline: 'Landing de indicação só por convite, com captura de leads que converte mais que formulário comum.',
-    summary:
-      'Uma página premium e só por convite para o cliente indicar novos negócios: ele compartilha o link com os prospects e cria um ponto de entrada de alta confiança, que converte muito mais que um formulário genérico.',
-    problem:
-      'Formulário de indicação genérico não passa confiança e converte pouco, e o lead indicado não chega qualificado nem vai direto pro time de vendas.',
-    solution:
-      'Desenhei e construí a página inteira, as animações e a integração do formulário: visual dark com partículas animadas, transições no scroll e prova social (depoimentos e números). Um formulário multi-etapas embutido captura o lead qualificado e o manda direto pro time de vendas, tudo mobile-first e rápido.',
-    features: [
-      'Página só por convite, de alta confiança',
-      'Visual dark com partículas animadas',
-      'Transições disparadas no scroll',
-      'Prova social: depoimentos e métricas',
-      'Formulário multi-etapas que captura leads qualificados',
-      'Roteia o lead direto pro time de vendas',
-      'Mobile-first e carregamento rápido',
-    ],
-    stack: ['Next.js', 'TypeScript', 'Framer Motion', 'Tailwind CSS'],
-  },
-  {
-    slug: 'brasil-dtf-impressoras',
-    name: 'Brasil DTF Impressoras',
-    client: 'Brasil DTF',
-    category: 'Landing Page',
-    year: '2026',
-    accent: '#F2B705',
-    plateBg: '#0B1220',
-    image: '/projects/brasildtf-impressoras.webp',
-    video: 'https://youtu.be/iS_OtZVSeWE',
-    tagline:
-      'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF — da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
-    summary:
-      'Página de conversão que funciona como um menu das máquinas da Brasil DTF: apresenta as 7 impressoras segmentadas por perfil de comprador, com um guia "qual máquina é pra você?", seção de parceria (garantia, treinamento, suporte e insumos), FAQ e CTAs diretos para o WhatsApp.',
-    problem:
-      'A Brasil DTF precisava de uma vitrine única para sua linha de impressoras DTF e UV-DTF: um lugar onde o comprador entende as diferenças entre os modelos, encontra a máquina certa para o seu momento e fala com a equipe sem fricção, em vez de tirar dúvidas espalhadas.',
-    solution:
-      'Construímos uma landing page focada em conversão: um catálogo das 7 máquinas segmentado por perfil (começando agora, pequeno negócio, produção 60cm, alto volume e UV/rótulos), um guia interativo que recomenda a máquina ideal, seção de parceria (garantia, treinamento, suporte por WhatsApp, insumos abertos e condições facilitadas), FAQ e CTAs diretos para o WhatsApp. Visual forte com tipografia Bebas Neue, efeito metal-shine e cards com brilho no hover, mobile-first.',
-    features: [
-      'Catálogo das 7 impressoras DTF e UV-DTF',
-      'Segmentação por perfil de comprador',
-      'Guia interativo "qual máquina é pra você?"',
-      'Seção de parceria: garantia, treinamento, suporte e insumos',
-      'FAQ e CTAs diretos para o WhatsApp',
-      'Visual com Bebas Neue, efeito metal-shine e cards com glow',
-    ],
-    stack: ['Astro', 'TypeScript', 'Tailwind CSS', 'Sharp'],
-    link: 'https://brasildtfimpressoras.com.br',
-  },
-  {
-    slug: 'deck-proposta-fidc',
-    name: 'Deck de Proposta · IA para FIDCs',
-    client: 'Growth Hub',
-    category: 'Apresentação Comercial',
-    year: '2026',
-    accent: '#7C5CFC',
-    plateBg: '#000000',
-    image: '/projects/deck-proposta-fidc.webp',
-    video: 'https://youtu.be/NZ5FrQ2-RTo',
-    tagline: 'Apresentação comercial navegável que substitui o PDF de proposta por um "site" que se adapta a cada cliente.',
-    summary:
-      'Deck web para vender um programa de formação em IA a FIDCs, securitizadoras e gestoras: motor único de 11 slides com dados isolados por proposta (nome, empresa, valor, prazo), resolvidos pela URL, sem tocar nas propostas já prontas.',
-    problem:
-      'Proposta comercial em PDF é estática e não passa a mesma credibilidade técnica do produto vendido, e criar uma versão por prospect costuma significar duplicar o arquivo inteiro — risco de inconsistência e retrabalho, e sem controle de quem acessa o quê.',
-    solution:
-      'Construí uma apresentação web navegável (não um PDF): motor único de 11 slides e um arquivo de dados isolado por proposta (cliente, empresa, valor, prazo), resolvido pela URL (?p=slug) e mesclado sobre uma base fixa de contatos, assinatura e ancoragem de preço — sem tocar nas propostas já prontas de outros clientes. A identidade visual foi clonada do meu portfólio (preto, glassmorphism, roxo #7C5CFC, metallic-silver) para reforçar a mesma autoridade técnica na venda.',
-    features: [
-      'Motor único de slides com dados isolados por proposta (nome, empresa, valor, prazo)',
-      'Proposta ativa resolvida pela URL (?p=slug), mesclada sobre uma base compartilhada',
-      'Deep-link direto por slide (?p=cliente#investimento)',
-      'Navegação por teclado, setas na tela, dots, índice e swipe no mobile',
-      'Slugs não óbvios por proposta, para não expor o preço de outro cliente',
-      '11 slides cobrindo dor, posicionamento, autoridade, programa, diferenciais, investimento e cronograma',
-      'Identidade visual clonada do portfólio: preto, glassmorphism, roxo #7C5CFC, metallic-silver',
-    ],
-    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Cloudflare Pages'],
-    link: 'https://apresentacao.methodgrowthhub.com.br',
-    linkNote: 'Proposta modelo (dados fictícios)',
   },
 ];
 
