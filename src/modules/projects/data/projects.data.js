@@ -456,6 +456,7 @@ export const projects = [
     accent: '#F2B705',
     plateBg: '#0B1220',
     image: '/projects/brasildtf-impressoras.webp',
+    video: 'https://youtu.be/iS_OtZVSeWE',
     tagline:
       'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF — da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
     summary:
