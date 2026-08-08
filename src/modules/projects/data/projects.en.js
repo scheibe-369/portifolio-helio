@@ -333,6 +333,29 @@ export const projectsEn = {
     ],
     linkNote: 'Sample proposal (placeholder data)',
   },
+  'ai-block': {
+    category: 'Platform / Digital Product',
+    tagline:
+      'A subscription AI knowledge hub: curated, verified prompts, skills, plugins, artifacts and repositories, all in one place.',
+    summary:
+      'A members area gathering 430 ready-to-use prompts across 8 categories plus 437 curated AI items (skills, plugins, artifacts, articles, news, repositories and libraries), with access granted automatically on purchase, a per-tier paywall in the database and an admin panel that publishes new content without a redeploy.',
+    problem:
+      'Anyone using AI daily burns hours digging for prompts, skills, plugins and repositories across scattered threads, and much of what circulates is a dead link, generic filler or material invented by another AI. There was no single archive, verified item by item and easy to browse.',
+    solution:
+      'I built the whole product, from the archive to the infrastructure. The content is not written, it is mined and verified: a pipeline of parallel AI agents sweeps different search angles, an adversarial reviewer reopens every link and checks title, author, date and stars against the real page, and the final assembly runs as a deterministic script, never as an agent. On top of that, a members area with login, three SKUs unlocked automatically by the purchase webhook, a real paywall in database RLS (hiding a tab in the front end is UI convenience, not protection) and an admin panel to publish content without a new deploy.',
+    features: [
+      '430 prompts across 8 categories, each with a real source and a recommended AI',
+      '437 curated items: skills, plugins, artifacts, articles, news, repositories and libraries',
+      'Curation pipeline with parallel agents and an adversarial reviewer that reopens every link',
+      'Validator that blocks dead links, duplicates and off-schema items before publishing',
+      'Access granted automatically on purchase, via webhook',
+      'Per-tier paywall in database RLS, not just hidden in the interface',
+      'Admin panel for members and content, publishes without a new deploy',
+      'Guide tab with an onboarding lesson and direct support',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'Vanilla JavaScript', 'Supabase (Auth, RLS, Edge Functions)', 'PostgreSQL', 'Cloudflare Pages'],
+    linkNote: 'Members area, restricted access',
+  },
   'indicacao-marcos': {
     name: 'Referral Landing Page',
     category: 'Landing Page',
