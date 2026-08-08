@@ -214,7 +214,7 @@ export const projects = [
     year: '2026',
     accent: '#2563FF',
     plateBg: '#0b0d12',
-    image: '/projects/ai-block-logo.webp',
+    image: '/projects/ai-block.webp',
     video: 'https://youtu.be/kpDD93zu6f8',
     link: 'https://aiblock.methodcipher.com',
     linkNote: 'Área de membros, acesso restrito',
