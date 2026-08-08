@@ -207,6 +207,38 @@ export const projects = [
     linkNote: 'Proposta modelo (dados fictícios)',
   },
   {
+    slug: 'ai-block',
+    name: 'AI Block',
+    client: 'CIPHER',
+    category: 'Plataforma / Infoproduto',
+    year: '2026',
+    accent: '#2563FF',
+    plateBg: '#0b0d12',
+    image: '/projects/ai-block-logo.webp',
+    video: 'https://youtu.be/kpDD93zu6f8',
+    link: 'https://aiblock.methodcipher.com',
+    linkNote: 'Área de membros, acesso restrito',
+    tagline:
+      'Hub de conhecimento em IA por assinatura: prompts, skills, plugins, artifacts e repositórios curados e verificados, num só lugar.',
+    summary:
+      'Área de membros que reúne 430 prompts prontos em 8 categorias e mais 437 itens curados sobre IA (skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas), com liberação automática de acesso na compra, paywall por tier no banco e painel admin que publica conteúdo novo sem redeploy.',
+    problem:
+      'Quem usa IA no dia a dia perde horas garimpando prompt, skill, plugin e repositório em threads soltas, e boa parte do que circula é link morto, conteúdo genérico ou material inventado por outra IA. Faltava um acervo único, verificado item a item e fácil de navegar.',
+    solution:
+      'Construí o produto inteiro, do acervo à infraestrutura. O conteúdo não é escrito, é garimpado e verificado: um pipeline de agentes de IA em paralelo varre ângulos diferentes de busca, um revisor adversarial reabre cada link e confere título, autor, data e estrelas contra a página real, e a montagem final roda em script determinista, nunca em agente. Em cima disso, uma área de membros com login, três SKUs liberados automaticamente pelo webhook de compra, paywall de verdade em RLS no banco (esconder aba no front é conveniência de UI, não proteção) e painel admin para publicar conteúdo sem novo deploy.',
+    features: [
+      '430 prompts em 8 categorias, cada um com fonte real e IA recomendada',
+      '437 itens curados: skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas',
+      'Pipeline de curadoria com agentes em paralelo e revisor adversarial que reabre cada link',
+      'Validador que barra link morto, duplicata e item fora do schema antes de publicar',
+      'Liberação automática de acesso na compra, via webhook',
+      'Paywall por tier em RLS no banco, não apenas escondido na interface',
+      'Painel admin de membros e de conteúdo, publica sem novo deploy',
+      'Aba de guia com aula de onboarding e suporte direto',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Supabase (Auth, RLS, Edge Functions)', 'PostgreSQL', 'Cloudflare Pages'],
+  },
+  {
     slug: 'indicacao-marcos',
     name: 'Landing de Indicação',
     client: 'Growth Hub',
@@ -537,6 +569,7 @@ export const projectGroups = {
   'damascena-films': ['websites'],
   'indicacao-marcos': ['websites'],
   'deck-proposta-fidc': ['websites'],
+  'ai-block': ['sistemas', 'agentes-ia'],
 };
 
 // Resolve um campo traduzível do projeto (EN via projects.en.js quando o idioma é EN).
