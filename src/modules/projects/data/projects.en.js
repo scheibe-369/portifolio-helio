@@ -376,4 +376,28 @@ export const projectsEn = {
       'Mobile-first and fast loading',
     ],
   },
+  'geracao-leads-previa': {
+    name: 'Lead Generation',
+    category: 'System / Prospecting',
+    tagline:
+      'A prospecting engine that mines the client own database and turns the companies that already pay well into a qualified lead list.',
+    summary:
+      'A system that cross-references the Previa base of payers and clients and returns, with a score and a buying signal, which companies are the best candidates to become new clients. It serves three portfolios, the qualification rules are editable right on the screen, and the list is built in under a second, straight from the real ERP database, not from a purchased list.',
+    problem:
+      'Prospecting in factoring and receivables funds almost always starts from zero: a cold list, no information on how the company actually pays and a low response rate. Yet the best answer was already in house. Every operation records thousands of payers, the companies that settle the receivables in the portfolio, and nobody looked at them as potential clients, because every attempt at that cross-reference meant querying the ERP database by hand.',
+    solution:
+      'I built a qualification engine that runs straight against the ERP database, read-only. It aggregates the receivables per payer, computes the payment behaviour indices (rollover, buyback, liquidity and punctuality), automatically drops anyone who is already a client so the team never prospects a current account, and cross-references every company registration number with the credit bureau. That is where the most valuable signal comes from: whoever already assigns receivables to another fund, meaning they already understand the product and just need a better offer. Around that, a panel where the sales team tunes the rules with no help from IT, exports the list to CSV and sees the history of who ran each search.',
+    features: [
+      'Sweeps the ERP base of payers, with read-only access',
+      'Per-company indices: rollover, buyback, liquidity and punctuality',
+      'Automatically drops anyone who is already a client, so no one prospects a current account',
+      'Per-candidate signals: already assigns to another fund, hub, recurring delay and credit restrictions',
+      'Qualification rules editable on the screen, each one switchable on and off',
+      'Score from 0 to 100, filtered by portfolio, period, minimum volume and state',
+      'Dashboard and metrics screen: qualification rate, potential volume, industry and state',
+      'CSV export and a history of the searches the team has run',
+    ],
+    stack: ['Next.js 16', 'React 19', 'TypeScript', 'SQL Server', 'Tailwind CSS v4', 'On-premise deploy (PM2)'],
+    linkNote: 'Navigable demo, placeholder data (any username and password works)',
+  },
 };

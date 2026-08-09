@@ -91,6 +91,38 @@ export const projects = [
     stack: ['Node.js', 'TypeScript', 'WhatsApp Business API', 'REST APIs', 'PostgreSQL'],
   },
   {
+    slug: 'geracao-leads-previa',
+    name: 'Geração de Leads',
+    client: 'Previa',
+    category: 'Sistema / Prospecção',
+    year: '2026',
+    accent: '#D11F36',
+    plateBg: '#000000',
+    image: '/projects/previa-leads.webp',
+    video: 'https://youtu.be/ENzsbL0YKnw',
+    tagline:
+      'Motor de prospecção que garimpa a própria base do cliente e transforma quem já paga bem em lista de leads qualificados.',
+    summary:
+      'Sistema que cruza a base de sacados e cedentes da Previa e devolve, com score e sinal de compra, quais empresas são as melhores candidatas a virar cliente novo. Atende três carteiras, tem as regras de qualificação editáveis na própria tela e monta a lista em menos de um segundo, direto da base real do ERP, não de lista comprada.',
+    problem:
+      'Prospecção em factoring e FIDC quase sempre começa do zero: lista fria, nenhuma informação sobre como a empresa realmente paga e uma taxa de resposta baixa. Só que a melhor resposta já estava dentro de casa. Toda operação registra milhares de sacados, as empresas que pagam os títulos da carteira, e ninguém olhava para elas como clientes em potencial, porque cada tentativa de cruzamento exigia consulta manual no banco do ERP.',
+    solution:
+      'Construí um motor de qualificação que roda direto sobre o banco do ERP, em modo somente leitura. Ele agrega os títulos por sacado, calcula os índices de comportamento de pagamento (prorrogação, recompra, liquidez e pontualidade), descarta automaticamente quem já é cedente para não prospectar cliente atual e cruza cada CNPJ com o bureau de crédito. Daí sai o sinal mais valioso da lista: quem já cede recebível para outro fundo, ou seja, já entende o produto e só precisa de uma proposta melhor. Em volta disso, um painel onde o comercial ajusta as regras sem depender de TI, exporta a lista em CSV e enxerga o histórico de quem rodou cada busca.',
+    features: [
+      'Varredura da base de sacados do ERP, em acesso somente leitura',
+      'Índices por sacado: prorrogação, recompra, liquidez e pontualidade',
+      'Descarte automático de quem já é cedente, para não prospectar cliente atual',
+      'Sinais por candidato: já cede a outro fundo, hub, atraso recorrente e restritivo',
+      'Regras de qualificação editáveis na tela, com liga e desliga por critério',
+      'Score de 0 a 100, com recorte por carteira, período, volume mínimo e UF',
+      'Dashboard e tela de métricas: taxa de qualificação, volume potencial, ramo e UF',
+      'Exportação em CSV e histórico das buscas rodadas pelo time',
+    ],
+    stack: ['Next.js 16', 'React 19', 'TypeScript', 'SQL Server', 'Tailwind CSS v4', 'Deploy on-premise (PM2)'],
+    link: 'https://preventiva-mock.pages.dev',
+    linkNote: 'Demo navegável, dados fictícios (qualquer usuário e senha entra)',
+  },
+  {
     slug: 'growth-hub-site',
     name: 'Site Growth Hub',
     client: 'Growth Hub',
@@ -558,6 +590,7 @@ export const projectGroups = {
   newcar: ['agentes-ia'],
   maternaforte: ['websites', 'sistemas'],
   previa: ['automacao'],
+  'geracao-leads-previa': ['sistemas', 'automacao'],
   'ai-agents-playground': ['agentes-ia'],
   'growth-hub-site': ['websites'],
   'token-cost-calculator': ['sistemas'],

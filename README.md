@@ -47,7 +47,7 @@ npx wrangler pages deploy dist --project-name=helioportifolio
 
 ## Destaques
 
-- 19 projetos com filtro por icone e paginacao (6/pagina)
+- 20 projetos com filtro por icone e paginacao (6/pagina)
 - Modal por projeto com video (YouTube), links e stack
 - Carrossel de stacks dominadas
 - Bilingue PT/EN com troca instantanea
