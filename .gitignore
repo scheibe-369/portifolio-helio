@@ -11,6 +11,13 @@ Thumbs.db
 # Sao 167 arquivos (com .next/ e .vercel/) que nao pertencem ao portfolio.
 SITE-GH/
 
-# Fonte de asset: o PNG original de onde sai o WebP servido em public/. Fica na raiz
+# Fonte de asset: o original de onde sai o WebP servido em public/. Fica na raiz
 # so enquanto a imagem esta sendo preparada, nunca vai pro deploy.
 /*.png
+/*.jpg
+/*.jpeg
+
+# Curriculo. ESTE REPO E PUBLICO e o .docx traz telefone pessoal que hoje nao esta
+# em lugar nenhum do site. As experiencias que saem dele ja vivem em
+# src/modules/experience/data/, sem dado de contato.
+/Curriculo_*.docx
