@@ -17,9 +17,17 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] Reescrever o plano sob as decisões travadas
 - [x] Dois verificadores adversariais sobre o plano v2 (24 + 20 achados)
 - [x] Aplicar as correções de dinheiro e isolamento (13 correções)
-- [ ] Aplicar as correções de acesso e mídia
-- [ ] Aplicar as correções de executabilidade
-- [ ] Fecho: conferir que cada achado entrou e que nada se contradiz
+- [x] Aplicar as correções de acesso e mídia
+- [x] Aplicar as correções de executabilidade
+- [x] Fecho: conferir que cada achado entrou e que nada se contradiz
+- [x] Incorporar a feature de experiências (com certificado) ao plano
+
+### Já no ar (código, não plano)
+
+- [x] Seção "Experiência" no portfólio do Helio, depois dos projetos, PT e EN
+- [x] 5 logos normalizadas para WebP com a arte ocupando 80% do quadrado
+- [x] Portfólio publicado em `myportifolio.com.br` e `www`, com o domínio antigo
+      `helioportifolio.methodgrowthhub.com.br` continuando no ar
 
 ### Infra (bloqueios que não são código)
 
@@ -29,7 +37,8 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [ ] **Spike 2: cache de resposta de Worker pela Cache API**, medido por
       `X-Portfolio-Cache` num deploy real. É o outro spike que precede código de produto
 - [ ] Resend no domínio: DKIM, e reescrever o SPF e o DMARC atuais, que hoje dizem
-      "este domínio não manda e-mail" e rejeitariam o código de acesso
+      "este domínio não manda e-mail" e rejeitariam o código de acesso. **É o próximo
+      bloqueio de infra**, e depende de você criar a conta e me passar as chaves
 - [ ] Projeto Supabase novo, já no plano Pro
 - [ ] Criar os 3 SKUs na Hubla e preencher o `PRODUCT_FLAG_MAP` com os ids reais
 - [ ] Turnstile: site key e secret
