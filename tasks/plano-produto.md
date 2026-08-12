@@ -78,7 +78,7 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 | S17 | **Apagar a linha em `storage.objects` deixa a URL pública daquele objeto respondendo erro**, e não continua servindo o binário | Subir um arquivo, copiar a URL pública, apagar a linha por SQL, e repetir o `curl`. Se continuar servindo, o caminho de takedown (5.8) passa a chamar a API de Storage (`DELETE /object/portfolio-media/<path>`) de dentro de uma Edge Function, em vez de apagar a linha |
 | S18 | **Cloudflare for SaaS tem faixa gratuita de 100 hostnames e cobra por hostname acima disso**, e o valor por hostname. As duas metades são suposição: o tamanho da faixa gratuita e o preço. O número aparece como plano B de S1 (seção 2, alternativa c3, e risco R1) e entra na conta de preço de 9.2, onde cada hostname acima da faixa é custo mensal eterno contra receita única | Abrir a tela de billing da conta e ler **os dois** números vigentes (tamanho da faixa gratuita e preço por hostname), **antes** de assinar a tabela de preço de 9.2, e registrar o que foi lido em `tasks/_plano/medicoes.md`. Enquanto não forem lidos, toda menção a "100 hostnames grátis" no documento é suposição e não fato, e a coluna "S1 caiu no plano B 2" da tabela de 9.2 fica marcada como não confirmada. Plano B se o preço inviabilizar: certificado avançado `*.dominio` (custo fixo, não por cliente), ou domínio próprio do comprador virando requisito do SKU acima da faixa |
 | S19 | **O Supabase Auth oferece segundo fator (TOTP) para uma conta específica**, e dá para exigir o fator na sessão antes de uma operação sensível (`aal2`) | Ligar o fator na conta do dono no projeto novo e conferir que uma sessão sem o segundo passo não passa em `is_admin()`. É pré requisito do primeiro pedido de facilitação atendido, não da primeira venda. Plano B, se o fator não existir ou não for legível pelo Postgres: a conta de admin passa a exigir **senha** (5.5) mais um código enviado a um segundo e-mail, e a concessão de facilitação (4.3) fica limitada a 72 horas por pedido, que é o que reduz a janela de dano |
-| S20 | **A role da migration consegue criar DDL nos schemas gerenciados da Supabase.** São três objetos, todos fora de `public`: `create trigger storage_objects_registra_midia` e `storage_objects_remove_midia` sobre `storage.objects` (4.4), as cinco `create policy ... on storage.objects` (4.6), e `create trigger claim_portfolio after insert on auth.users` (4.5). `storage.objects` pertence a `supabase_storage_admin` e `auth.users` a `supabase_auth_admin`; S10 assume o **comportamento** do trigger e não a permissão de criá-lo. Se cair, o entregável 7 da fase 1 muda de forma e o plano B deixa de ser plano B | Aplicar `0003`, `0004` e `0005` no projeto novo e conferir, em uma linha cada: `select tgname from pg_trigger where tgrelid = 'storage.objects'::regclass`, `select tgname from pg_trigger where tgrelid = 'auth.users'::regclass` e `select policyname from pg_policies where schemaname = 'storage'`. É o primeiro comando depois da migration, antes de qualquer upload de teste. Plano B, e ele muda o tamanho da fase 1: a cota passa a ser aplicada pela Edge Function `media-upload` com URL assinada (o cliente perde o `insert` direto no Storage), o `claim_portfolio` vira uma chamada explícita de `claim_my_portfolio()` no primeiro carregamento do editor, e a leitura pública do bucket passa a ser configuração de bucket público em vez de policy nossa |
+| S20 | **A role da migration consegue criar DDL nos schemas gerenciados da Supabase.** São três objetos, todos fora de `public`: `create trigger storage_objects_registra_midia` e `storage_objects_remove_midia` sobre `storage.objects` (4.4), as cinco `create policy ... on storage.objects` (4.6), e `create trigger claim_portfolio after insert on auth.users` (4.5). `storage.objects` pertence a `supabase_storage_admin` e `auth.users` a `supabase_auth_admin`; S10 assume o **comportamento** do trigger e não a permissão de criá-lo. Se cair, o entregável 7 da fase 1 muda de forma e o plano B deixa de ser plano B | Aplicar `0003`, `0004`, `0005` e `0007` no projeto novo e conferir, em uma linha cada: `select tgname from pg_trigger where tgrelid = 'storage.objects'::regclass`, `select tgname from pg_trigger where tgrelid = 'auth.users'::regclass` e `select policyname from pg_policies where schemaname = 'storage'`, que depois de `0007` tem que listar as quatro policies novas de `portfolio-docs` (4.7.1). É o primeiro comando depois da migration, antes de qualquer upload de teste. Plano B, e ele muda o tamanho da fase 1: a cota passa a ser aplicada pela Edge Function `media-upload` com URL assinada (o cliente perde o `insert` direto no Storage), o `claim_portfolio` vira uma chamada explícita de `claim_my_portfolio()` no primeiro carregamento do editor, e a leitura pública do bucket passa a ser configuração de bucket público em vez de policy nossa |
 | S21 | **`pg_cron` está disponível no projeto e a migration consegue criar a extensão e usar o schema `cron`** (`create extension if not exists pg_cron` mais `grant usage on schema cron to postgres`, 4.2). Seis jobs dependem disso: keep alive, faxina de `slug_history`, faxina de mídia órfã, faxina de publicações, liberação de slug retido, limpeza de `access_throttle` | Rodar `0001` no projeto novo e conferir `select extname from pg_extension where extname = 'pg_cron'` e `select jobname from cron.job`, que tem que listar os seis. Plano B: os jobs viram rotas internas de um **Cron Trigger de Worker** (o mesmo mecanismo do plano B de S5), chamando RPCs `security definer` com a service key, uma rota por job, o que troca seis linhas de SQL por um handler `scheduled` com seis casos e mantém o resto igual |
 | S22 | **Dá para ler o tempo de CPU por invocação do Worker publicado** (`wrangler tail`, ou a analytics de Workers da zona), que é o único número comparável ao limite de CPU da plataforma | Publicar o Worker da fase 1, gerar 50 requisições em miss forçado e conferir se sai número de CPU por invocação. Registrar em `tasks/_plano/medicoes.md`. Plano B, e ele é observável sem doc nenhuma: 500 requisições em miss forçado contra um tenant com 20 projetos, e **nenhuma** resposta pode vir sem o nosso corpo (toda resposta é `200` com o `<title>` do tenant, ou uma das nossas páginas de erro com o nosso HTML). Uma única resposta de erro de plataforma no meio do lote significa render acima do teto, e aí o orçamento do render (seção 2) reprova mesmo sem o número exato |
 | S23 | **Com `run_worker_first: false`, um arquivo estático que casa o caminho é servido sem o Worker rodar**, ou seja, o asset tem precedência sobre o código. A tabela de verificados confirma que os knobs existem, não a ordem entre eles. Esta suposição é a razão de ser da regra "`dist/` nunca contém `.html`" (seção 2) e do critério 2 daquela seção | No primeiro deploy do Worker (fase 1, item 3): colocar um `sonda.html` dentro de `dist/`, publicar, e pedir `https://<host>/sonda.html`. Se vier o conteúdo do arquivo, a precedência é a assumida e a regra do build é obrigatória; se vier resposta do Worker, a precedência é a inversa. Apagar a sonda no deploy seguinte. Plano B se a precedência for a inversa: a regra do build continua valendo por higiene, mas deixa de ser a defesa, e a defesa passa a ser o Worker recusar explicitamente servir `.html` de `env.ASSETS` em hostname de tenant |
@@ -86,6 +86,7 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 | S25 | **O caminho `/cdn-cgi/*` é reservado pela Cloudflare em toda a zona, inclusive dentro de cada subdomínio de tenant, e nunca chega ao Worker.** É a única defesa citada para esse namespace dentro do subdomínio do cliente | No primeiro deploy do Worker: `curl -s https://<slug>.myportifolio.com.br/cdn-cgi/trace` e conferir se a resposta é da plataforma (corpo com `fl=`, `h=`, `ip=`) ou do nosso código. Plano B, barato: o roteador de `worker/index.js` passa a tratar `/cdn-cgi/*` explicitamente, respondendo `404` da nossa página, para o caminho não virar superfície nossa por acidente. `cdn-cgi` continua em `reserved_slugs` nos dois casos, porque lá ele defende o **rótulo** de subdomínio, que é outra coisa |
 | S26 | **Workers tem versões, deploy gradual e `wrangler rollback`**, e dá para voltar a versão anterior sem rebuild. O risco R9 (ponto único de falha global) depende inteiro disso, e S4 cobre só a URL de preview por versão | Depois do primeiro deploy do Worker: `npx wrangler deployments list` e `npx wrangler rollback --help`, mais um rollback de mentira entre duas versões triviais, cronometrado. Plano B se não existir como descrito: o rollback passa a ser `git checkout <tag anterior> && npm run build && npx wrangler deploy`, o que exige que **toda** publicação saia de uma tag, e o tempo de recuperação sobe de segundos para minutos, o que muda o texto do R9 e não a arquitetura |
 | S27 | **A thumb `https://i.ytimg.com/vi/<id>/hqdefault.jpg` de um ID inexistente devolve um placeholder cinza de 120x90 em vez de `404`**, ou seja, imagem quebrada no card não é sinal de ID errado | Um `curl -sI` com um ID de 11 caracteres inventado, lendo status e `Content-Length`. É o menos grave da tabela porque a defesa já está desenhada ao lado (6.6): o editor confere o ID pelo oEmbed (suposição S13) e não confia na thumb. Plano B: se a thumb devolver `404` de verdade, o editor pode usar o próprio status da thumb como checagem barata e o oEmbed vira redundância |
+| S28 | **Dá para assinar uma URL de leitura de objeto em bucket privado com a service role** (`POST /storage/v1/object/sign/portfolio-docs/<caminho>` com validade em segundos), e a URL assinada serve o arquivo com o `content-type` gravado no upload. É disso que depende a rota `/certificado/` (4.7.1), que é o único caminho pelo qual um certificado chega ao visitante. A seção 5.9 já cita URL assinada para o export de dados, mas lá o bucket é público e aqui não é, e é a parte privada que não foi lida na documentação | Subir um PDF de teste em `portfolio-docs` e conferir quatro coisas com `curl`, em ordem: a URL **não** assinada do objeto responde erro; a URL assinada com validade de 300 s responde `200` com `content-type: application/pdf`; a mesma URL depois do vencimento responde erro; e um `GET` do mesmo caminho com a anon key responde erro. **Momento:** fase 1, no primeiro upload de certificado, antes de a rota `/certificado/` existir. **Plano B, sem mexer em uma coluna sequer:** a rota deixa de responder `302` e passa a devolver os bytes lidos pelo Worker com a service key, sempre com `content-disposition: attachment` e `cache-control: private, no-store`, o que mantém o PDF fora do nosso origin como conteúdo ativo e troca a assinatura por banda de Worker |
 
 Regra que vale para o documento inteiro: número de performance mora **só** em
 `tasks/_plano/medicoes.md`, gerado por `scripts/medir-render.mjs`. O plano v1 citava dois
@@ -178,24 +179,30 @@ não entrega.
    sociais, três números de destaque, lista de stacks, botão de CTA próprio.
 4. Projetos: imagem, nome, cliente, categoria, ano, frase de efeito, o desafio, a solução,
    funcionalidades, stack, link do trabalho, vídeo do YouTube por embed.
-5. Filtros e paginação que se derivam sozinhos do conteúdo dele.
-6. Rascunho separado do que está no ar, publicação instantânea da segunda vez em diante
+5. Experiência: uma entrada por passagem, com logo da organização, nome da organização, se
+   foi trabalho ou estudo (faculdade, curso, certificação), cargo, período, local, o que
+   ele fez ali, uma observação livre e um certificado anexado. Organização sem logo entra
+   com o monograma das iniciais, nunca com um buraco no card. A seção **já está no ar** no
+   portfólio do Helio (`src/modules/experience/`, seção 4.7.1), e o comprador recebe
+   exatamente o mesmo render.
+6. Filtros e paginação que se derivam sozinhos do conteúdo dele.
+7. Rascunho separado do que está no ar, publicação instantânea da segunda vez em diante
    (a primeira passa por conferência de até 24 horas, risco R8), link de prévia
    compartilhável que funciona desde antes de publicar, e **histórico das últimas 10
    publicações** (o botão de restaurar é entregue na fase 2; o histórico já é gravado desde
    a fase 1). Achado 13: sem isso, quem apaga metade dos projetos e publica não tem volta, e
    o Supabase Free não tem PITR.
-7. Preview de link correto: quem colar a URL no WhatsApp ou no LinkedIn vê o nome, a
+8. Preview de link correto: quem colar a URL no WhatsApp ou no LinkedIn vê o nome, a
    descrição e a foto do comprador, não a do Helio. Isso é entregue pelo SSR e não é
    negociável em nenhuma fase.
-8. Contador de visualizações do próprio portfólio e um e-mail mensal com o número
+9. Contador de visualizações do próprio portfólio e um e-mail mensal com o número
    (**fase 2**). Achado 28: com pagamento único não existe churn de assinatura, mas o
    contador continua sendo o único sinal de valor que o produto emite, e é o que sustenta
    a venda futura de upgrade.
-9. Botão "baixar meus dados" (o próprio `payload` publicado mais os caminhos de mídia) e
-   botão "apagar minha conta" com confirmação por código (achado 27, LGPD art. 18).
-10. Termos de uso e política de privacidade publicados **antes** da primeira venda.
-11. Rodapé com o crédito "Desenvolvida por Method Growth Hub".
+10. Botão "baixar meus dados" (o próprio `payload` publicado mais os caminhos de mídia) e
+    botão "apagar minha conta" com confirmação por código (achado 27, LGPD art. 18).
+11. Termos de uso e política de privacidade publicados **antes** da primeira venda.
+12. Rodapé com o crédito "Desenvolvida por Method Growth Hub".
 
 ### O que o comprador NÃO recebe na v1
 
@@ -210,6 +217,15 @@ não entrega.
   variações (seção 6.10).
 - Analytics além do contador de visitas, e formulário de contato com resposta.
 - Página própria por case, com deep link indexável (fase 3).
+- Na experiência: mais de um certificado por entrada (é um arquivo por passagem), leitor de
+  PDF embutido na página (o certificado abre em aba própria pela rota `/certificado/`, e
+  nunca dentro do nosso HTML, seção 4.7.1), e busca automática da logo da organização por
+  domínio. A logo é upload, como qualquer outra imagem do produto.
+- Ordenação automática da experiência por data. A ordem é escolha do comprador, com a
+  sugestão de um clique descrita em 6.5.1, pela mesma razão do "vídeo primeiro" nos
+  projetos: reordenar em silêncio mexe no que ele acabou de arrumar.
+- Conferência de autenticidade do certificado. O produto anexa o documento que o comprador
+  subiu e não afirma nada sobre ele, e é assim que os termos precisam dizer (5.9).
 - Blog, depoimentos, tabela de preços, agenda embutida.
 - Exportar o site como HTML estático (o "baixar meus dados" exporta o **conteúdo**, não o
   site montado).
@@ -605,8 +621,11 @@ inclusive concorrentes. Duas consequências, e a segunda é a que mata:
    variar sem que a chave varie, o cache serve conteúdo errado para outro visitante. O bug
    deixa de ser "idioma trocado" e vira "vazamento entre requests".
 
-Portanto, e isto não é negociável: `t(v, lang)`, `tui(key, lang)` e
-`px(project, field, lang)` puros, com `lang` vindo do `ctx` do request. O estado mutável
+Portanto, e isto não é negociável: `t(v, lang)`, `tui(key, lang)`,
+`px(project, field, lang)` e `ex(experience, field, lang)` puros, com `lang` vindo do `ctx`
+do request. `ex()` entrou nesta lista depois das três rodadas de revisão, junto da seção de
+experiência (6.5.1), e hoje ele lê `getLang()` de módulo exatamente como os outros liam. O
+estado mutável
 de idioma sai para `src/app/langState.js`, importado **apenas** por `src/main.js`
 (browser). O achado 15 está certo também na parte chata: isso valia igual para a
 arquitetura A do plano v1, então o item nunca foi diferencial entre arquiteturas, e sim
@@ -636,7 +655,7 @@ worker/
 │   └── paginas.js            naoExiste(), bloqueado(), indisponivel()
 └── rotas/
     ├── apex.js               vitrine, /comprar, /entrar, /app, /termos, /privacidade
-    ├── tenant.js             o caminho quente, e a rota de previa
+    ├── tenant.js             o caminho quente, a rota de previa e /certificado/ (4.7.1)
     ├── sitemap.js            gerado com a service key, nunca com anon (fase 3)
     ├── robots.js             por hostname: apex e tenant tem robots diferentes
     └── cron.js               alvo do handler scheduled: ping HTTP no PostgREST (S5)
@@ -778,7 +797,7 @@ O que cada item obriga, com o detalhe que costuma ser esquecido:
 | **Vínculo de e-mail** | `supabase/functions/link-login-email/index.ts` | Manda código para o e-mail **da compra** e grava o alias (achado 3) |
 | **Banco** | Supabase Postgres `sa-east-1` | Fonte da verdade. RLS em tudo. Rascunho normalizado, publicado em snapshot versionado |
 | **Editor** | `myportifolio.com.br/app`, bundle `src/app/editorBoot.js` | Canvas ao vivo mais gaveta de formulário. Único lugar que importa `@supabase/supabase-js` |
-| **Storage** | Supabase Storage, bucket `portfolio-media` | Avatar, hero e imagens de projeto, com hash no nome e prefixo `<portfolio_id>/` obrigatório no `CHECK` (achado 17) |
+| **Storage** | Supabase Storage, buckets `portfolio-media` (público) e `portfolio-docs` (privado) | `portfolio-media`: avatar, hero, imagens de projeto e logo de organização. `portfolio-docs`: só o certificado da experiência, que é documento pessoal e por isso não divide bucket com a página pública (4.7.1). Nos dois, hash no nome e prefixo `<portfolio_id>/` obrigatório no `CHECK` (achado 17) |
 | **Renderizador público** | `worker/rotas/tenant.js` | Resolve slug pelo hostname, lê o ponteiro no cache, lê `get_published_portfolio` no miss, injeta head e payload, responde e grava o cache |
 | **Hidratação** | `src/main.js` | Lê `<script id="pf-payload">`, liga os listeners delegados no `document`. Nunca reescreve o HTML no load quando ele já veio pintado |
 
@@ -787,8 +806,10 @@ Bindings, variáveis e segredos, todos nomeados:
 - Binding `ASSETS` (Static Assets, `directory: ./dist`).
 - Vars em `wrangler.jsonc`: `APEX_HOST`, `CACHE_NS`.
 - Secrets do Worker por `wrangler secret put`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, e
-  `SUPABASE_SERVICE_ROLE_KEY` **usado exclusivamente na rota `/sitemap.xml` do apex**
-  (fase 3). Nenhuma outra rota toca a service key.
+  `SUPABASE_SERVICE_ROLE_KEY`, usado em **exatamente duas** rotas e em nenhuma outra:
+  `/sitemap.xml` no apex (fase 3) e `/certificado/<slug-da-experiencia>` no subdomínio do
+  tenant (fase 1), que assina a URL de vida curta do documento privado (4.7.1, suposição
+  S28). O caminho quente do tenant continua sem tocar a service key.
 - Secrets das Edge Functions: `HUBLA_WEBHOOK_TOKEN` (**novo**, nunca o mesmo do AI Block:
   token compartilhado entre dois produtos significa que comprometer um compromete os
   dois), `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `APP_URL`.
@@ -810,6 +831,11 @@ Bindings, variáveis e segredos, todos nomeados:
 - `anon` **não** tem `select` em `portfolio_publications` nem em view de publicados (achado
   6: com `grant select to anon`, um `GET /rest/v1/portfolio_publications?select=payload`
   baixa a base de clientes inteira, com dado pessoal, sem autenticação).
+- O certificado é o único arquivo do comprador que o visitante **não** busca no Storage. A
+  rota `/certificado/<slug-da-experiencia>` em `worker/rotas/tenant.js` lê o caminho do
+  payload que já está em cache, assina uma URL de vida curta e responde `302` (suposição
+  S28). O Worker nunca serve os bytes do PDF pelo nosso origin, e a URL assinada nunca
+  entra em HTML nem em cache compartilhado (4.7.1).
 
 ### O contrato de `ctx`, que é o que substitui o estado de módulo
 
@@ -843,8 +869,10 @@ diagnosticado:
   `republish_all()` sobre a base inteira.
 - **`ctx` é somente leitura para o render.** Nenhuma função de render escreve em `ctx`: um
   componente que guarda estado ali reinventa o `let lang` num objeto compartilhado.
-- **`ctx.lang` é a única fonte de idioma.** `t`, `tui` e `px` recebem `lang` por parâmetro,
-  e `src/app/langState.js` (que muta) só existe no browser.
+- **`ctx.lang` é a única fonte de idioma.** `t`, `tui`, `px` e `ex` recebem `lang` por
+  parâmetro, e `src/app/langState.js` (que muta) só existe no browser. `ctx` não ganha
+  chave nova por causa da experiência: ela viaja dentro de `ctx.portfolio`, como os
+  projetos, e o caminho da logo é resolvido por `mediaBase` como qualquer outra imagem.
 
 ### Regras de fronteira que valem como revisão de PR
 
@@ -2770,6 +2798,10 @@ end;
 $$;
 revoke execute on function public.montar_payload_portfolio(uuid) from public, anon, authenticated;
 
+-- ATENCAO: esta funcao e reaplicada por 0007 (4.7.1) com create or replace, carregando
+-- ESTE corpo inteiro mais tres acrescimos (as experiencias). Mexer aqui sem mexer la
+-- desfaz o acrescimo na proxima migration.
+
 -- PUBLICAR -----------------------------------------------------------------
 -- O nucleo esta separado da autorizacao de proposito. Existe um caminho legitimo de
 -- publicacao SEM usuario logado na frente: quando has_custom muda (compra ou estorno do
@@ -3591,10 +3623,622 @@ escrever a migration sem inventar nome:
 
 ---
 
+### 4.7.1 `supabase/migrations/0007_experiencias.sql`
+
+A experiência do comprador (onde ele trabalhou, onde estudou, o que fez ali, o certificado)
+é a segunda área de conteúdo do produto, depois dos projetos. Ela **já existe implementada
+no repo**, em `src/modules/experience/`, e o formato de lá foi escrito de propósito para
+virar linha de banco sem reescrita: um campo por coluna, `slug` como chave estável, `ex()`
+resolvendo tradução por slug exatamente como `px()` faz nos projetos. Esta migration é a
+tradução daquele formato para o schema, mais as três coisas que só o produto precisa:
+limite por conta, confinamento de arquivo e consentimento para o certificado.
+
+**Numeração:** este é o `0007`, e ele roda depois do `0006`. A subseção é `4.7.1` e não
+`4.8` porque `4.8`, `4.9` e `4.10` já são referenciadas por número em outras seções do
+documento, e renumerar por causa de um arquivo novo quebraria essas referências em silêncio.
+
+**Nada aqui reescreve `0001` a `0006`.** O que precisa mudar naquelas tabelas (a coluna de
+cota, o `kind` da mídia, a chave de `portfolio_media`, as três funções de storage e a
+policy de upload) entra como `alter`, `create or replace` e `drop policy` neste arquivo. É a
+regra normal de migration: arquivo aplicado não se edita, mesmo antes de existir cliente,
+porque a base de desenvolvimento já rodou.
+
+**Por que uma tabela só, com `kind`, e não uma para trabalho e outra para estudo.** As duas
+têm os mesmos onze campos, o mesmo card, a mesma ordem e a mesma cota. A única diferença é
+um selo de "formação" na linha do topo, que o render já resolve com
+`e.kind === 'education'`. Duas tabelas dariam duas policies, dois triggers de cota, dois
+blocos no payload e uma decisão nova toda vez que alguém quisesse ordenar as duas juntas na
+mesma lista, que é justamente como a seção é renderizada hoje.
+
+```sql
+-- Experiencia (espelha experience.data.js + experience.en.js), bucket de documento e o
+-- certificado. Roda DEPOIS de 0006.
+
+-- PERIODO -------------------------------------------------------------------
+-- O repo guarda o periodo como rotulo ('2025' ou '03/2025') e imprime literal, e o produto
+-- mantem isso. Coluna date obrigaria o comprador a informar um DIA que ele nao lembra, e
+-- todo mundo escolheria o dia 1, o que e dado falso com cara de dado preciso. Entao o
+-- rotulo continua sendo o dado, e a comparacao vira chave derivada 'AAAAMM': e ela que
+-- permite um CHECK dizer "o fim veio antes do inicio" em vez de deixar isso para o front.
+-- period_end NULO significa ATUAL, e esse e o unico significado dele.
+create or replace function public.periodo_valido(p_valor text) returns boolean
+language sql immutable as $$
+  select p_valor is null or p_valor ~ '^([0-9]{4}|(0[1-9]|1[0-2])/[0-9]{4})$';
+$$;
+
+-- p_fim existe porque ano solto significa coisas diferentes nas duas pontas: '2024' como
+-- inicio e o comeco de 2024, como fim e o fim de 2024. Sem isso, "03/2024 a 2024" seria
+-- recusado como fim antes do inicio, que e uma linha de curriculo perfeitamente normal.
+create or replace function public.periodo_chave(p_valor text, p_fim boolean default false)
+returns text language sql immutable as $$
+  select case
+    when p_valor is null then null
+    when p_valor ~ '^[0-9]{4}$' then p_valor || case when p_fim then '12' else '01' end
+    else substr(p_valor, 4, 4) || substr(p_valor, 1, 2)
+  end;
+$$;
+-- Regra do fim de 4.8, aplicada tambem a validador: o Postgres concede EXECUTE a PUBLIC
+-- por padrao e o PostgREST expoe qualquer funcao de public como /rpc/<nome>. Quem escreve
+-- na tabela e authenticated, e e so ele que precisa avaliar o CHECK.
+revoke execute on function public.periodo_valido(text) from public, anon;
+revoke execute on function public.periodo_chave(text, boolean) from public, anon;
+grant execute on function public.periodo_valido(text) to authenticated;
+grant execute on function public.periodo_chave(text, boolean) to authenticated;
+
+create table if not exists public.portfolio_experiences (
+  id uuid primary key default gen_random_uuid(),
+  portfolio_id uuid not null references public.portfolios(id) on delete cascade,
+
+  slug text not null,
+  org text not null,
+  -- 'work' e trabalho, 'education' cobre faculdade, curso e certificacao. E o mesmo par
+  -- que experience.data.js ja usa, e o render decide o selo de formacao por ele.
+  kind text not null default 'work' check (kind in ('work','education')),
+  role_i18n jsonb not null default '{"pt": ""}'::jsonb,
+
+  period_start text not null,
+  period_end   text,
+  location_i18n jsonb,
+
+  logo_path text,
+  logo_mime text,   -- mesma razao de projects.image_mime: nunca confiar na extensao
+  -- Cor da placa atras da logo. E do bump has_custom, igual a plate_bg dos projetos, e
+  -- guardada pelo trigger portfolio_experiences_guarda mais abaixo.
+  plate_bg text not null default '#0b0b12',
+
+  highlights_i18n jsonb not null default '{"pt": []}'::jsonb,
+  note_i18n jsonb,
+
+  certificate_path text,
+  certificate_mime text,
+  certificate_label_i18n jsonb,
+  -- CONSENTIMENTO, e nao preferencia de layout. Certificado e documento pessoal: diploma,
+  -- declaracao e certificado de curso costumam trazer nome completo, CPF, data de
+  -- nascimento e assinatura. Enquanto isto for falso o arquivo existe, conta cota e e
+  -- legivel pelo dono, e NAO aparece em lugar nenhum publico, nem como caminho. Quem liga
+  -- e so o titular, nunca o operador do bump de facilitacao (trigger de guarda abaixo).
+  certificate_public boolean not null default false,
+
+  position integer not null default 0,
+  is_visible boolean not null default true,
+  is_sample  boolean not null default false,
+  en_status  text check (en_status in ('auto','human')),
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint experiences_slug_unico unique (portfolio_id, slug),
+  constraint experiences_slug_formato check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
+                                             and char_length(slug) between 2 and 60),
+  constraint experiences_org_ok       check (char_length(org) between 1 and 60),
+  constraint experiences_role_ok      check (public.i18n_texto_valido(role_i18n, 80)),
+  constraint experiences_local_ok     check (public.i18n_texto_valido(location_i18n, 60)),
+  constraint experiences_destaques_ok check (public.i18n_lista_valida(highlights_i18n, 6, 300)),
+  constraint experiences_nota_ok      check (public.i18n_texto_valido(note_i18n, 700)),
+  -- plate_bg entra CRU em style="..." no template da placa, igual ao dos projetos.
+  constraint experiences_plate_ok     check (public.cor_hex_valida(plate_bg)),
+  constraint experiences_inicio_ok    check (public.periodo_valido(period_start)),
+  constraint experiences_fim_ok       check (public.periodo_valido(period_end)),
+  constraint experiences_ordem_ok     check (period_end is null
+    or public.periodo_chave(period_end, true) >= public.periodo_chave(period_start)),
+  -- ACHADO 17 outra vez, agora em dois arquivos por linha. media_path_valido ja recusa
+  -- ':', '//' inicial e segmento '.' ou '..'; o like e o confinamento na pasta do tenant.
+  constraint experiences_logo_ok check (
+    logo_path is null or (public.media_path_valido(logo_path)
+                          and logo_path like portfolio_id::text || '/%')),
+  constraint experiences_cert_ok check (
+    certificate_path is null or (public.media_path_valido(certificate_path)
+                                 and certificate_path like portfolio_id::text || '/%')),
+  constraint experiences_cert_mime_ok check (
+    certificate_path is null
+    or certificate_mime in ('application/pdf','image/webp','image/png','image/jpeg')),
+  constraint experiences_cert_label_ok check (public.i18n_texto_valido(certificate_label_i18n, 40)),
+  -- Consentimento sem arquivo e flag ligada apontando para o nada, e e o estado que faz o
+  -- payload publicar 'certificatePath': null e o front desenhar um botao morto.
+  constraint experiences_cert_consentimento check (
+    not certificate_public or certificate_path is not null)
+);
+
+create index if not exists portfolio_experiences_pf_idx
+  on public.portfolio_experiences (portfolio_id, position);
+create trigger portfolio_experiences_set_updated_at before update on public.portfolio_experiences
+  for each row execute function public.set_updated_at();
+
+-- TITULAR, QUE NAO E A MESMA PERGUNTA QUE POSSE -----------------------------
+-- owns_portfolio() responde "sim" tambem para o operador do bump de facilitacao com
+-- concessao viva (0002), e isso e CERTO para montar o portfolio do cliente. E errado para
+-- uma coisa so: consentir a exposicao publica de um documento pessoal do cliente. Esta
+-- funcao existe exatamente para essa diferenca e nao substitui owns_portfolio em lugar
+-- nenhum.
+create or replace function public.eh_titular_do_portfolio(p_portfolio_id uuid) returns boolean
+language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.portfolios p
+    where p.id = p_portfolio_id
+      and (p.owner_id = (select auth.uid())
+        or p.owner_email = (select public.current_purchase_email())));
+$$;
+grant execute on function public.eh_titular_do_portfolio(uuid) to authenticated;
+revoke execute on function public.eh_titular_do_portfolio(uuid) from public, anon;
+
+-- GUARDA DE COLUNA ----------------------------------------------------------
+-- Um trigger por tabela, cobrindo bump e coluna protegida, igual ao par que ja existe em
+-- portfolios e portfolio_projects. Duas diferencas em relacao ao dos projetos, as duas
+-- deliberadas:
+--
+-- 1. Ele e BEFORE INSERT OR UPDATE, e nao so before update. O guarda dos projetos pode ser
+--    so de update porque a unica coisa que ele protege (accent, plate_bg) tambem e
+--    NORMALIZADA na saida de montar_payload_portfolio: um valor que entrou no insert sem o
+--    bump nunca chega a aparecer na pagina. certificate_public nao tem normalizacao
+--    equivalente, porque ele nao e apresentacao, e sim a propria decisao de publicar; um
+--    insert ja nasceria com o documento exposto.
+-- 2. A pergunta do certificado e eh_titular_do_portfolio, e nao portfolio_tem_custom nem
+--    owns_portfolio. Consentimento de expor documento pessoal e do titular, e nao de quem
+--    esta montando o portfolio para ele, ainda que a concessao seja legitima e esteja viva.
+--    O operador continua podendo SUBIR o certificado (isso e o servico que foi vendido),
+--    so nao pode decidir publicar.
+--
+-- A porta de fuga continua sendo unica e a mesma: a marca de transacao, ligada dentro das
+-- RPCs privilegiadas do proprio schema.
+create or replace function public.portfolio_experiences_guarda_colunas() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if public.em_operacao_confiavel() then return new; end if;
+
+  if tg_op = 'UPDATE'
+     and new.plate_bg is distinct from old.plate_bg
+     and not public.portfolio_tem_custom(new.portfolio_id) then
+    raise exception 'personalizacao nao liberada nesta conta';
+  end if;
+
+  -- Ramos separados de proposito: OLD nao existe em INSERT, e a ordem de avaliacao de um
+  -- AND nao e garantida, entao "tg_op = 'INSERT' or not old.x" e uma armadilha.
+  if new.certificate_public and not public.eh_titular_do_portfolio(new.portfolio_id) then
+    if tg_op = 'INSERT' then
+      raise exception 'so o titular publica o proprio certificado';
+    elsif not old.certificate_public then
+      raise exception 'so o titular publica o proprio certificado';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+create trigger portfolio_experiences_guarda before insert or update on public.portfolio_experiences
+  for each row execute function public.portfolio_experiences_guarda_colunas();
+
+-- COTA DE EXPERIENCIA -------------------------------------------------------
+-- Teto proprio, e nao dividindo o teto de projeto: um curriculo honesto passa de doze
+-- entradas sem abuso nenhum, e somar as duas faria cadastrar experiencia comer a cota de
+-- case, que e o que o comprador veio comprar. Trigger e nao "with check" de RLS pela mesma
+-- razao de 4.4: aqui o erro sobe com o numero do teto, que e o que o editor mostra na tela.
+alter table public.quotas add column if not exists max_experiences int not null default 20;
+update public.quotas set max_experiences = 20  where code = 'padrao';
+update public.quotas set max_experiences = 100 where code = 'interno';
+
+create or replace function public.enforce_experience_limit() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare v_max int; v_count int;
+begin
+  select (public.quota_do_portfolio(new.portfolio_id)).max_experiences into v_max;
+  select count(*) into v_count from public.portfolio_experiences
+   where portfolio_id = new.portfolio_id;
+  if v_count >= v_max then
+    raise exception 'limite atingido: maximo de % experiencias', v_max;
+  end if;
+  return new;
+end;
+$$;
+create trigger portfolio_experiences_limite before insert on public.portfolio_experiences
+  for each row execute function public.enforce_experience_limit();
+
+-- O CERTIFICADO DENTRO DO ORCAMENTO DE BYTES QUE JA EXISTE -------------------
+-- Um orcamento de espaco, nao dois. Dois numeros de espaco na mesma tela ("voce usou 8 de
+-- 20 MB de imagem e 3 de 15 MB de documento") e um numero que ninguem entende e que
+-- ninguem consegue planejar. O que muda e o teto, porque a conta de arquivos mudou de
+-- tamanho:
+--   24 imagens de case + avatar + hero .................. 26 arquivos, ~2,2 MB
+--   20 logos de experiencia (mesmo orcamento de 90 KB) .. 20 arquivos, ~1,8 MB
+--   20 certificados, uso real de ~400 KB cada ........... 20 arquivos, ~8,0 MB
+-- Uso real somado da uns 12 MB. 40 MB continua sendo folga de mais de 3x e ainda flagra
+-- abuso, e quem impede um PDF unico de 30 MB comer a cota sozinho e o file_size_limit do
+-- bucket de documento (3 MB), que e a primeira barreira, igual ao de imagem em 4.6.
+-- 130 arquivos deixa margem para o orfao que ainda espera a faxina de 24 horas (4.4).
+update public.quotas set max_media_files = 130, max_media_bytes = 41943040 where code = 'padrao';
+
+-- BUCKET DE DOCUMENTO, PRIVADO ----------------------------------------------
+-- O certificado nao cabe em portfolio-media, e nao e so por causa do tipo de arquivo.
+-- Aquele bucket e PUBLICO por decisao (4.6), porque o conteudo dele E a pagina publica.
+-- Documento pessoal em bucket publico fica legivel por quem tiver a URL DESDE O UPLOAD,
+-- antes de o comprador decidir qualquer coisa, e um upload que o proprio comprador
+-- abandonou continuaria servindo CPF por tempo indeterminado. Isso e tratamento de dado
+-- pessoal sem base legal (secao 5.9), e o bucket separado e o que torna o estado padrao
+-- "fechado" em vez de "aberto ate alguem lembrar de fechar".
+--
+-- application/pdf entra na allowlist porque certificado quase sempre e PDF; imagem entra
+-- porque muita declaracao chega como foto do papel. O tamanho e maior que o da imagem
+-- (3 MB contra 2 MB) porque PDF de scan de duas paginas passa de 2 MB com facilidade, e
+-- recusar o arquivo do cliente sem alternativa e pior do que guardar 1 MB a mais.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('portfolio-docs', 'portfolio-docs', false, 3145728,
+        array['application/pdf','image/webp','image/png','image/jpeg'])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+-- portfolio_media passa a contabilizar os dois buckets. Sem a coluna, o mesmo caminho nos
+-- dois buckets colidiria no unique de path, e a soma da cota nao saberia de qual arquivo
+-- esta falando.
+alter table public.portfolio_media
+  add column if not exists bucket text not null default 'portfolio-media';
+alter table public.portfolio_media drop constraint if exists portfolio_media_bucket_ok;
+alter table public.portfolio_media add constraint portfolio_media_bucket_ok
+  check (bucket in ('portfolio-media','portfolio-docs'));
+alter table public.portfolio_media drop constraint if exists portfolio_media_path_key;
+alter table public.portfolio_media add constraint portfolio_media_bucket_path_unico
+  unique (bucket, path);
+alter table public.portfolio_media drop constraint if exists portfolio_media_kind_check;
+alter table public.portfolio_media add constraint portfolio_media_kind_check
+  check (kind in ('avatar','hero','project','experience','certificate'));
+
+-- REGISTRO E COTA, AGORA NOS DOIS BUCKETS -----------------------------------
+-- Corpo identico ao de 4.4 salvo os cinco pontos marcados com [0007]. O porque de cada
+-- decisao que NAO mudou (cota que falha fechada no ramo sem metadata, orfao contando na
+-- soma, suposicoes S9, S10 e S20) esta escrito em 4.4 e nao se repete aqui. O trigger
+-- storage_objects_registra_midia continua o mesmo e nao e recriado: ele ja dispara para
+-- qualquer bucket, e quem filtra e o corpo da funcao.
+create or replace function public.storage_registrar_midia() returns trigger
+language plpgsql security definer set search_path = public, storage as $$
+declare
+  v_folder text := (storage.foldername(new.name))[1];
+  v_tipo   text := (storage.foldername(new.name))[2];
+  v_pf uuid; v_bytes bigint; v_max bigint; v_max_files int;
+  v_total bigint; v_files int;
+begin
+  -- [0007] 1: os dois buckets entram.
+  if new.bucket_id not in ('portfolio-media','portfolio-docs') then return new; end if;
+
+  v_bytes := nullif(new.metadata ->> 'size', '')::bigint;
+  if v_bytes is null then
+    select b.file_size_limit into v_bytes from storage.buckets b where b.id = new.bucket_id;
+    if v_bytes is null then
+      raise exception 'bucket sem file_size_limit: nao da para aplicar cota com seguranca';
+    end if;
+  end if;
+
+  select p.id into v_pf from public.portfolios p where p.id::text = v_folder;
+  if v_pf is null then
+    raise exception 'caminho fora de qualquer portfolio: %', new.name;
+  end if;
+
+  -- [0007] 2: cada bucket tem o seu conjunto de pastas, e 'certificate' SO existe no
+  -- privado. Sem este par, o vetor obvio e subir o PDF com CPF em <id>/certificate/ dentro
+  -- de portfolio-media, que e publico, e o confinamento por pasta passaria liso.
+  if (new.bucket_id = 'portfolio-media'
+      and v_tipo not in ('avatar','hero','project','experience'))
+     or (new.bucket_id = 'portfolio-docs' and v_tipo is distinct from 'certificate') then
+    raise exception 'tipo de midia invalido no caminho: %', coalesce(v_tipo, '(vazio)');
+  end if;
+
+  select (public.quota_do_portfolio(v_pf)).max_media_bytes,
+         (public.quota_do_portfolio(v_pf)).max_media_files
+    into v_max, v_max_files;
+
+  -- [0007] 3: a soma atravessa os dois buckets, porque o orcamento de bytes e um so.
+  select coalesce(sum(m.bytes), 0), count(*) into v_total, v_files
+  from public.portfolio_media m
+  where m.portfolio_id = v_pf
+    and not (m.bucket = new.bucket_id and m.path = new.name);
+
+  if v_total + v_bytes > v_max then
+    raise exception 'cota de midia excedida: % de % bytes', v_total + v_bytes, v_max;
+  end if;
+  if v_files + 1 > v_max_files then
+    raise exception 'limite de arquivos atingido: maximo de %', v_max_files;
+  end if;
+
+  -- [0007] 4 e 5: bucket entra na linha e na chave do conflito.
+  insert into public.portfolio_media (portfolio_id, bucket, path, kind, bytes, mime)
+  values (v_pf, new.bucket_id, new.name, v_tipo, v_bytes, new.metadata ->> 'mimetype')
+  on conflict (bucket, path) do update set
+    bytes = excluded.bytes, mime = excluded.mime,
+    is_orphan = false, orphan_since = null;
+
+  return new;
+end;
+$$;
+
+create or replace function public.storage_remover_midia() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if old.bucket_id in ('portfolio-media','portfolio-docs') then
+    delete from public.portfolio_media
+     where bucket = old.bucket_id and path = old.name;
+  end if;
+  return old;
+end;
+$$;
+
+-- Faxina: a unica mudanca e casar o bucket pela coluna em vez do literal. Certificado
+-- orfao precisa sair do bucket pelo mesmo motivo que imagem orfa, mais um: enquanto ele
+-- existir, existe documento pessoal guardado sem ninguem apontando para ele.
+create or replace function public.purgar_midia_orfa(
+  p_idade interval default interval '24 hours',
+  p_portfolio_id uuid default null)
+returns int language plpgsql security definer set search_path = public, storage as $$
+declare v_n int;
+begin
+  delete from storage.objects o
+  using public.portfolio_media m
+  where o.bucket_id = m.bucket
+    and o.name = m.path
+    and m.is_orphan
+    and coalesce(m.orphan_since, m.created_at) < now() - p_idade
+    and (p_portfolio_id is null or m.portfolio_id = p_portfolio_id);
+  get diagnostics v_n = row_count;
+  return v_n;
+end;
+$$;
+revoke execute on function public.purgar_midia_orfa(interval, uuid)
+  from public, anon, authenticated;
+
+-- Apagar a experiencia marca os DOIS arquivos dela como orfaos, pela mesma razao de 4.4:
+-- apagar objeto de dentro de trigger seria chamada externa dentro de transacao.
+-- Trocar a logo sem apagar o arquivo antigo deixa o arquivo velho sem dono logico e sem
+-- marca de orfao, exatamente como ja acontece com portfolio_projects.image_path: quem
+-- apaga o objeto substituido e o editor, no mesmo passo do upload (6.5).
+create or replace function public.marcar_midia_experiencia_orfa() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  update public.portfolio_media
+  set is_orphan = true, orphan_since = coalesce(orphan_since, now())
+  where portfolio_id = old.portfolio_id
+    and path in (old.logo_path, old.certificate_path);
+  return old;
+end;
+$$;
+create trigger portfolio_experiences_midia_orfa after delete on public.portfolio_experiences
+  for each row execute function public.marcar_midia_experiencia_orfa();
+
+-- POLICIES DE STORAGE -------------------------------------------------------
+-- A de upload no bucket publico ganha a pasta 'experience'. Recriada inteira em vez de
+-- alterada porque policy nao tem alter de expressao.
+drop policy if exists "dono sobe midia na propria pasta" on storage.objects;
+create policy "dono sobe midia na propria pasta" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'portfolio-media'
+    and public.owns_portfolio_folder((storage.foldername(name))[1])
+    and (storage.foldername(name))[2] in ('avatar','hero','project','experience')
+    and public.pasta_tem_acesso_ativo((storage.foldername(name))[1]));
+
+-- NAO existe policy de select publica para portfolio-docs, e essa ausencia E o desenho:
+-- em bucket privado, quem nao tem policy nao le, inclusive anon com a anon key. Quem
+-- entrega o arquivo ao visitante e a rota /certificado/ do Worker, com URL assinada de
+-- vida curta (suposicao S28), e so quando certificate_public estiver ligado.
+create policy "dono le o proprio documento" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'portfolio-docs'
+         and public.owns_portfolio_folder((storage.foldername(name))[1]));
+
+create policy "dono sobe documento na propria pasta" on storage.objects
+  for insert to authenticated with check (
+    bucket_id = 'portfolio-docs'
+    and public.owns_portfolio_folder((storage.foldername(name))[1])
+    and (storage.foldername(name))[2] = 'certificate'
+    and public.pasta_tem_acesso_ativo((storage.foldername(name))[1]));
+
+create policy "dono atualiza documento da propria pasta" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'portfolio-docs'
+         and public.owns_portfolio_folder((storage.foldername(name))[1]))
+  with check (bucket_id = 'portfolio-docs'
+         and public.owns_portfolio_folder((storage.foldername(name))[1])
+         and public.pasta_tem_acesso_ativo((storage.foldername(name))[1]));
+
+-- Delete NAO exige acesso ativo, mesma razao de 4.6, e aqui ela pesa mais: reter documento
+-- pessoal de quem foi bloqueado, sem deixar a pessoa apagar, e refem de dado.
+create policy "dono deleta documento da propria pasta" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'portfolio-docs'
+         and public.owns_portfolio_folder((storage.foldername(name))[1]));
+
+-- SEM policy de admin aqui, e isto e o que muda em relacao a 4.6. La o admin le a midia
+-- porque midia e a pagina publica, que ele ja consegue ver com um navegador. Documento
+-- pessoal nao e publico, e "ser admin" nao pode significar ler o CPF de qualquer cliente
+-- sem escopo, sem prazo e sem rastro. Quem precisa abrir o arquivo por moderacao passa por
+-- concessao viva (owns_portfolio_folder ja aceita), que tem prazo e fica registrada; e o
+-- takedown nao depende de policy nenhuma, porque admin_takedown_portfolio e security
+-- definer e chama purgar_midia_orfa (4.5).
+
+-- RLS ----------------------------------------------------------------------
+-- Copia exata do padrao de portfolio_projects (4.4), inclusive nas perguntas: owns_portfolio
+-- para a posse (que ja inclui a concessao de facilitacao) e portfolio_tem_acesso_ativo para
+-- a escrita, que pergunta pelo DONO DA LINHA e nao por quem esta logado. Nada aqui muda em
+-- relacao aos projetos; o que e diferente na experiencia esta no trigger de guarda acima,
+-- que e onde ele tem que estar.
+alter table public.portfolio_experiences enable row level security;
+revoke all on public.portfolio_experiences from anon;
+grant select, insert, update, delete on public.portfolio_experiences to authenticated;
+
+create policy "dono le experiencias" on public.portfolio_experiences for select to authenticated
+  using (public.owns_portfolio(portfolio_id));
+create policy "dono insere experiencias" on public.portfolio_experiences for insert to authenticated
+  with check (public.owns_portfolio(portfolio_id)
+              and public.portfolio_tem_acesso_ativo(portfolio_id));
+create policy "dono atualiza experiencias" on public.portfolio_experiences for update to authenticated
+  using (public.owns_portfolio(portfolio_id))
+  with check (public.owns_portfolio(portfolio_id)
+              and public.portfolio_tem_acesso_ativo(portfolio_id));
+create policy "dono deleta experiencias" on public.portfolio_experiences for delete to authenticated
+  using (public.owns_portfolio(portfolio_id));
+create policy "admin le todas as experiencias" on public.portfolio_experiences for select
+  to authenticated using (public.is_admin());
+```
+
+#### O que este arquivo acrescenta a `montar_payload_portfolio`
+
+A função inteira vive em 4.5 e `0007` a reaplica com `create or replace`, carregando aquele
+corpo **sem mudar uma vírgula** mais os três acréscimos abaixo. Ela não é reescrita aqui
+para não existirem duas versões do mesmo corpo no documento, que é como as duas divergem no
+primeiro mês.
+
+**1. Nas declarações, junto de `v_projects_en`:**
+
+```sql
+  v_experiences jsonb; v_experiences_en jsonb;
+```
+
+**2. Logo depois do bloco que monta `v_projects_en`, antes do bloco de filtros:**
+
+```sql
+  -- Ordem: position, e depois created_at para empate. Aqui NAO existe o equivalente do
+  -- projects_video_first: a lista de experiencia e cronologica na cabeca de quem le, e a
+  -- ordem e escolha do comprador (o repo ja guarda "mais recente primeiro" como convencao
+  -- do array, e position e a traducao disso).
+  select coalesce(jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
+    'slug', x.slug,
+    'org', x.org,
+    'kind', x.kind,
+    'role', x.role_i18n ->> 'pt',
+    'start', x.period_start,
+    'end', x.period_end,          -- ausente no payload significa "atual", igual ao repo
+    'location', x.location_i18n ->> 'pt',
+    'logoPath', x.logo_path,      -- caminho relativo, o Worker resolve (achado 12)
+    'plateBg', case when v_custom then x.plate_bg else '#0b0b12' end,
+    'highlights', x.highlights_i18n -> 'pt',
+    'note', x.note_i18n ->> 'pt',
+    -- LGPD, e e o unico ponto do payload com esta forma: sem o consentimento do titular,
+    -- nem o CAMINHO sai daqui. Publicar o caminho de um documento privado ja e vazamento
+    -- mesmo com o bucket fechado, porque o caminho e exatamente o que o assinador precisa,
+    -- e o payload publicado e servido a qualquer visitante. Caminho relativo e nunca URL,
+    -- pela regra do achado 12 e por uma razao a mais: URL assinada tem validade de minutos
+    -- e o snapshot vive em cache por muito mais tempo do que isso.
+    'certificatePath',  case when x.certificate_public then x.certificate_path end,
+    'certificateMime',  case when x.certificate_public then x.certificate_mime end,
+    'certificateLabel', case when x.certificate_public
+                             then x.certificate_label_i18n ->> 'pt' end
+  )) order by x.position, x.created_at), '[]'::jsonb) into v_experiences
+  from public.portfolio_experiences x
+  where x.portfolio_id = v_pf.id and x.is_visible and not x.is_sample;
+
+  if v_pf.english_enabled then
+    select coalesce(jsonb_object_agg(x.slug, jsonb_strip_nulls(jsonb_build_object(
+      'role', nullif(x.role_i18n ->> 'en', ''),
+      'location', nullif(x.location_i18n ->> 'en', ''),
+      'highlights', x.highlights_i18n -> 'en',
+      'note', nullif(x.note_i18n ->> 'en', ''),
+      'certificateLabel', case when x.certificate_public
+                               then nullif(x.certificate_label_i18n ->> 'en', '') end))),
+      '{}'::jsonb)
+    into v_experiences_en
+    from public.portfolio_experiences x
+    where x.portfolio_id = v_pf.id and x.is_visible and not x.is_sample;
+  else
+    v_experiences_en := '{}'::jsonb;
+  end if;
+```
+
+**3. No `jsonb_build_object` final, logo depois de `'projectsEn'`:**
+
+```sql
+    'experiences', v_experiences,
+    'experiencesEn', v_experiences_en,
+```
+
+**`payload_v` continua `2`, e isso é decisão, não esquecimento.** O acréscimo é puramente
+aditivo: nenhuma chave existente muda de forma ou de significado. Subir para `3` faria toda
+publicação já no ar ficar mais velha que o banco, o que não é problema (o leitor tem
+adaptador para versão menor), mas faria também a janela de deploy em que o banco publica `3`
+e o Worker antigo ainda está no ar responder `503` a todo mundo, pela regra 3 de 4.9, por
+causa de uma chave nova que aquele Worker simplesmente ignoraria. O preço de não subir é uma
+obrigação escrita no leitor: **`experiences` ausente é lista vazia**, nunca erro, porque todo
+tenant publicado antes do `0007` tem payload sem a chave até `republish_all(2)` passar. O
+critério 26 de 4.10 é o que reprova se essa tolerância não existir.
+
+#### O caminho do certificado, ponta a ponta
+
+Este é o caso novo de verdade desta migration, e é o único lugar do produto em que um
+arquivo do comprador **não** é servido direto do bucket. Em ordem:
+
+1. **Upload.** Editor sobe para `portfolio-docs`, em
+   `<portfolio_id>/certificate/<nome>-<hash8>.pdf`. Mesma convenção de caminho endereçado
+   por conteúdo de 4.6, pelo mesmo motivo de cache, e as mesmas duas barreiras de tamanho
+   (o `file_size_limit` do bucket primeiro, o trigger de cota depois).
+2. **Estado padrão: fechado.** `certificate_public` nasce `false`. O arquivo conta cota,
+   aparece para o dono no editor, e não existe para mais ninguém.
+3. **Consentimento.** Só o titular liga a chave, e a caixa que a liga na UI diz o que ela
+   faz, com o texto que a seção 5.9 exige: o documento passa a ficar acessível a quem tiver
+   o endereço, e certificado costuma trazer CPF.
+4. **Publicação.** `montar_payload_portfolio` inclui `certificatePath` apenas com a chave
+   ligada.
+5. **Leitura pública.** O link no card aponta para `/certificado/<slug-da-experiencia>` no
+   subdomínio do tenant, e não para o Storage. O Worker resolve o slug pelo payload que já
+   está em cache, assina uma URL de vida curta com a service key (suposição **S28**) e
+   responde `302`, com `X-Robots-Tag: noindex, noarchive` e `Cache-Control: private,
+   no-store` na resposta do redirecionamento. Sem `certificatePath` no payload, a rota
+   responde `404` da nossa página de erro.
+6. **Desligar o consentimento tira do ar de verdade.** No próximo publish o caminho some do
+   payload, e a rota passa a responder `404` sem depender de expiração de nada. É por isso
+   que a URL assinada nunca é congelada dentro do snapshot.
+
+Duas consequências que valem como revisão de PR: o documento **nunca** é servido pelo nosso
+origin como conteúdo ativo (um PDF sabe executar JavaScript, e servi-lo em
+`<slug>.myportifolio.com.br` o colocaria na origem do tenant), e a URL assinada nunca entra
+em HTML renderizado nem em cache compartilhado.
+
+#### Mapa campo a campo, de `experience.data.js` para coluna
+
+Lido do repo, `src/modules/experience/data/experience.data.js` e o espelho
+`experience.en.js`. Onde a coluna é `*_i18n`, o valor do repo vira a chave `pt` e a entrada
+correspondente de `experienceEn[slug]` vira a chave `en`, que é a mesma convenção já usada
+em projetos e perfil.
+
+| Campo no repo | Coluna | Observação |
+|---|---|---|
+| `slug` | `slug` | chave estável, única por portfólio, e é por ela que `ex()` acha a tradução |
+| `org` | `org` | não é traduzível: nome de empresa e de faculdade não traduz, e o `experience.en.js` já reflete isso |
+| `kind` | `kind` | `'work'` e `'education'`, os mesmos dois valores do repo |
+| `role` | `role_i18n` | cargo |
+| `start` | `period_start` | `'2025'` ou `'03/2025'`, validado por `periodo_valido()` |
+| `end` | `period_end` | `null` é "atual". `end` é palavra reservada no Postgres, daí o prefixo |
+| `location` | `location_i18n` | opcional |
+| `logo` | `logo_path` mais `logo_mime` | no repo é asset do build (`/experience/x.webp`); no produto é caminho no bucket `portfolio-media`, pasta `experience` |
+| `plateBg` | `plate_bg` | cor da placa, do bump `has_custom`, normalizada na saída sem o bump |
+| `highlights[]` | `highlights_i18n` | lista traduzível, até 6 itens de 300 caracteres |
+| `note` | `note_i18n` | a observação livre que o dono pediu, até 700 caracteres |
+| `certificate.url` | `certificate_path` mais `certificate_mime` e `certificate_public` | caminho no bucket **privado** `portfolio-docs`, nunca URL |
+| `certificate.label` | `certificate_label_i18n` | traduzível, até 40 caracteres, como `link_note` dos projetos |
+| ordem do array | `position` | o repo documenta "mais recente primeiro" como convenção do array; `position` é a tradução disso para dado |
+| `experienceEn[slug]` | a chave `en` de cada `*_i18n` | um objeto por slug no repo, uma chave por coluna no banco |
+| `iniciais(org)` | nenhuma | monograma de fallback é derivado no render, e derivado não se guarda |
+| sem equivalente no repo | `id`, `portfolio_id`, `is_visible`, `is_sample`, `en_status`, `created_at`, `updated_at` | o que só existe porque agora há mais de um dono, rascunho e amostra de onboarding |
+
+---
+
 ### 4.8 Lista de RPCs e quem executa cada uma
 
 `anon` = visitante com a anon key. `authenticated` = usuário logado com e-mail confirmado.
-`service_role` = chave de servidor (Edge Functions, Worker na rota de sitemap). "admin" =
+`service_role` = chave de servidor (Edge Functions, Worker nas rotas de sitemap e de
+certificado). "admin" =
 `authenticated` que passa por `is_admin()` dentro do corpo.
 
 | RPC | `anon` | `authenticated` | `service_role` | Guarda interna |
@@ -3623,6 +4267,7 @@ escrever a migration sem inventar nome:
 | `current_login_email()` / `current_purchase_email()` | não | sim | sim | exigem `email_confirmed_at` |
 | `is_admin()` | não | sim | sim | consulta `admin_users` |
 | `owns_portfolio(id)` / `owns_portfolio_folder(pasta)` | não | sim | sim | usadas dentro de policy |
+| `eh_titular_do_portfolio(id)` | não | sim | sim | usada dentro do trigger de guarda das experiências. É `owns_portfolio` **sem** o ramo da concessão de facilitação, e existe só para o consentimento do certificado (4.7.1) |
 | `em_operacao_confiavel()` | não | sim | sim | lê GUC de transação |
 | `admin_block_member(email, motivo)` | não | sim (só admin passa) | sim | `is_admin()` no corpo |
 | `admin_unblock_member(email)` | não | sim (só admin passa) | sim | `is_admin()` no corpo |
@@ -3636,8 +4281,9 @@ escrever a migration sem inventar nome:
 | `consume_access_quota(scope, key, limite)` | **não** | **não** | **sim** | chamada por Edge Function e por `get_draft_portfolio` |
 | `montar_payload_portfolio(id)` | não | **não** | **sim** | interna, chamada por `publicar_interno` e `get_draft_portfolio` |
 | `publicar_interno(id)` | **não** | **não** | **sim** | interna e **sem** verificação de autorização: quem chama responde por ela. Existe para o trigger de `has_custom` republicar sem usuário logado |
-| `purgar_midia_orfa(idade, portfolio_id)` | **não** | **não** | **sim** | interna, chamada pelo `pg_cron` da faxina e pelo takedown |
+| `purgar_midia_orfa(idade, portfolio_id)` | **não** | **não** | **sim** | interna, chamada pelo `pg_cron` da faxina e pelo takedown. A partir de `0007` ela varre os dois buckets (4.7.1) |
 | `quota_do_portfolio(id)` | não | **não** | **sim** | interna, chamada pelos triggers de cota |
+| `periodo_valido(v)` / `periodo_chave(v, fim)` | não | sim | sim | `immutable`, usadas dentro de `CHECK` das experiências (4.7.1) |
 
 Regra que vale para toda função nova neste schema, sem exceção: o Postgres concede
 `EXECUTE` a `PUBLIC` por padrão e o PostgREST expõe toda função de `public` como
@@ -3744,7 +4390,7 @@ falhar**. Um item que não pode falhar não é critério.
     `true` para `'joao'` e `'joao-silva'`. E o mesmo conjunto de entradas passado por
     `ehRotuloDnsValido()` de `worker/lib/host.js` tem que dar exatamente o mesmo resultado,
     valor a valor. Divergência reprova.
-11. **Decisão 1, nada de maquinário de inadimplência.** Nos seis arquivos
+11. **Decisão 1, nada de maquinário de inadimplência.** Nos sete arquivos
     `supabase/migrations/000*.sql`,
     `grep -cE "past_due|grace_until|suspended_reason|reactivate|'suspended'"` tem que dar
     `0`, e `psql -c "\d public.portfolios" | grep -c " status "` tem que dar `0`. Se
@@ -3815,6 +4461,66 @@ falhar**. Um item que não pode falhar não é critério.
     `select count(*) from portfolio_slug_history where slug = 'x'` é `0`, e
     `slug_available('x')` passa a ser `true`. Repetir com um portfólio revogado que **nunca**
     publicou: ele libera na primeira execução, sem esperar prazo nenhum.
+22. **Confinamento da mídia de experiência, e a porta dos fundos do PDF.** Cinco tentativas,
+    nenhuma pode passar. `update portfolio_experiences set logo_path = '<id de outro
+    tenant>/experience/x-aabbccdd.webp'` tem que violar `experiences_logo_ok`; a travessia
+    `'<meu id>/../<id de outro tenant>/x-aabbccdd.webp'` também; as duas repetidas em
+    `certificate_path` contra `experiences_cert_ok`; e
+    `insert into storage.objects (bucket_id, name, ...) values ('portfolio-media',
+    '<meu id>/certificate/x-aabbccdd.pdf', ...)` tem que levantar
+    `tipo de midia invalido no caminho`. Esta última é a que importa mais: ela é a tentativa
+    de guardar o documento pessoal no bucket **público** usando a pasta do bucket privado, e
+    o confinamento por pasta sozinho não a pegaria.
+23. **A experiência tem teto próprio, e o certificado gasta o orçamento de bytes que já
+    existe.** Com `quotas.max_experiences` temporariamente em `2`, o terceiro
+    `insert into portfolio_experiences` tem que falhar com
+    `limite atingido: maximo de 2 experiencias`. Depois, com `max_media_bytes` em `1000`:
+    subir uma logo de 200 KB em `portfolio-media` falha, e subir um certificado de 200 KB em
+    `portfolio-docs` **também** falha, com
+    `select coalesce(sum(bytes),0) from portfolio_media where portfolio_id = ...` idêntico
+    antes e depois das duas tentativas. Se o upload no bucket de documento passar, o
+    certificado está fora da cota e o orçamento de bytes passou a ter dois donos.
+24. **O certificado é privado até o titular dizer o contrário.** Com a anon key, um `GET` da
+    URL pública do objeto em `portfolio-docs` tem que responder erro, e um `select` em
+    `storage.objects` daquele caminho como `authenticated` de **outro** tenant tem que
+    devolver zero linhas. Com `certificate_public = false`, `publish_portfolio()` e depois
+    `select payload::text like '%certificate%' from portfolio_publications where is_live`
+    tem que dar `false`: nem o caminho pode vazar. Ligar o consentimento como titular,
+    publicar de novo, e agora
+    `payload -> 'experiences' -> 0 ->> 'certificatePath'` tem que casar
+    `^<portfolio_id>/certificate/` e **não** conter `https://`. Desligar e republicar: a
+    chave tem que sumir. Se o caminho aparecer com a chave desligada, o consentimento é
+    enfeite.
+25. **Consentimento é do titular; a cor é do dono da linha.** Com um operador com concessão
+    viva de facilitação sobre o portfólio de um cliente:
+    `update portfolio_experiences set certificate_path = '<id>/certificate/x-aabbccdd.pdf'`
+    tem que passar (subir o documento é o serviço vendido), `update ... set
+    certificate_public = true` tem que levantar `so o titular publica o proprio
+    certificado`, e um `insert` de experiência já nascendo com `certificate_public = true`
+    tem que levantar a mesma coisa (é o caso que um trigger só de `update` deixaria passar).
+    Logado como o titular, os três passam. No mesmo teste, com o **dono da linha** sem
+    `has_custom`, `update ... set plate_bg = '#ff0000'` tem que levantar
+    `personalizacao nao liberada nesta conta`, inclusive quando quem escreve é um operador
+    que comprou o bump para a própria conta.
+26. **O payload leva experiência, em caminho relativo, e o formato continua `2`.** Portfólio
+    com 3 projetos e 2 experiências, uma delas com `period_end` nulo. Depois de
+    `publish_portfolio()`: `jsonb_array_length(payload -> 'projects')` é `3`,
+    `jsonb_array_length(payload -> 'experiences')` é `2`, a entrada atual **não** tem a
+    chave `end`, `payload::text` não contém `supabase.co` nem `https://` dentro de
+    `logoPath`, e `select payload_v from portfolio_publications where is_live` é `2`. Com
+    `english_enabled = false`, `payload -> 'experiencesEn'` é `{}`; ligando o inglês e
+    republicando, ele passa a ter as experiências que têm `en`. **E a tolerância que
+    substitui o bump de versão:** `update portfolio_publications set payload = payload -
+    'experiences' where is_live`, e o Worker tem que continuar respondendo `200` com a
+    página inteira, sem a seção de experiência e sem nenhuma outra seção quebrada. `500` ou
+    página em branco reprova, e significa que a chave precisava de `payload_v = 3`.
+27. **Apagar a conta leva o documento pessoal junto.** `request_account_deletion()`, forçar o
+    prazo, rodar a purga e depois `select public.purgar_midia_orfa(interval '0 seconds')`.
+    Três conferências: `select count(*) from portfolio_experiences where portfolio_id = ...`
+    é `0`, `select count(*) from portfolio_media where portfolio_id = ...` é `0`, e
+    `select count(*) from storage.objects where bucket_id = 'portfolio-docs' and name like
+    '<id>/%'` é `0`. Um certificado que sobrevive à exclusão da conta é dado pessoal retido
+    sem base legal, e é o pior caso desta seção.
 
 ---
 
@@ -4756,18 +5462,21 @@ E-mail imediato ao dono, mais a linha no painel de admin.
 
 **Exportar meus dados (LGPD art. 18 e 20).** Rota `/app/dados`, botão "Baixar meus dados".
 RPC `export_my_data()` `security definer`, filtrada por `current_purchase_email()`, que
-devolve um `jsonb` com o portfólio, todos os projetos, a lista de mídias com caminho e
-bytes, a linha de `member_access` (sem colunas internas de moderação) e a de
-`setup_requests`. O front serializa em `.json` e baixa. As imagens vão como lista de URLs
-assinadas de 1 hora geradas pelo Storage, não como zip: montar zip no browser para 30
-imagens é um projeto, e a lista resolve o direito.
+devolve um `jsonb` com o portfólio, todos os projetos, todas as experiências, a lista de
+mídias com bucket, caminho e bytes, a linha de `member_access` (sem colunas internas de
+moderação) e a de `setup_requests`. O front serializa em `.json` e baixa. As imagens **e os
+certificados** vão como lista de URLs assinadas de 1 hora geradas pelo Storage, não como
+zip: montar zip no browser para 30 imagens é um projeto, e a lista resolve o direito. O
+certificado é o item que mais importa nessa lista, porque é o único arquivo do produto que o
+titular não consegue rebaixar de um bucket público (4.7.1).
 
 **Apagar minha conta.** RPC `request_account_deletion()`, escrita abaixo. Ela despublica na
 hora (o subdomínio passa a responder **410**, que é o estado `gone` de 4.5: o endereço já
 esteve no ar, então ele nunca volta a ser oferta de compra), grava a marca de prazo e devolve
 a data. A purga real é um job diário que lê as marcas depois do prazo e
-apaga `portfolio_projects`, `portfolio_media` (marcando os arquivos do Storage como órfãos
-para a faxina), `portfolio_publications`, a linha de `portfolios`, os aliases de login e o
+apaga `portfolio_projects`, `portfolio_experiences`, `portfolio_media` (marcando os arquivos
+do Storage como órfãos para a faxina, nos **dois** buckets, o que inclui o certificado),
+`portfolio_publications`, a linha de `portfolios`, os aliases de login e o
 usuário em `auth.users`. `hubla_events`, `refund_requests`, `terms_consents`,
 `moderation_log` e a linha de `member_access` **não** são apagadas: são registro fiscal,
 contratual e antifraude. Essa exceção vai escrita na política de privacidade, senão a
@@ -5179,6 +5888,172 @@ entregável da fase 1 exatamente por isso.
 
 ---
 
+### 6.5.1 A experiência no editor, e o certificado, que é upload de tipo novo
+
+A experiência é a segunda área de conteúdo do produto, e ela chega ao editor numa situação
+que nenhuma outra tem: **o render já existe e já está no ar**, em `src/modules/experience/`,
+e o schema dela está escrito em 4.7.1. O que falta é o CRUD, a persistência e um tipo de
+upload que o produto ainda não tinha. Nada nesta subseção pede componente de render novo, e
+tratar isto como feature de tela cheia é superestimar o trabalho.
+
+**Numeração:** esta é a `6.5.1` e não a `6.6` pela mesma razão de 4.7.1, ou seja, `6.6` a
+`6.11` já são referenciadas por número em outras seções.
+
+**Onde ela é editada.** Canvas vivo e a mesma gaveta de 6.2, com a âncora
+`data-edit="experience:<slug>"`, irmã de `data-edit="project:<slug>"`. Painel de lista
+"Minha experiência", irmão de "Meus projetos" (6.4).
+
+Um fato do repo que, ignorado, deixa o comprador novo sem por onde clicar:
+`renderExperienceSection()` devolve `''` quando a lista está vazia. Isso está **certo** na
+página pública (seção sem conteúdo não se desenha) e é fatal no canvas, porque um portfólio
+recém-criado não tem nenhum alvo de clique para "adicionar experiência". O editor desenha o
+bloco vazio por conta própria, sob `is-editing`, sem mexer no contrato da função de render:
+mudar o `''` para um esqueleto seria publicar uma seção vazia no domínio do comprador.
+
+Segundo fato do repo, pequeno e visível na primeira tela do produto: o cabeçalho da seção
+imprime `${experience.length} ${tui('experienceCount')}`, e `experienceCount` hoje é
+`passagens`, no plural. O Helio tem cinco entradas e o defeito nunca apareceu; o comprador
+começa com **uma** e lê "1 passagens". A chave passa a ter singular e plural, resolvidos
+por contagem, como qualquer outro rótulo contável do produto.
+
+**Quatro campos na primeira tela, pela mesma razão de 6.3.** São os onze campos de conteúdo
+que 4.7.1 conta, mais o `slug` derivado e a cor da placa, e pedir tudo isso para cadastrar a
+primeira passagem é o mesmo erro que pedir dezenove campos para cadastrar o primeiro
+projeto.
+
+| Campo | Onde aparece |
+|---|---|
+| `kind` | **Passo 1.** Dois botões, "Trabalho" e "Estudo", com "Trabalho" já escolhido. Não é um campo a mais: é o que decide o rótulo de todos os outros |
+| `org`, `role`, `period_start` | **Passo 1, "O básico".** Os três únicos campos de digitação visíveis ao abrir, mais o switch "estou aqui até hoje", **ligado**, que é `period_end = null` (4.7.1) |
+| `period_end` | Passo 1, e só nasce quando o switch é desligado, mesma regra do `link_note` que só nasce depois do `link` (6.3) |
+| `logo`, `location` | Passo 2, "A organização", recolhido. Sem logo o card cai no monograma e continua apresentável |
+| `highlights` | Passo 2 também. Uma linha por marcador, no máximo 6 de 300 caracteres, que é exatamente o `CHECK` de 4.7.1 |
+| `note` | Passo 3, "Observação", recolhido. É o campo livre que o dono pediu para contar a história, até 700 caracteres |
+| `certificate`, `certificate_label`, `certificate_public` | Passo 3 quando `kind = 'work'`; **sobe para o passo 2** quando `kind = 'education'` |
+| `slug` | Derivado de `org` mais `role` por `slugify()`, editável em "Ajustes finos". É a chave que amarra a tradução (4.7.1) |
+| `plate_bg` | "Ajustes finos", já preenchido com o default `#0b0b12` e com cadeado sem o bump de personalização (6.10) |
+
+Ao terminar o passo 1 a entrada **já aparece na seção atrás da gaveta**, com o monograma no
+lugar da logo, e já é publicável. É o mesmo gancho de 6.3 e o mesmo motivo de o canvas ser
+vivo.
+
+**A diferença entre trabalho e estudo é de rótulo e de ordem, e de nada mais.** Isso não é
+economia de esforço, é a consequência direta da decisão de 4.7.1 de ter uma tabela só com
+`kind`: se o formulário de estudo pedisse um campo que o de trabalho não tem, aquela decisão
+estaria errada. Os rótulos saem de uma chave nova no `fieldSchema.js`, `labelPorKind`, e não
+de um segundo formulário.
+
+| Campo | `kind = 'work'` | `kind = 'education'` |
+|---|---|---|
+| `org` | "Empresa" | "Instituição" |
+| `role` | "Cargo" | "Curso ou formação" (ajuda: "Bacharelado em Design", "Certificação AWS") |
+| `period_start` e o switch | "Entrei em" e "Estou aqui até hoje" | "Comecei em" e "Ainda estou cursando" |
+| `highlights` | "O que você fez ali?" | "O que você estudou ou construiu ali?" |
+| Certificado | passo 3, opcional | passo 2, porque nesse tipo de entrada ele é a prova principal |
+
+Se algum dia a diferença passar a pedir **coluna** (carga horária, nota, número de
+registro), a decisão que precisa ser reaberta é a de 4.7.1, não a deste formulário.
+
+**Logo: o pipeline de 6.5 com destino novo, e uma margem assada no canvas.** Nada de novo no
+pipeline: mesma allowlist, mesma recusa antes de decodificar, mesma guarda do
+`canvas.toBlob`, mesmo nome endereçado por conteúdo. O que muda é o destino:
+
+- Crop central **1:1**, porque a placa é quadrada (`w-14 h-14` em `experienceSection.js`).
+- Orçamento de **90 KB**, o mesmo da imagem de projeto. Não é número novo: é o que a conta
+  de cota de 4.7.1 já assinou (20 logos, cerca de 1,8 MB).
+- Caminho `<portfolio_id>/experience/<slug>-<hash8>.webp`, na pasta `experience` que a
+  policy de upload de 4.7.1 passou a aceitar dentro de `portfolio-media`.
+- Trocar a logo (e trocar o certificado) **apaga o objeto substituído no mesmo passo do
+  upload**. Isso é obrigação do editor, escrita em 4.7.1: o trigger de exclusão só marca
+  órfão quando a **linha** da experiência é apagada, então arquivo trocado sem essa limpeza
+  fica ocupando cota para sempre sem ninguém apontando para ele, exatamente como já
+  acontece com `portfolio_projects.image_path`.
+
+E um passo que só existe aqui: **o pipeline desenha a arte a 80% do quadrado, sobre canvas
+transparente**. O comentário dentro de `experienceSection.js` explica o porquê melhor do que
+qualquer regra de CSS: a placa não tem padding de propósito, porque o respiro já vem assado
+no WebP de todas as logos, e padding no CSS por cima reintroduziria a margem dobrada que
+fazia cada logo aparecer num tamanho diferente. Se o comprador subir a arte sangrando na
+borda, a fileira fica torta. Assar a margem no canvas mantém a convenção sem tocar no CSS da
+placa e sem inventar coluna nenhuma.
+
+Limitação declarada, sem conserto na v1: logo em JPEG traz o fundo dela junto (branco, quase
+sempre) e a placa default é escura, então aparece um quadrado branco dentro da placa. O
+editor mostra a prévia da placa dentro do próprio formulário e a dica "PNG com fundo
+transparente fica melhor". Resolver de verdade é trocar `plate_bg`, que é campo do bump
+(6.10), e essa é uma das poucas coisas que o bump realmente compra.
+
+**O certificado é o tipo de upload novo do produto, e o único arquivo que sobe sem ter sido
+gerado por nós.** Toda imagem do produto é um blob que nós criamos a partir de um canvas
+(6.5). O PDF não é, e não tem como ser: não existe re-encode de PDF no browser, e forjar um
+seria dependência nova e risco novo. Essa é a razão técnica de tudo que vem a seguir.
+
+1. **O que a UI aceita:** `accept="application/pdf,image/jpeg,image/png,image/webp"`, que é
+   letra por letra a `allowed_mime_types` do bucket `portfolio-docs` (4.7.1). A mesma lista
+   é checada em JS por `file.type`, **nunca** pela extensão.
+2. **Imagem passa pelo pipeline de 6.5, com duas mudanças.** Sem crop, porque cortar
+   documento corta assinatura e rodapé, e é o oposto do que a pessoa quer; e orçamento de
+   **500 KB** com o lado maior em 2000 px, porque aqui o teste é "dá para ler", não "carrega
+   rápido" (o arquivo nem entra na página, entra atrás de um clique). Sai WebP, com a mesma
+   guarda do item 6 de 6.5 e o mime real gravado em `certificate_mime`.
+3. **PDF sobe como veio, e o cliente não protege nada.** As duas barreiras são de servidor,
+   as mesmas de sempre: o `file_size_limit` de 3 MB do bucket e o trigger de cota. O editor
+   recusa acima de 3 MB antes de mandar por educação, para não fazer o comprador esperar um
+   upload que vai morrer na porta.
+4. **É por não ser gerado por nós que ele vai para bucket privado** e sai por
+   `/certificado/<slug-da-experiencia>` com `302` para URL assinada, em vez de ser servido
+   pelo nosso origin (4.7.1). PDF sabe executar JavaScript.
+5. **O que a UI mostra quando o arquivo não é imagem:** nenhuma miniatura e, principalmente,
+   nenhum `<iframe>`, `<embed>` ou `<object>` apontando para o arquivo, pelo mesmo motivo
+   que a página pública não o serve. Aparece o mesmo chip do card publicado (o ícone de
+   anexo que `experienceSection.js` já desenha), com o nome original truncado, o tamanho em
+   KB, e três ações: abrir em aba nova (URL `blob:` local enquanto o upload não resolveu, a
+   rota `/certificado/` depois), trocar e remover. Imagem ganha miniatura de 56 px, e essa é
+   a única diferença visual entre os dois casos.
+6. `certificate_label_i18n` é um campo de texto de até 40 caracteres, default "Certificado",
+   traduzível. É o que vira o rótulo do botão no card, no lugar do `tui('certificate')`.
+
+**O consentimento é uma caixa, e é o único controle do editor cuja recusa vem do banco por
+identidade em vez de por flag.** Nasce desligada, e o texto ao lado dela diz o que ela faz,
+com o teor que 5.9 exige: o documento passa a ficar acessível a quem tiver o endereço, e
+certificado costuma trazer nome completo e CPF. Duas consequências de UI que saem direto do
+trigger de 4.7.1, e nenhuma delas é opcional:
+
+1. Enquanto a caixa está desligada, o arquivo existe, conta cota, é legível pelo dono e
+   **não sai no payload nem como caminho**. O editor escreve isso na própria linha ("só você
+   vê"), senão o comprador publica, não acha o botão no card e abre ticket.
+2. Para quem está montando o portfólio pelo **bump de facilitação**, a caixa aparece
+   desabilitada, com a explicação de que só o titular publica o próprio documento. Aqui
+   esconder no JS não é só conveniência: o banco recusa por `eh_titular_do_portfolio()`, e
+   deixar habilitado um controle que sempre falha é desenhar um erro que o operador vai
+   reportar como bug. O operador continua podendo subir o arquivo, que é o serviço vendido.
+
+**Ordem: as mesmas setas dos projetos, mais uma sugestão de um clique.** Setas para cima e
+para baixo no painel de lista, sem `draggable` na fase 1 (6.1), gravando em `position`. O
+que não existe aqui é o equivalente do `projects_video_first`, e isso é decisão escrita em
+4.7.1. O que existe é um botão "colocar em ordem, da mais recente para a mais antiga", que
+**mostra o resultado antes de aplicar** e nunca roda sozinho, pela mesma razão de 6.4:
+reordenar em silêncio mexe justamente no que o comprador acabou de arrumar.
+
+Ordenar exige comparar `'2024'` com `'03/2024'`, e comparar as duas pontas, que é
+exatamente o que `periodo_chave()` faz no banco (4.7.1). O editor **não** chama a RPC uma
+vez por comparação: ele tem a mesma regra em
+`src/modules/experience/lib/periodoChave.js`. Duas implementações da mesma regra divergem
+com o tempo, então esta cópia fica declarada aqui e tem critério próprio (item 11 de 6.11):
+divergência entre as duas é como "03/2024 a 2024" passa a ser aceito no editor e recusado no
+`insert`, com o comprador perdendo o que digitou.
+
+**Bilíngue: a decisão de 6.7, sem exceção nenhuma.** Traduzíveis, e por isso com a pílula
+`PT | EN` no label: `role`, `location`, `highlights`, `note` e `certificate_label`. Não
+traduzíveis, e por isso sem pílula: `org`, `kind`, `period_start`, `period_end`, `logo`,
+`plate_bg` e `slug`. É a mesma lista que o cabeçalho de `experience.en.js` já documenta
+("nome de empresa e ano não traduzem"), e ela sai do `i18n: true|false` do `fieldSchema.js`,
+nunca de uma segunda lista escrita à mão. Na fase 1 o editor escreve só a chave `pt` dos
+`*_i18n`; a pílula aparece na fase 3, junto com o resto do bilíngue, e o `ex()` já cai no PT
+sozinho enquanto isso.
+
+---
+
 ### 6.6 YouTube: aceitar qualquer coisa que ele colar
 
 O parser de hoje (`projectModal.js`) é
@@ -5481,6 +6356,29 @@ Cada um roda por outra pessoa e pode falhar:
 7. Os quatro `curl` de 6.9 (prévia válida, token adulterado, token rotacionado, sem
    querystring) devolvem exatamente os códigos e corpos descritos lá.
 8. Os quatro `update` de 6.10 devolvem exatamente os erros e sucessos descritos lá.
+9. **A experiência mínima publica, e a seção vazia continua vazia.** Cadastrar uma entrada
+   preenchendo **só** o passo 1 (organização, cargo, início) produz uma linha na seção com o
+   monograma das iniciais no lugar da logo, e publica. No mesmo portfólio, **antes** de
+   cadastrar a primeira,
+   `curl -s https://<slug>.myportifolio.com.br/ | grep -c 'id="experiencia"'` devolve **0**
+   (o `''` de `renderExperienceSection()` continua valendo na página pública), e o canvas do
+   editor, no mesmo estado, mostra o bloco de adicionar. Se o `curl` devolver 1, o editor
+   mudou o contrato do render e o comprador está publicando uma seção vazia.
+10. **Certificado: o PDF chega inteiro, a imagem é reconvertida, e nada disso é embutido no
+    editor.** Subir um PDF de 2,5 MB e um JPEG de 8 MB no mesmo campo, em duas experiências.
+    Esperado: o PDF baixado pela URL assinada é **byte a byte** o original (`cmp` sai com 0);
+    o JPEG virou `image/webp` abaixo de 500 KB; e
+    `select bucket, kind, mime, bytes from portfolio_media where portfolio_id = ...` mostra
+    os dois em `portfolio-docs` com `kind = 'certificate'`, com os `bytes` batendo com a API
+    do Storage. Um `.pdf` renomeado para `.png` é recusado no cliente por `file.type` e, se
+    passar, recusado pelo bucket. E o editor não embute o documento em lugar nenhum:
+    `grep -rnE "<(iframe|embed|object)" src/modules/editor/fields/certificado.js src/modules/media/lib/docUpload.js`
+    retorna vazio (o `<iframe>` do YouTube em 6.6 é de outro campo e não entra nesta busca).
+11. **`periodoChave.js` e `periodo_chave()` concordam, caso a caso.** Rodar os mesmos oito
+    valores nos dois (`'2024'` como início, `'2024'` como fim, `'03/2024'`, `'12/2024'`,
+    `'01/2024'`, `'1999'`, `null` como fim, e um valor fora do formato) e comparar as saídas
+    string a string. Qualquer divergência reprova. É essa divergência que faz o editor
+    aceitar "03/2024 a 2024" e o `insert` recusar, com o comprador perdendo o que digitou.
 
 ---
 
@@ -5549,7 +6447,8 @@ portifolio-helio/
 │   └── rotas/
 │       ├── apex.js                   vitrine, /comprar, /entrar, /app, /termos, /privacidade
 │       ├── tenant.js                 o caminho quente e a rota de prévia
-│       ├── sitemap.js                fase 3, única rota que usa a service key
+│       ├── sitemap.js                fase 3, uma das duas rotas com service key
+│       │                             (a outra é /certificado/, dentro de tenant.js)
 │       ├── robots.js
 │       └── cron.js                   handler scheduled: ping HTTP no PostgREST (S5)
 │
@@ -5584,7 +6483,9 @@ portifolio-helio/
 │   │   ├── 0003_projetos_e_midia.sql     projetos, portfolio_media, cota por trigger
 │   │   ├── 0004_publicacao.sql           publicações versionadas, RPCs públicas, prévia
 │   │   ├── 0005_storage.sql              bucket e policies
-│   │   └── 0006_operacao_e_juridico.sql  throttle, setup_requests, refund_requests, export
+│   │   ├── 0006_operacao_e_juridico.sql  throttle, setup_requests, refund_requests, export
+│   │   └── 0007_experiencias.sql         portfolio_experiences, bucket portfolio-docs,
+│   │                                     cota de experiência, certificado (4.7.1)
 │   └── functions/
 │       ├── hubla-webhook/            index.ts + productFlags.ts
 │       ├── request-access-code/      Turnstile + rate limit + resposta uniforme
@@ -5620,6 +6521,16 @@ portifolio-helio/
 │   │   │   ├── lib/projectField.js            [iso] px(project, field, lang)
 │   │   │   ├── lib/youtube.js                 [iso] parseYoutubeId
 │   │   │   └── data/seed/helio.projects.pt.js  helio.projects.en.js
+│   │   ├── experience/                        JÁ EXISTE no repo, vira produto (4.7.1, 6.5.1)
+│   │   │   ├── components/experienceSection.js [iso] MODIFICADO: recebe ctx e para de
+│   │   │   │                                   importar dado (é o 9º componente da fase 0)
+│   │   │   ├── lib/experienceField.js         [iso] NOVO: ex(experience, field, lang),
+│   │   │   │                                   irmão de projectField.js, sai do data.js
+│   │   │   ├── lib/iniciais.js                [iso] NOVO: monograma de fallback, idem
+│   │   │   ├── lib/periodoChave.js            [iso] NOVO: cópia declarada de periodo_chave()
+│   │   │   └── data/seed/helio.experience.pt.js  helio.experience.en.js
+│   │   │                                      (são o experience.data.js e o experience.en.js
+│   │   │                                       de hoje, renomeados como os de projeto)
 │   │   ├── stacks/components/stacksMarquee.js [iso] MODIFICADO: (stacks, lang)
 │   │   ├── checkout/config/checkoutLinks.js   [browser] 3 SKUs da Hubla
 │   │   ├── legal/                             [browser] fase 1, achado 27
@@ -5637,10 +6548,12 @@ portifolio-helio/
 │   │   │   ├── state/draftState.js  publishState.js
 │   │   │   ├── components/editorShell.js  editorDrawer.js  publishChecklist.js
 │   │   │   ├── panels/*.js
-│   │   │   ├── fields/*.js
-│   │   │   ├── api/portfolioApi.js  projectsApi.js
+│   │   │   ├── fields/*.js                    inclui certificado.js (6.5.1), o único campo
+│   │   │   │                                  de arquivo que não é imagem
+│   │   │   ├── api/portfolioApi.js  projectsApi.js  experiencesApi.js
 │   │   │   └── styles/editor.css              importado só por app.html
-│   │   ├── media/                             [browser] pipeline de imagem e upload
+│   │   ├── media/                             [browser] lib/imagePipeline.js (6.5) e
+│   │   │                                      lib/docUpload.js (certificado, 6.5.1)
 │   │   ├── onboarding/                        [browser] wizard (fase 1 mínimo, fase 2 completo)
 │   │   └── admin/                             [browser] fase 1 mínimo
 │   │       └── components/setupQueue.js       fila do bump de facilitação
@@ -5880,8 +6793,17 @@ visível e sem dependência nova. Se quebrar, quebra aqui, com o site ainda 100%
    só `lucide`, e nada disso vai parar em bundle de browser nem de Worker.
 3. Refatoração para `ctx` (M a G), **com o contrato de `ctx` da seção 3 como especificação**,
    campo a campo: sem ele, "trocar import por parâmetro" é oito decisões independentes que
-   divergem entre si. Os 8 componentes trocam import por parâmetro. `t`, `tui` e `px` viram
-   puros (`t(v, lang)`). `getLang`/`setLang`/`toggleLang` saem de `src/app/i18n.js` para
+   divergem entre si. Os componentes trocam import por parâmetro, e eles são **nove**, não
+   oito: `src/modules/experience/components/experienceSection.js` entrou no repo depois desta
+   lista ser escrita e importa dado direto
+   (`import { experience, ex, iniciais } from '../data/experience.data.js'`), o que faz o
+   critério `grep -rn "from '.*data/" src/modules/**/components/` **desta mesma fase**
+   reprovar hoje, no dia zero. Junto com ele, `ex()` sai para
+   `src/modules/experience/lib/experienceField.js` e `iniciais()` para
+   `src/modules/experience/lib/iniciais.js`, que é a arrumação que `projectField.js` já tem
+   do lado dos projetos. O HTML de saída não muda, então a allowlist do `dom-diff` continua
+   com as quatro entradas fechadas. `t`, `tui`, `px` e `ex` viram puros (`t(v, lang)`).
+   `getLang`/`setLang`/`toggleLang` saem de `src/app/i18n.js` para
    `src/app/langState.js`, que só o `main.js` importa. Isso é a dívida D1 e é pré-requisito
    duro de SSR, não item de higiene.
 4. `src/modules/portfolio/lib/sanitize.js` (P) e aplicação em todos os pontos crus hoje:
@@ -6005,12 +6927,15 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 | Os três `productId` reais da Hubla, que preenchem `PRODUCT_FLAG_MAP` (5.2) | painel da Hubla, lido pelo dono | o webhook (item 5): evento chega, nenhuma flag casa, e a venda vira 500 em laço |
 | Site key e secret do Turnstile | painel da Cloudflare, criado pelo dono | o login (item 4): sem o par, nem o formulário nem o CAPTCHA nativo do Auth (S14) sobem |
 | Conta Resend no domínio novo, com DKIM publicado e SPF e DMARC **reescritos** | Resend mais a zona, ação do dono | o login inteiro: a zona hoje tem os TXT de "domínio que não manda e-mail", então o código de acesso é rejeitado na origem |
-| Teto de pedidos abertos do SKU de facilitação, e o estoque configurado na Hubla | decisão do dono (9.3 recomenda começar em 5) | o risco R6: o checkout vende trabalho humano sem limite, e a fila do item 10 só mostra o estrago depois |
+| Teto de pedidos abertos do SKU de facilitação, e o estoque configurado na Hubla | decisão do dono (9.3 recomenda começar em 5) | o risco R6: o checkout vende trabalho humano sem limite, e a fila do item 11 só mostra o estrago depois |
 
 **Entregáveis, na ordem de execução**
 
-1. **Banco (M).** Projeto Supabase novo em `sa-east-1`, e as migrations `0001` a `0006`
-   como escritas na seção 4 e na 5. O que não pode faltar, cada item ligado a um achado:
+1. **Banco (M).** Projeto Supabase novo em `sa-east-1`, e as migrations `0001` a `0007`
+   como escritas na seção 4 e na 5. A `0007` (experiência, bucket `portfolio-docs`,
+   certificado) é aditiva e não reescreve nenhuma das anteriores, então ela não muda o
+   tamanho deste item: é mais um arquivo aplicado na mesma sessão (4.7.1).
+   O que não pode faltar, cada item ligado a um achado:
    entitlement por flag (`has_main`, `has_custom`, `has_setup`), nunca `plan_code` escalar
    (achado 4); `portfolio_publications` com PK `(portfolio_id, version)` e índice parcial
    `unique (portfolio_id) where is_live` (achado 13); `member_access.email` imutável com
@@ -6043,7 +6968,11 @@ meio do caminho, e inventar valor aqui é pior do que parar:
    `position` igual ao índice do array, preservando a invariante de vídeo primeiro (13 com
    vídeo em 0..12, 7 sem em 13..19). Cliente parametrizado, nunca `.sql` concatenado: os
    textos têm aspas curvas e ponto médio. O `payload` guarda **caminho relativo** de mídia e
-   não guarda `canonical` (achado 12).
+   não guarda `canonical` (achado 12). O mesmo script insere as **cinco experiências** do
+   Helio, com `position` igual ao índice do array (o repo já guarda da mais recente para a
+   mais antiga) e as logos de `public/experience/` subidas para a pasta `experience` do
+   bucket. Nenhuma delas tem certificado hoje, então o seed não exercita esse caminho: quem
+   testa certificado é o comprador de teste do item 7.
 3. **Reestruturação de build e `worker/` com SSR e cache (G).** Não são "60 linhas" (achado
    24), e antes do Worker existe um trabalho de build que não pertencia a fase nenhuma e sem
    o qual nada abaixo compila. Ele vem primeiro, dentro deste item:
@@ -6073,6 +7002,12 @@ meio do caminho, e inventar valor aqui é pior do que parar:
    (ponteiro por slug, documento e socorro por tenant) conforme o resultado do spike 2, e
    apagar ponteiro e socorro quando a resposta for `gone`; e servir a rota de prévia
    `?previa=<token>` com `no-store` e `noindex`, fora da Cache API (6.9).
+   Mais uma rota, pequena e do mesmo arquivo (`worker/rotas/tenant.js`):
+   `/certificado/<slug-da-experiencia>`, que lê `certificatePath` do payload **que já está
+   em cache**, assina uma URL de vida curta e responde `302` com `X-Robots-Tag: noindex,
+   noarchive` e `Cache-Control: private, no-store`; sem o caminho no payload, responde o
+   `404` da nossa página de erro. Ela é a única rota de tenant que toca a service key, e
+   depende da suposição **S28**, verificada neste mesmo item antes de a rota existir.
 4. **Auth OTP (M).** `access/` portado do AI Block, senha trocada por OTP. SMTP no domínio
    novo, do zero: DKIM publicado e SPF e DMARC **reescritos** (a zona hoje tem os TXT de
    "domínio que não manda e-mail"). Signup público desligado (`disable_signup`) **e CAPTCHA
@@ -6097,7 +7032,22 @@ meio do caminho, e inventar valor aqui é pior do que parar:
    paleta por canvas. Inclui as regras de formulário em
    `src/modules/editor/styles/editor.css`, que hoje não existem em lugar nenhum (dívida D2),
    e **não** no `global.css`.
-7. **Cota de mídia aplicada no servidor (M).** O trigger `storage_registrar_midia()` sobre
+7. **CRUD de experiência e o certificado (M).** Este item é separado do anterior de
+   propósito, para o tamanho dele ficar honesto: **a renderização já existe e já está no
+   ar** (`src/modules/experience/`, e a fase 0 já a deixou pura), e o schema já está escrito
+   (4.7.1), então o que se entrega aqui é formulário, persistência e upload, e não uma
+   seção nova de portfólio. São quatro coisas, todas desenhadas em 6.5.1: o formulário de
+   três passos com `labelPorKind` (o mesmo formulário para trabalho e para estudo, mudando
+   rótulo e ordem); o upload da logo pelo pipeline de 6.5 com destino `experience`,
+   proporção 1:1, orçamento de 90 KB e a margem de 80% assada no canvas; o campo de
+   certificado em `src/modules/editor/fields/certificado.js` mais
+   `src/modules/media/lib/docUpload.js`, com a caixa de consentimento desligada por padrão;
+   e as setas de ordem gravando em `position`. **A verificação da suposição S28 acontece
+   aqui**, no primeiro certificado subido, antes de a rota `/certificado/` do item 3
+   existir: se ela cair, a rota passa a devolver os bytes com `content-disposition:
+   attachment` em vez de `302`, e isso é uma mudança de dez linhas na rota, não uma mudança
+   de coluna.
+8. **Cota de mídia aplicada no servidor (M).** O trigger `storage_registrar_midia()` sobre
    `storage.objects` lendo `metadata->>'size'`, mais
    `revoke insert on portfolio_media from authenticated` (achado 7). A soma conta órfão, e o
    ramo sem `metadata` conta o pior caso em vez de liberar o upload: os dois vazamentos
@@ -6107,7 +7057,7 @@ meio do caminho, e inventar valor aqui é pior do que parar:
    Antes de escrever o upload do editor, rodar a verificação da suposição S10; se ela falhar,
    o entregável passa a ser a Edge Function `media-upload` com URL assinada, e isso muda o
    tamanho do item.
-8. **Pacote jurídico e de saída (M). Obrigatório antes da primeira venda (achado 27).**
+9. **Pacote jurídico e de saída (M). Obrigatório antes da primeira venda (achado 27).**
    - Página de termos e página de privacidade, servidas pelo apex, com o prazo de retenção e
      a cláusula de "vitalício" definida em texto (decisão 9.5).
    - Caixa de consentimento no primeiro login, gravando em `public.terms_consents` a versão
@@ -6122,15 +7072,15 @@ meio do caminho, e inventar valor aqui é pior do que parar:
      pedido.
    - Fluxo de arrependimento de 7 dias (CDC art. 49) escrito nos termos, com o botão no
      editor lendo `main_granted_at` e gravando em `refund_requests`.
-9. **`/comprar` e os 3 SKUs (P).** Página de oferta no apex com os 3 links de checkout da
-   Hubla, e a linha de crédito no rodapé.
-10. **Fila do bump de facilitação (P).** `/app/admin/fila` listando `setup_requests` com
+10. **`/comprar` e os 3 SKUs (P).** Página de oferta no apex com os 3 links de checkout da
+    Hubla, e a linha de crédito no rodapé.
+11. **Fila do bump de facilitação (P).** `/app/admin/fila` listando `setup_requests` com
     estado e data, mais os cartões de `compras_incompletas` e de eventos travados. Sem isso,
     vende e não entrega (risco R6). A mesma tela traz, no topo, a **fila de primeira
     publicação** (`publish_reviews`) com aprovar e recusar de um clique, e o alerta por
     e-mail a cada entrada: é a única camada preventiva que olha o conteúdo, e sem ela a
     defesa contra phishing no nosso domínio volta a ser "o dono percebe depois" (risco R8).
-11. **Conciliação de vendas (P).** `vendas_conferidas`, a consulta de concessão sem venda, o
+12. **Conciliação de vendas (P).** `vendas_conferidas`, a consulta de concessão sem venda, o
     alarme diário de volume e a rotação do token do webhook (5.11). Sob pagamento único, um
     POST forjado concede acesso vitalício e nada nunca reconcilia sozinho.
 
@@ -6207,6 +7157,22 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 - Botão "baixar meus dados" devolve o JSON com o portfólio e as URLs assinadas da mídia.
   Botão "apagar minha conta" tira o subdomínio do ar em menos de 1 minuto.
 - Os quatro `curl` de prévia (6.9) passam.
+- **A experiência sai publicada, e o certificado só sai com consentimento.** Num tenant de
+  teste com duas experiências (uma `work`, uma `education`, a segunda com certificado e com
+  `certificate_public = true`),
+  `curl -s https://<slug>.myportifolio.com.br/ | grep -c 'id="experiencia"'` devolve **1**,
+  o HTML traz as duas organizações **sem executar JS**, e o botão do certificado aponta para
+  `/certificado/<slug-da-experiencia>` e não para o Storage. Desligar `certificate_public`,
+  republicar, e o mesmo `curl` não traz mais nem o botão nem o caminho, e
+  `curl -sI https://<slug>.myportifolio.com.br/certificado/<slug-da-experiencia>` passa a
+  devolver **404**. Enquanto ligado, esse mesmo `curl -sI` devolve **302** com
+  `X-Robots-Tag` contendo `noindex` e `Cache-Control: private, no-store`, e o `location`
+  aponta para uma URL assinada que expira. Se o PDF for servido pelo nosso hostname em vez
+  de por redirecionamento, o critério reprova mesmo com o arquivo abrindo (4.7.1).
+- **Um tenant publicado antes da `0007` continua no ar.** Publicar um tenant, aplicar a
+  `0007` depois, e conferir que `curl -sI` daquele tenant continua **200** com o mesmo
+  corpo: o payload dele não tem a chave `experiences` e o leitor trata ausente como lista
+  vazia (é o critério 26 de 4.10, e este é o mesmo teste visto pela ponta do Worker).
 - `node scripts/dom-diff.mjs` continua passando, agora com a allowlist da fase 1 (as
   diferenças esperadas são: `<head>` por tenant, payload inline, rodapé, e o `<html lang>`
   vindo do dado em vez do default).
@@ -6214,6 +7180,12 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 **O que pode ser cortado se apertar**
 
 - O link de prévia, **e só se** o SKU de facilitação não for vendido nesta fase (6.9).
+- **O certificado, e só ele.** O CRUD de experiência sem o campo de certificado é entrega
+  útil (a seção já mostra organização, cargo, período, destaques e observação), e cortá-lo
+  tira junto o bucket privado, a rota `/certificado/` e a suposição S28 do caminho crítico.
+  A `0007` continua sendo aplicada inteira, porque a coluna vazia não custa nada e voltar
+  depois seria migration nova. **Não se corta o CRUD de experiência**: o render já está no
+  ar e a seção apareceria vazia para todo comprador.
 - A barra de completude e o contador de uso no editor.
 - Sitemap dinâmico. O estático continua servindo o Helio.
 - A tela `/app/admin/fila` pode virar uma view SQL consultada no painel do Supabase,
@@ -6230,8 +7202,9 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 tem processo em vez de heroísmo.
 
 **Entregáveis.** Wizard completo de 4 perguntas com starter kits por vertical;
-`applyStarterKit` com projetos marcados `is_sample`; reordenação por arrastar; painel "Meus
-projetos" com badges; cropper livre e extração de cor (o que saiu da fase 1); `video-check`
+`applyStarterKit` com projetos marcados `is_sample`; reordenação por arrastar **nas duas
+listas**, projetos e experiência (as setas da fase 1 continuam existindo, porque são o que
+funciona no celular); painel "Meus projetos" com badges; cropper livre e extração de cor (o que saiu da fase 1); `video-check`
 por oEmbed (suposição S13) e Shorts em 9:16; **botão de restaurar publicação anterior**
 (a PK versionada da fase 1 já guarda o histórico, falta a UI sobre `restore_publication`);
 checklist de publicação completo; job de retomada por `pg_cron` para quem comprou e sumiu;
@@ -6315,11 +7288,13 @@ com SLA.
 
 **Objetivo.** Vender o bump de personalização com mais argumento e ganhar tráfego orgânico.
 
-**Entregáveis.** `english_enabled` com pílula PT/EN nos campos (6.7); toggle renderizado só
+**Entregáveis.** `english_enabled` com pílula PT/EN nos campos (6.7), inclusive nos cinco
+campos traduzíveis da experiência (`role`, `location`, `highlights`, `note` e
+`certificate_label`, 6.5.1); toggle renderizado só
 quando há EN preenchido; tradução automática com selo `auto`; deep link de case
 (`fulano.myportifolio.com.br/#case=<projeto>` com o texto no HTML mesmo escondido);
 `worker/rotas/sitemap.js` (sitemap por tenant no subdomínio e índice no apex, a única rota
-que usa a service key, via `list_published_slugs`); `robots.txt` com `Disallow: /app` no
+do apex que usa a service key, via `list_published_slugs`); `robots.txt` com `Disallow: /app` no
 apex; JSON-LD de `Person` com `sameAs` dos sociais; `hreflang` PT e EN.
 
 **Critério de pronto (executável sob demanda, por outra pessoa).**
@@ -6572,7 +7547,7 @@ conclusões práticas:
 - O modelo só fecha com volume, então o preço não pode ser alto a ponto de travar volume.
   R$ 297 é o ponto onde uma pessoa compra por impulso sem pedir reunião.
 - Todo custo **variável** por visita tem que ser cortado até virar zero. É isso que faz do
-  cache na borda (spike 2) e da cota de mídia aplicada no servidor (fase 1, item 7) itens de
+  cache na borda (spike 2) e da cota de mídia aplicada no servidor (fase 1, item 8) itens de
   sobrevivência do modelo de negócio, não otimização.
 
 **Custo dos outros caminhos.** Preço mais alto (R$ 597) reduz volume e piora a diluição do
@@ -6846,7 +7821,7 @@ desenvolve o produto. O resultado padrão é atraso, reembolso e reclamação p�
 produto de ticket baixo custa mais do que a receita do bump inteiro. Agrava: reembolso do
 bump com pagamento único deixa o comprador com o principal vitalício e sem o serviço, então
 o dono devolve dinheiro e continua pagando hospedagem para sempre.
-**Sinal de que aconteceu.** A fila da fase 1 item 10 mostrando pedido com mais de 5 dias
+**Sinal de que aconteceu.** A fila da fase 1 item 11 mostrando pedido com mais de 5 dias
 úteis, ou mais de N pedidos abertos ao mesmo tempo.
 **Plano B, em degraus.** (1) **Estoque limitado na Hubla** com teto de pedidos abertos
 simultâneos, começando em 5. Esgotou, o botão some. É controle na origem e é o único que
@@ -6888,7 +7863,7 @@ domínio. São três camadas, todas na fase 1:
 3. **Reativa:** `admin_takedown_portfolio` derrubando página, mídia e cache em um comando
    (achado 10 implementado de verdade, não coluna morta), com `410` de verdade (seção 2).
 
-Mais os termos de uso escritos antes da primeira venda (fase 1, item 8). Se o domínio pai for
+Mais os termos de uso escritos antes da primeira venda (fase 1, item 9). Se o domínio pai for
 marcado mesmo assim, o plano B estrutural é Cloudflare for SaaS com domínio próprio do
 cliente, que isola reputação por hostname.
 
@@ -6973,12 +7948,40 @@ divergiram em vários destes; o que está aqui é o que vale, e o próximo agent
 | Adaptador de payload antigo | `src/modules/portfolio/payload/adapt-v1.js` | `src/modules/render/payload/...` |
 | Estado de idioma (browser) | `src/app/langState.js` | manter `let lang` em `i18n.js` |
 | Guarda de fronteira | `scripts/import-graph.mjs` mais `scripts/boundary.config.json` | `scripts/checar-fronteira.mjs` |
+| Módulo de experiência | `src/modules/experience/`, já existente no repo | `resume/`, `career/`, `experiencia/`, e experiência dentro de `profile/` |
+| Render da experiência | `src/modules/experience/components/experienceSection.js`, `renderExperienceSection(ctx)` | `experienceList.js`, `timeline.js` |
+| Campo traduzível da experiência (no código) | `src/modules/experience/lib/experienceField.js`, `ex(experience, field, lang)`, irmão de `px` | manter `ex()` dentro de `experience.data.js` |
+| Monograma de fallback | `src/modules/experience/lib/iniciais.js`, `iniciais(org)` | `initials.js`, avatar de organização gerado no servidor |
+| Chave de período em JS | `src/modules/experience/lib/periodoChave.js`, cópia declarada de `periodo_chave()` e testada contra ela | chamar a RPC uma vez por comparação, ordenar por string crua |
+| Seed da experiência do Helio | `src/modules/experience/data/seed/helio.experience.pt.js` e `helio.experience.en.js` | manter `experience.data.js` e `experience.en.js` no produto |
+
+### Editor e mídia
+
+| Coisa | Nome canônico | Nomes descartados |
+|---|---|---|
+| Fonte de campos do editor | `src/modules/editor/data/fieldSchema.js`, uma entrada por campo | um arquivo de schema por painel |
+| Rótulo que muda entre trabalho e estudo | chave `labelPorKind` na entrada do `fieldSchema.js` | um segundo formulário para `education`, `fieldSchemaExperience.js` à parte |
+| API de experiência no editor | `src/modules/editor/api/experiencesApi.js`, irmã de `projectsApi.js` | escrever experiência dentro de `portfolioApi.js` |
+| Campo de certificado | `src/modules/editor/fields/certificado.js` | `certificateField.js`, campo genérico de arquivo |
+| Upload de documento | `src/modules/media/lib/docUpload.js`, irmão de `lib/imagePipeline.js` | passar PDF pelo `imagePipeline.js`, `fileUpload.js` genérico |
+| Destino de imagem da logo de organização | `experience`, 1:1, orçamento de 90 KB, arte desenhada a 80% do quadrado | padding no CSS da placa, orçamento novo fora da conta de 4.7.1 |
+| Âncora de edição no canvas | `data-edit="experience:<slug>"`, irmã de `data-edit="project:<slug>"` | `data-edit="exp:<slug>"` |
 
 ### Banco
 
 | Coisa | Nome canônico | Nomes descartados |
 |---|---|---|
-| Migrations | `0001_base_acesso`, `0002_portfolios`, `0003_projetos_e_midia`, `0004_publicacao`, `0005_storage`, `0006_operacao_e_juridico` | `0001_acesso`, `0006_juridico` |
+| Migrations | `0001_base_acesso`, `0002_portfolios`, `0003_projetos_e_midia`, `0004_publicacao`, `0005_storage`, `0006_operacao_e_juridico`, `0007_experiencias` | `0001_acesso`, `0006_juridico`, `0007_experiencia` no singular |
+| Campo traduzível | sufixo `_i18n`, `jsonb {pt,en}`, validado por `i18n_texto_valido` ou `i18n_lista_valida` | duas colunas `_pt` e `_en`, tabela de traduções à parte |
+| Experiência | `public.portfolio_experiences`, uma linha por passagem, `kind in ('work','education')` | `portfolio_jobs` mais `portfolio_education`, `portfolio_resume` |
+| Período da experiência | `period_start` / `period_end` (`null` significa atual), mais `periodo_valido()` e `periodo_chave()` | `start` / `end` (palavra reservada), `daterange`, `is_current` |
+| Certificado | `portfolio_experiences.certificate_path` no bucket `portfolio-docs`, mais `certificate_public` como consentimento do titular | `certificate_url`, certificado dentro de `portfolio-media` |
+| Bucket de documento | `portfolio-docs`, privado, `application/pdf` mais imagem, 3 MB por arquivo | `portfolio-files`, bucket público para PDF |
+| Rota do certificado | `/certificado/<slug-da-experiencia>` no subdomínio do tenant, `302` para URL assinada | link direto para o Storage dentro do HTML publicado |
+| Titular, sem a concessão | `eh_titular_do_portfolio(id)` | reusar `owns_portfolio` para consentimento |
+| Cota de experiência | `quotas.max_experiences` mais `enforce_experience_limit()` | contar experiência dentro de `max_projects` |
+| Órfã de experiência | `marcar_midia_experiencia_orfa()`, que marca logo e certificado | reusar `marcar_midia_orfa()` para as duas tabelas |
+| Bucket na contabilidade | `portfolio_media.bucket` mais o único `(bucket, path)` | `path` único sozinho |
 | Entitlement | `public.member_access`, PK `email` (e-mail da compra, imutável) | `purchase_email` como nome da coluna, `plans` com `rank`, `plan_code` |
 | Flags | `has_main`, `has_custom`, `has_setup` | tier escalar |
 | Marca do prazo do CDC | `member_access.main_granted_at` | `granted_at` (é de qualquer produto) |
@@ -7007,7 +8010,7 @@ divergiram em vários destes; o que está aqui é o que vale, e o próximo agent
 | Conciliação de vendas | `public.vendas_conferidas` mais a consulta de concessão sem venda (5.11) | conferência por soma de `count(*)` |
 | Contador de visitas (fase 2) | `public.portfolio_visits (portfolio_id, dia, visitas)` mais `bump_visit_counts(jsonb)`, em lote | uma escrita por visita no miss |
 | Trigger de cota de mídia | `storage_registrar_midia()` sobre `storage.objects` | `registrar_midia_do_storage()`, `enforce_media_quota` em `portfolio_media` |
-| Guarda de coluna | `portfolios_guarda_colunas()` e `portfolio_projects_guarda_colunas()`, um por tabela, cobrindo coluna protegida **e** bump | `guard_personalizacao()` como segundo trigger |
+| Guarda de coluna | `portfolios_guarda_colunas()`, `portfolio_projects_guarda_colunas()` e `portfolio_experiences_guarda_colunas()`, um por tabela, cobrindo coluna protegida **e** bump | `guard_personalizacao()` como segundo trigger |
 | Cores do bump | `portfolios.theme_accent` / `theme_plate_bg` (global) e `portfolio_projects.accent` / `plate_bg` (por projeto) | `portfolios.accent` / `portfolios.plate_bg` |
 | Criação do portfólio | `create_my_portfolio(p_slug, p_display_name, p_role, p_kit)` | `criar_meu_portfolio`, versão de 2 argumentos |
 | Disponibilidade de slug | `slug_available(p_slug)` | `slug_disponivel` |
@@ -7029,13 +8032,13 @@ fase volta a ser buraco na hora de executar.
    que é o único escritor e não aceita o ator por parâmetro. **Fase 1, item 1.**
 3. **Cancelamento do pedido de exclusão de conta:** `cancel_account_deletion()` (5.9), com o
    link no e-mail de confirmação e o critério que exige `true`, depois `false`, e que não
-   republica o que o dono já tinha tirado do ar. **Fase 1, item 8**, junto do botão de apagar
+   republica o que o dono já tinha tirado do ar. **Fase 1, item 9**, junto do botão de apagar
    conta: entregar um sem o outro é prender o cliente numa carência que ele não consegue
    desfazer.
 4. **Onde o consentimento dos termos é gravado:** `public.terms_consents` mais
    `record_terms_consent(versao, ip, user_agent)` (5.9), uma linha por versão aceita, sem
    `UPDATE`, com a versão vigente em `app_settings.terms_version`. Tabela na **fase 1, item
-   1**; caixa de consentimento na **fase 1, item 8**.
+   1**; caixa de consentimento na **fase 1, item 9**.
 
 ### O que continua sem valor definido (e nenhum agente deve inventar)
 
@@ -7079,6 +8082,19 @@ Ele passou por três rodadas:
    isolamento entre clientes (`tasks/_plano/verificacao-1-dinheiro-e-isolamento.md`) e outro
    atrás de executabilidade, ou seja, critério que não consegue falhar, afirmação de
    plataforma sem base e fase sem dono (`tasks/_plano/verificacao-2-executabilidade.md`).
+
+**Depois das três rodadas, uma feature entrou, e ela não reabriu nenhuma decisão.** A área
+de experiência (organização, se foi trabalho ou estudo, cargo, período, local, o que foi
+feito, observação livre e certificado anexado) foi pedida pelo dono depois da revisão. Ela
+não é desenho novo: a implementação de referência já está no repo e no ar
+(`src/modules/experience/`), e o que o plano fez foi absorvê-la em blocos aditivos, todos
+nomeados aqui para ninguém procurá-los no lugar errado: a migration `0007` em **4.7.1** com
+os critérios 22 a 27 de **4.10**; o formulário, a logo e o certificado em **6.5.1** com os
+critérios 9 a 11 de **6.11**; o módulo na árvore da **seção 7**; e a fase 1 (itens 1, 3 e
+7), com a renderização já pronta desde a fase 0. Duas numerações existentes mudaram, e as
+duas estão declaradas: a lista "O que o comprador recebe" da seção 1 ganhou um item no meio,
+e a fase 1 ganhou o item 7, com as referências por número a esses dois blocos corrigidas no
+mesmo passo. Quem for revisar isto começa por 4.7.1 e por 6.5.1.
 
 Os defeitos apontados nas três rodadas estão fechados no corpo deste documento, cada um com
 o objeto no banco, o critério de pronto que pode reprovar, ou a suposição numerada com plano
