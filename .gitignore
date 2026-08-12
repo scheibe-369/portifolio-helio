@@ -1,6 +1,16 @@
 node_modules
 dist
 .vite
+.wrangler
 *.local
 .DS_Store
 Thumbs.db
+
+# Copia parada de outro projeto que foi parar aqui dentro por engano. O Site-GH de
+# verdade vive em "Growth Hub/Site-GH", tem git proprio e esta bem mais a frente.
+# Sao 167 arquivos (com .next/ e .vercel/) que nao pertencem ao portfolio.
+SITE-GH/
+
+# Fonte de asset: o PNG original de onde sai o WebP servido em public/. Fica na raiz
+# so enquanto a imagem esta sendo preparada, nunca vai pro deploy.
+/*.png
