@@ -60,7 +60,16 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       todo evento chegar sem casar flag, ou seja, pagou e não entrou
 - [ ] Ler a taxa da Hubla (percentual e parcela fixa). No low ticket ela decide o ponto de
       equilíbrio, e a conta do plano usa 10% como estimativa (suposição S29)
-- [ ] Turnstile: site key e secret
+- [x] **Turnstile: criado pela API da Cloudflare.** Widget `myportifolio`, modo managed,
+      domínio `myportifolio.com.br`. As duas chaves em `.env.local`, e o secret foi testado
+      contra o `siteverify` (recusou por token inválido, não por secret inválido)
+- [x] Preços lidos dos checkouts reais: principal **R$ 47,90**, facilitação **R$ 490,00**
+- [ ] Descobrir o id do bump de personalização. Ele não tem link próprio (vive dentro do
+      checkout do principal), então só aparece no corpo do primeiro evento real com o bump
+      marcado. Até lá, comprar o bump não libera nada
+- [ ] Estender o webhook `hubla-webhook` (que já está no ar servindo o AI Block) para
+      conhecer os produtos do MyPortifolio. **Sem isso, a primeira venda entra em laço de
+      500 e o comprador paga sem entrar**
 
 ### Higiene do repo
 

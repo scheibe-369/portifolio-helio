@@ -17,8 +17,9 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 4. **Customização:** a base é só conteúdo (mesmo layout, mesmo visual), com personalização
    e facilitação vendidas em cima.
 5. **Preço, low ticket:** principal a R$ 47,90, order bump de personalização a R$ 37,00, e
-   facilitação a R$ 297 como upsell dentro do editor, fora do checkout, porque é hora de
-   trabalho humano e não escala no preço de um bump (ver 9.2).
+   facilitação a R$ 490 como upsell dentro do editor, fora do checkout, porque é hora de
+   trabalho humano e não escala no preço de um bump (ver 9.2). Os três preços foram lidos
+   dos checkouts reais da Hubla, não estimados.
 
 ## Índice
 
@@ -110,6 +111,46 @@ organização, e os dois já estavam usados: o app financeiro do Fabrício
 (`qiuyxggwzonbqyxkqtaz`, com dados financeiros reais de 6 pessoas) e o próprio AI Block. A
 organização vazia não resolve, porque o limite segue a pessoa. As alternativas eram pagar o
 Pro agora ou instalar Docker para rodar local, e o dono escolheu compartilhar.
+
+### O webhook é UM só, e isso é uma bomba-relógio se ninguém tratar
+
+O projeto compartilhado já tem a Edge Function `hubla-webhook` **no ar** (`verify_jwt=false`,
+status `ACTIVE`), que hoje serve o AI Block. Como a Hubla aponta para uma URL só, ela vai
+receber também os eventos do MyPortifolio.
+
+**O que aconteceria sem tratar, no dia da primeira venda.** O código atual, lido linha a
+linha, termina assim:
+
+```js
+if (granted && appliedTiers.length === 0) {
+  console.error('NENHUM TIER APLICADO num member_added', ...);
+  return json({ status: 'no-tier-applied', ... }, 500);  // 500 de proposito
+}
+```
+
+Produto do MyPortifolio chega, nenhum id casa no `PRODUCT_TIER_MAP` do AI Block, zero tiers
+aplicados, e a função responde **500 de propósito** para forçar retentativa. A Hubla
+retenta, dá 500 de novo, e entra em laço. O comprador paga e não entra, e o log do AI Block
+enche de erro por uma venda que nem é dele. Esse 500 existe por um bom motivo (ver 5.3),
+mas ele só faz sentido quando o produto **deveria** ter casado.
+
+**A correção é aditiva e não toca no caminho do AI Block:** a mesma função passa a consultar
+dois mapas. Id que casar no mapa do AI Block segue exatamente o fluxo de hoje, chamando
+`public.grant_or_revoke_member_access`. Id que casar no mapa do MyPortifolio chama
+`myportifolio.grant_or_revoke_member_access`. O contador de "aplicou alguma coisa" soma os
+dois, então o 500 volta a significar o que sempre significou: **nenhum dos dois produtos
+reconheceu este id**, que aí é erro de verdade.
+
+Regras para não quebrar o produto vizinho ao mexer numa função que já está em produção:
+
+- Não alterar nenhuma linha do caminho existente. A mudança é **acrescentar** um `else if`.
+- `hubla_events` continua sendo a tabela de auditoria dos dois, porque a PK é o header de
+  idempotência e ele é único por evento, independente do produto.
+- Deploy da função é atômico por versão: se der errado, `supabase functions deploy` da
+  versão anterior volta. Testar com `x-hubla-sandbox: true`, que o código já trata e que
+  **não concede acesso**, antes de qualquer compra real.
+- Critério de pronto: disparar um evento de sandbox com um id do MyPortifolio e conferir que
+  o AI Block continua concedendo normalmente um evento de sandbox com um id dele.
 
 ### A regra que nasce disso, e ela não é estilo, é segurança
 
@@ -238,7 +279,7 @@ de margem, não de arrumação (ver 9.2).
 |---|---|---|---|---|---|
 | **Principal** | R$ 47,90 | Checkout | O portfólio em si, vitalício, no subdomínio próprio | `has_main` | Software |
 | **Personalização** | R$ 37,00 | **Order bump** no checkout | Cor de destaque e as variações visuais que não deixam o comprador estragar o layout | `has_custom` | Software |
-| **Facilitação** | R$ 297 | **Upsell dentro do editor** | Nós montamos o portfólio a partir do material que ele mandar | `has_setup` | Trabalho humano |
+| **Facilitação** | R$ 490 | **Upsell dentro do editor** | Nós montamos o portfólio a partir do material que ele mandar | `has_setup` | Trabalho humano |
 
 **A Hubla manda um evento por produto**: uma compra com o bump marcado gera **duas** chamadas
 `POST` independentes ao webhook, cada uma com seu `x-hubla-idempotency`, em ordem não
@@ -4657,6 +4698,30 @@ dois aliases por produto do AI Block (o id da listagem e o id da URL de edição
 ```ts
 export type Flag = 'main' | 'custom' | 'setup';
 export const PRODUCT_FLAG_MAP: Record<string, Flag> = {
+  // "My portifolio" principal, R$ 47,90 (checkout pay.hub.la/U9cuWxeCOsTvt4urY5vS).
+  // Dois aliases, mesmo padrao do AI Block: o id informado pelo dono e o slug do checkout.
+  dol37hflBB4LloFHpGab: 'main',
+  U9cuWxeCOsTvt4urY5vS: 'main',
+
+  // Facilitacao, R$ 490 (checkout pay.hub.la/q7IxDLHWM6OI8EBmrreo). Upsell no editor.
+  q7IxDLHWM6OI8EBmrreo: 'setup',
+
+  // FALTA o bump de personalizacao: ele vive dentro do checkout do principal e nao tem
+  // link proprio, entao o id so aparece no corpo do primeiro evento real com o bump
+  // marcado. Ate la, 'custom' nunca casa e a compra do bump nao libera nada.
+};
+```
+
+**Correção de uma afirmação anterior deste plano.** Uma versão anterior dizia que o id do
+produto "não é o slug da URL de pagamento". **É, sim, pelo menos como um dos aliases.** O
+`productTiers.ts` do AI Block, que está em produção, usa exatamente isso:
+`PGIg5fGjLrjOO6gNAAlN: 'main'` é o slug de `pay.hub.la/PGIg5fGjLrjOO6gNAAlN`. Por isso os
+dois valores conhecidos do principal entram como aliases: id sobrando não concede nada
+errado, e id faltando é venda que não libera.
+
+```ts
+// (o bloco abaixo era o texto antigo, mantido só para o histórico da decisão)
+const _obsoleto = {
   // AINDA VAZIO. Os links de checkout ja existem (ver abaixo), mas o que casa aqui NAO e
   // o slug da URL de pagamento, e sim o `productId` que vem no corpo do evento. Sao coisas
   // diferentes, e preencher isto com o slug da URL faz todo evento chegar sem casar flag
@@ -4665,6 +4730,11 @@ export const PRODUCT_FLAG_MAP: Record<string, Flag> = {
 };
 ```
 
+O que continua valendo do aviso antigo: **o único id em que se pode confiar de verdade é o
+que chega no corpo de um evento real.** Por isso o critério da fase 1 confere o
+`product_ids` gravado em `hubla_events` contra este mapa depois da primeira compra de teste,
+em vez de confiar no painel.
+
 **Links de checkout já criados pelo dono em 2026-08-13**, e eles moram em
 `src/modules/checkout/config/checkoutLinks.js` (nunca no portfólio, nunca hard-coded numa
 rota):
@@ -4672,7 +4742,7 @@ rota):
 | SKU | Link | Observação |
 |---|---|---|
 | Principal, R$ 47,90 | `https://pay.hub.la/U9cuWxeCOsTvt4urY5vS` | **Já carrega o order bump de personalização dentro dele.** É o único link que a página `/comprar` mostra |
-| Facilitação, R$ 297 | `https://pay.hub.la/q7IxDLHWM6OI8EBmrreo` | Upsell dentro do editor, nunca no `/comprar` (9.2) |
+| Facilitação, R$ 490 | `https://pay.hub.la/q7IxDLHWM6OI8EBmrreo` | Upsell dentro do editor, nunca no `/comprar` (9.2) |
 
 O bump de personalização **não tem link próprio**: ele é marcado dentro do checkout do
 principal. Isso não muda nada no webhook, que continua recebendo um evento por produto, mas
@@ -5358,7 +5428,7 @@ grant execute on function public.admin_close_setup_grant(uuid) to authenticated;
 -- ESTORNO DO BUMP TIRA O PEDIDO DA FILA --------------------------------------
 -- Revogar has_setup mexia so em member_access. setup_requests nao tinha trigger nenhum, a
 -- fila ordena por opened_at e nao olha flag, e o resultado era o dono entregando trabalho
--- humano de R$ 297 ja estornado, sem nada na tela avisando. Aqui a fila passa a saber que a
+-- humano de R$ 490 ja estornado, sem nada na tela avisando. Aqui a fila passa a saber que a
 -- compra caiu, e a concessao de escrita cai junto: nao existe motivo para alguem continuar
 -- com acesso a conta de quem pediu o dinheiro de volta.
 create or replace function public.setup_request_sync_acesso() returns trigger
@@ -7218,7 +7288,7 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 10. **`/comprar` (P).** Página de oferta no apex com **um** link de checkout da Hubla, o do
     principal a R$ 47,90, que já carrega o order bump de personalização a R$ 37,00 dentro
     dele. **A facilitação não aparece aqui**: ela é upsell dentro do editor (9.2 e 9.3), e
-    pôr um SKU de R$ 297 na página de um produto de R$ 47,90 estraga a leitura de preço do
+    pôr um SKU de R$ 490 na página de um produto de R$ 47,90 estraga a leitura de preço do
     funil principal. Mais a linha de crédito no rodapé.
 11. **Fila do bump de facilitação (P).** `/app/admin/fila` listando `setup_requests` com
     estado e data, mais os cartões de `compras_incompletas` e de eventos travados. Sem isso,
@@ -7653,7 +7723,7 @@ e-mail do registrador.
 |---|---|---|---|
 | Principal (portfólio vitalício) | **R$ 47,90** | Checkout | O portfólio, o subdomínio, o editor, para sempre |
 | Personalização | **R$ 37,00** | **Order bump** no checkout | Cor de destaque e as variações visuais que não deixam estragar o layout |
-| Facilitação | **R$ 297** | **Upsell dentro do editor**, não no checkout | Nós montamos o portfólio a partir do material dele (ver 9.3) |
+| Facilitação | **R$ 490** | **Upsell dentro do editor**, não no checkout | Nós montamos o portfólio a partir do material dele (ver 9.3) |
 
 **Por que a facilitação saiu do checkout.** O dono pediu low ticket com "bumps não muito
 acima disso". Personalização obedece sem problema: é código que já existe, custo marginal
@@ -7743,7 +7813,7 @@ engenharia, não conselho:
   verdade: onboarding que não trava, mensagem de erro que resolve sozinha, e nenhum passo
   que exija explicação.
 
-**Custo dos outros caminhos.** Preço mais alto (R$ 297, que era a recomendação anterior)
+**Custo dos outros caminhos.** Preço mais alto (R$ 490, que era a recomendação anterior)
 melhora a margem por venda e piora o volume, que é o motor do modelo. Preço mais baixo
 (abaixo de R$ 30) não paga o custo de suporte de um público que compra por impulso e espera
 atendimento.
@@ -7752,7 +7822,7 @@ atendimento.
 
 ### 9.3. O que exatamente a facilitação entrega, e em quanto tempo
 
-Este é o SKU que **não** está no checkout: ele é upsell dentro do editor, a R$ 297 (9.2).
+Este é o SKU que **não** está no checkout: ele é upsell dentro do editor, a R$ 490 (9.2).
 Quem vê a oferta já entrou, já mexeu e já sabe que não vai montar sozinho, o que muda o
 texto: não é "compre também", é "quer que a gente monte pra você".
 
@@ -7775,7 +7845,7 @@ texto: não é "compre também", é "quer que a gente monte pra você".
 
 **Custo de cada caminho.** Prazo sem lista de material obrigatória vira negociação infinita
 por WhatsApp e o SLA é descumprido na primeira venda. Escopo sem teto de projetos faz um
-comprador com 40 cases consumir uma semana inteira por R$ 297. Vagas sem teto é o risco R6
+comprador com 40 cases consumir uma semana inteira por R$ 490. Vagas sem teto é o risco R6
 acontecendo.
 
 ---
