@@ -99,6 +99,90 @@ em 0,056 ms na seção 6). Nenhum dos dois entra aqui.
 
 ---
 
+## O banco é COMPARTILHADO com o AI Block, e isso muda uma regra estrutural
+
+**Decidido pelo dono em 2026-08-13.** O MyPortifolio não tem projeto Supabase próprio. Ele
+mora dentro do projeto `fxchcqlbjszichhbllzm`, o mesmo do **AI Block**, que está em produção
+com clientes pagantes.
+
+**Por que.** O limite de projetos gratuitos do Supabase é **por pessoa**, não por
+organização, e os dois já estavam usados: o app financeiro do Fabrício
+(`qiuyxggwzonbqyxkqtaz`, com dados financeiros reais de 6 pessoas) e o próprio AI Block. A
+organização vazia não resolve, porque o limite segue a pessoa. As alternativas eram pagar o
+Pro agora ou instalar Docker para rodar local, e o dono escolheu compartilhar.
+
+### A regra que nasce disso, e ela não é estilo, é segurança
+
+> **Todo objeto do MyPortifolio vive no schema `myportifolio`. Nada, em hipótese alguma,
+> é criado em `public`.**
+
+O motivo é concreto e foi medido, não suposto. O `public` deste projeto **já tem três
+funções com assinatura idêntica** às que este plano cria:
+
+| Função em `public` (AI Block) | Assinatura | O que aconteceria |
+|---|---|---|
+| `grant_or_revoke_member_access` | `(text, text, boolean)` | **Idêntica** à deste plano. Um `create or replace` a substituiria e o webhook da Hubla do AI Block passaria a gravar as flags erradas |
+| `is_admin` | `()` | Idêntica. Trocaria a regra de admin de um produto pago |
+| `set_updated_at` | `()` | Idêntica. Usada por triggers dos dois produtos |
+
+Não é colisão de nome que dá erro: `create or replace function` **substitui em silêncio**,
+sem aviso, e o estrago só aparece na próxima venda do AI Block. Schema separado é o que
+impede isso.
+
+### O que já foi feito
+
+- Schema `myportifolio` criado, com `grant usage` para `anon`, `authenticated` e
+  `service_role`, e um `comment on schema` explicando o porquê para quem abrir o banco
+  daqui a seis meses.
+- Conferido depois da criação: as 5 funções de `public` do AI Block continuam intactas.
+
+### O que muda no SQL deste documento
+
+Todas as migrations de `0001` a `0007` foram escritas com `public.`. **Elas precisam ser
+reescritas com `myportifolio.` antes de rodar.** Isso é transformação mecânica, mas tem três
+exceções que **continuam** em `public` ou em outro schema, porque não são nossas:
+
+1. `auth.users` e `auth.uid()`, que são do Supabase.
+2. `storage.objects` e `storage.buckets`. Os buckets novos (`portfolio-media` e
+   `portfolio-docs`) não colidem com os do AI Block (`avatars` e `pacotes`), mas os
+   **triggers** e as **policies** que este plano cria sobre `storage.objects` passam a
+   conviver com os do AI Block na mesma tabela: precisam de nome próprio e de um `when` que
+   filtre por `bucket_id`, senão disparam para upload do outro produto.
+3. `cron.job`. O AI Block já tem `keep-supabase-alive-job`. Os jobs deste plano precisam de
+   nome prefixado (`mp-faxina-midia-orfa`, etc.), senão um `cron.unschedule` por nome
+   derruba o keep-alive do produto vizinho.
+
+**Critério de pronto, executável e capaz de reprovar**, a rodar depois de cada migration:
+
+```sql
+-- 1. Nenhum objeto novo escapou para public. Deve devolver ZERO linhas.
+select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname not in ('grant_or_revoke_member_access','has_tier','is_admin',
+                        'rls_auto_enable','set_updated_at');
+
+-- 2. As tabelas do AI Block continuam as mesmas seis. Deve devolver exatamente 6.
+select count(*) from information_schema.tables
+where table_schema = 'public' and table_type = 'BASE TABLE';
+```
+
+### O risco que fica registrado, de olhos abertos
+
+O isolamento por schema resolve colisão de nome. **Não resolve duas coisas**, e elas ficam
+escritas aqui para ninguém se surpreender depois:
+
+- **`auth.users` é compartilhado.** Comprador do MyPortifolio e membro do AI Block vivem na
+  mesma tabela de login. Hoje isso é seguro porque **não existe nenhum trigger próprio em
+  `auth.users`** neste projeto (verificado). O trigger `claim_portfolio_on_signup` que este
+  plano cria vai ser o primeiro, e por isso ele **precisa** ser inofensivo para quem não é
+  cliente deste produto: sem linha correspondente, ele não faz nada e retorna.
+- **Um erro de migration atinge os dois produtos.** Não existe isolamento de falha: um
+  `drop` errado, um lock longo numa tabela grande ou o projeto ser pausado derruba o AI
+  Block junto. Isso é o preço da decisão, e o caminho de saída é o Supabase Pro com projeto
+  próprio, que continua sendo o destino antes de escalar.
+
+---
+
 ## 1. O produto em uma página
 
 ### O que é

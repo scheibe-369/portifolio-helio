@@ -43,7 +43,16 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       certo: o envio sai do subdomínio e o DKIM alinha por domínio organizacional
 - [ ] Confirmar que o e-mail de teste caiu na **caixa de entrada** e não no spam. É a
       única parte que eu não consigo verificar daqui
-- [ ] Projeto Supabase novo, já no plano Pro
+- [x] **Supabase: resolvido compartilhando o projeto do AI Block** (decisão do dono, o
+      limite de 2 projetos free é por pessoa e já estava esgotado). Schema `myportifolio`
+      criado e isolado. Motivo do isolamento, medido e não suposto: `public` já tem
+      `grant_or_revoke_member_access(text,text,boolean)`, `is_admin()` e `set_updated_at()`
+      com assinatura **idêntica** às do plano, e `create or replace` substituiria em
+      silêncio as de um produto com clientes pagantes
+- [ ] Reescrever o SQL das migrations 0001 a 0007 de `public.` para `myportifolio.`, com
+      as três exceções (`auth`, `storage`, `cron`) tratadas caso a caso
+- [ ] Migrar para projeto Supabase próprio antes de escalar. Enquanto dividir, um erro de
+      migration derruba o AI Block junto
 - [x] Criar os SKUs na Hubla. Links prontos: principal (com o order bump dentro)
       `pay.hub.la/U9cuWxeCOsTvt4urY5vS`, facilitação `pay.hub.la/q7IxDLHWM6OI8EBmrreo`
 - [ ] Pegar os `productId` reais no painel da Hubla para o `PRODUCT_FLAG_MAP`. **Não é o
