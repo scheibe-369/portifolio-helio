@@ -51,7 +51,7 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 | **Os tokens Cloudflare do dono não têm permissão de Cache Purge** | Invalidação é **sempre** por chave versionada, nunca por purge |
 | **Zona `myportifolio.com.br` existe na conta** (id `67579cef2f0a7010548217ab9e59547b`, plano Free, tipo `full`) e está com status **`active`**: o dono trocou os nameservers no registro.br, a delegação propagou (`kipp.ns.cloudflare.com` e `serenity.ns.cloudflare.com`) e o Universal SSL foi emitido na ativação | A ação manual que bloqueava tudo **já aconteceu**. O portão 0 da fase 0 não pergunta se ela vai acontecer: ele **reconfere por comando** que continua valendo, porque delegação de domínio é estado que pode regredir |
 | **TLS curinga funciona no domínio real.** Com `AAAA * -> 100::` **proxiado** na zona, três hostnames que nunca tiveram registro próprio fecharam handshake com certificado publicamente confiável, SANs `myportifolio.com.br` e `*.myportifolio.com.br`, emissor Google Trust Services, no plano Free | É a resposta de S1, e ela veio **sim**. Custo por hostname é zero: nenhum comprador acima do centésimo vira custo mensal eterno contra pagamento único. Cloudflare for SaaS deixa de ser dependência da v1 e volta a ser só o caminho de "cliente traz o domínio dele" |
-| **A zona está limpa:** só os três registros que a Cloudflare cria para domínio sem e-mail (`MX .`, `TXT v=spf1 -all`, `TXT _dmarc p=reject`) | Nenhum risco de derrubar coisa em produção. Ligar o Resend **exige reescrever o SPF e o DMARC**, senão o e-mail de código é rejeitado na origem |
+| **O e-mail já está de pé:** `mail.myportifolio.com.br` verificado no Resend, com DKIM e SPF no subdomínio de envio, e dois envios reais entregues no Gmail | O SPF e o DMARC do **apex** ficam como estão (`v=spf1 -all` e `p=reject`), e isso é correto: o envio sai do subdomínio, e o DKIM alinha por domínio organizacional. Ver 5.5 |
 | **O token MASTER escreve DNS** (testado com criação e remoção de um TXT de sondagem). O token DEPLOY **não** lê nem escreve DNS | O CLAUDE.md global descreve o MASTER como read-only, e isso está errado |
 | **Supabase:** 2 organizações, 2 projetos ativos no Free. Um projeto novo cabe | O projeto novo nasce em `sa-east-1`, e a escolha da organização muda a conta do Pro (seção 9.4) |
 | **`src/app/i18n.js:6` tem `let lang` em escopo de módulo** e `t()` lê essa variável (`i18n.js:30`); `setLang` (linha 15) muta o módulo | Pureza de `t`, `tui` e `px` é pré-requisito duro de SSR. É o achado 15 |
@@ -4973,20 +4973,48 @@ logins por hora do produto inteiro**, não uma folga de configuração.
   padrão (suposição S6, conferir no painel), e é editável pela API de configuração. Trinta
   logins por hora é o teto do produto. Para 100 compradores é folgado; num pico de
   lançamento, não é.
-- **SMTP próprio no domínio novo é pré-requisito da primeira venda**, não item de backlog:
-  Resend, `smtp.resend.com` porta 465, DKIM (`resend._domainkey.myportifolio.com.br`), SPF
-  no return path e `_dmarc` com `p=reject`. Atenção ao estado atual da zona: os TXT que
-  estão lá hoje são os de "domínio que não manda e-mail" (`v=spf1 -all` e `p=reject`), e
-  ligar o Resend **exige reescrever os dois**. Com `p=reject`, um `From` desalinhado com o
-  DKIM não cai em spam, é **rejeitado**, e o comprador simplesmente não recebe nada. O
-  remetente é `acesso@myportifolio.com.br`.
+- **SMTP próprio é pré-requisito da primeira venda, e ele JÁ ESTÁ DE PÉ** (2026-08-13).
+  Configuração real, medida e não suposta:
+
+  | Item | Valor |
+  |---|---|
+  | Provedor | Resend, conta `heliomonteiroprofissional@gmail.com` |
+  | Domínio de envio | `mail.myportifolio.com.br`, **verificado**, região São Paulo (`sa-east-1`) |
+  | Remetente | `acesso@mail.myportifolio.com.br` |
+  | SMTP para o Supabase | `smtp.resend.com`, usuário `resend`, senha igual à API key |
+  | API key | permissão **Sending access**, guardada em `.env.local` (gitignored) |
+
+  **Correção de uma afirmação anterior deste plano, que estava errada.** A versão anterior
+  mandava "reescrever o SPF e o DMARC do apex", com o argumento de que os TXT atuais
+  (`v=spf1 -all` e `p=reject`) rejeitariam o código de acesso. **Não rejeitam, e não devem
+  ser tocados.** O motivo: o envio sai de um **subdomínio** (`mail.myportifolio.com.br`),
+  não do apex. O SPF que importa é o do return path, que vive em
+  `send.mail.myportifolio.com.br`, e o `-all` do apex continua correto e útil, porque de
+  fato nada envia como `@myportifolio.com.br`. O `p=reject` do apex também fica: o DKIM
+  assina com `d=mail.myportifolio.com.br`, que sob alinhamento relaxado (o padrão do DMARC)
+  alinha com o domínio organizacional, então o DMARC **passa**.
+
+  Isso não é raciocínio no papel, foi verificado com dois envios reais para o Gmail, ambos
+  com status `Delivered` no painel do Resend. O padrão também bate com o que já roda em
+  produção no AI Block (`mail.methodcipher.com`, mesma estrutura).
+
+  Registros criados na zona, e são só três (o MX de **recebimento** que o Resend oferece
+  não foi criado, porque o produto não recebe e-mail, e o AI Block também não o usa):
+
+  ```
+  TXT  resend._domainkey.mail   p=MIGfMA0GCSqGSIb3...   (DKIM, 218 caracteres)
+  MX   send.mail                feedback-smtp.sa-east-1.amazonses.com   prioridade 10
+  TXT  send.mail                v=spf1 include:amazonses.com ~all
+  ```
 
 Sequência obrigatória, e ela é sequencial de verdade:
 
-1. Trocar os nameservers no registro.br e esperar a zona virar `active` na Cloudflare
-   (**já feito**, e o portão 0 da fase 0 reconfere).
-2. Criar o domínio no Resend, publicar DKIM, reescrever SPF e DMARC, esperar verificar.
+1. Trocar os nameservers no registro.br e esperar a zona virar `active` na Cloudflare.
+   **FEITO**, e o portão 0 da fase 0 reconfere.
+2. Criar o domínio no Resend e publicar DKIM e SPF no subdomínio de envio. **FEITO e
+   verificado com envio real.**
 3. Configurar o SMTP no projeto Supabase novo e subir `rate_limit_email_sent` para 100.
+   **PENDENTE**, depende do projeto Supabase existir.
 4. Rodar a migration `0001` que grava `apex_host` em `app_settings`.
 5. Só então ligar o checkout da Hubla em produção.
 
@@ -6955,7 +6983,7 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 |---|---|---|
 | Os três `productId` reais da Hubla, que preenchem `PRODUCT_FLAG_MAP` (5.2) | painel da Hubla, lido pelo dono | o webhook (item 5): evento chega, nenhuma flag casa, e a venda vira 500 em laço |
 | Site key e secret do Turnstile | painel da Cloudflare, criado pelo dono | o login (item 4): sem o par, nem o formulário nem o CAPTCHA nativo do Auth (S14) sobem |
-| Conta Resend no domínio novo, com DKIM publicado e SPF e DMARC **reescritos** | Resend mais a zona, ação do dono | o login inteiro: a zona hoje tem os TXT de "domínio que não manda e-mail", então o código de acesso é rejeitado na origem |
+| ~~Conta Resend no domínio novo~~ **FEITO em 2026-08-13** | `mail.myportifolio.com.br` verificado, chave em `.env.local` | destravado. O que resta é apontar o SMTP do Supabase para ele |
 | Teto de pedidos abertos do SKU de facilitação, e o estoque configurado na Hubla | decisão do dono (9.3 recomenda começar em 5) | o risco R6: o checkout vende trabalho humano sem limite, e a fila do item 11 só mostra o estrago depois |
 
 **Entregáveis, na ordem de execução**
@@ -7037,9 +7065,11 @@ meio do caminho, e inventar valor aqui é pior do que parar:
    noarchive` e `Cache-Control: private, no-store`; sem o caminho no payload, responde o
    `404` da nossa página de erro. Ela é a única rota de tenant que toca a service key, e
    depende da suposição **S28**, verificada neste mesmo item antes de a rota existir.
-4. **Auth OTP (M).** `access/` portado do AI Block, senha trocada por OTP. SMTP no domínio
-   novo, do zero: DKIM publicado e SPF e DMARC **reescritos** (a zona hoje tem os TXT de
-   "domínio que não manda e-mail"). Signup público desligado (`disable_signup`) **e CAPTCHA
+4. **Auth OTP (M).** `access/` portado do AI Block, senha trocada por OTP. O SMTP **já
+   existe**: `mail.myportifolio.com.br` verificado no Resend e provado com envio real
+   (5.5), então este item só aponta o Supabase Auth para `smtp.resend.com` com usuário
+   `resend` e a chave de `.env.local`, e sobe `rate_limit_email_sent` para 100. Nada de
+   SPF ou DMARC do apex é tocado, e a razão está em 5.5. Signup público desligado (`disable_signup`) **e CAPTCHA
    nativo do Auth ligado** (`security_captcha_enabled` com Turnstile, suposição S14): sem
    ele, `/auth/v1/otp` continua aberto com a anon key e as outras camadas protegem um
    endereço que o atacante não precisa usar. `request-access-code` com Turnstile validado
@@ -7517,8 +7547,8 @@ foi emitido.
 a rota do Worker, e o `app_settings.apex_host`. Continua sendo o primeiro item de tudo, e o
 portão 0 da fase 0 o reconfere por comando em vez de assumir.
 
-**O que continua pendente nesta frente:** o Resend no domínio novo, com DKIM publicado e os
-TXT de SPF e DMARC reescritos. Enquanto isso não estiver de pé, o código de acesso não
+**O que continua pendente nesta frente:** nada de e-mail. O Resend foi resolvido em
+2026-08-13 (ver 5.5). O que falta é o projeto Supabase, para o código de acesso não
 chega, e sem código de acesso não existe login nem primeira venda.
 
 **O risco que vem junto, e que precisa de disciplina em vez de decisão:** `.com.br` é do
@@ -7860,7 +7890,7 @@ Turnstile validado dentro de `request-access-code`, rate limit por IP e por e-ma
 global transforma o rate limit no próprio ataque, 5.4), e resposta uniforme. Se apertar com
 volume legítimo, subir a cota no painel. A válvula final é **senha opcional**, que tira o
 login recorrente do caminho do e-mail, e por isso ela é item obrigatório da **fase 1** e não
-"quando aparecer o primeiro ticket". O SMTP próprio (Resend no domínio novo) precisa estar
+"quando aparecer o primeiro ticket". O SMTP próprio (Resend, já de pé desde 2026-08-13) precisa estar
 configurado desde a fase 1.
 
 ### R4. Egress de imagem do Supabase virar conta aberta (achado 18b)
@@ -8140,7 +8170,7 @@ escrito na própria fase):
 |---|---|---|
 | `PRODUCT_FLAG_MAP` (5.2): os `productId` reais dos 3 SKUs | o dono, no painel da Hubla | o webhook (fase 1, item 5): sem eles, o evento chega e nenhuma flag casa |
 | Site key e secret do Turnstile | o dono, no painel da Cloudflare | o formulário de login e o CAPTCHA nativo do Auth (fase 1, item 4, suposição S14) |
-| Conta Resend no domínio novo, com DKIM, e SPF e DMARC reescritos | o dono, no Resend e na zona | o login inteiro: sem isso o código de acesso não chega |
+| ~~Conta Resend no domínio novo~~ **FEITO**, ver 5.5 | resolvido em 2026-08-13 | nada mais bloqueia por este lado |
 | Teto de pedidos abertos do SKU de facilitação, e o estoque na Hubla | o dono (9.3 recomenda 5) | o risco R6, que é vender trabalho humano sem limite |
 
 **Números que só se leem no ato, e que não bloqueiam o começo de nada:**

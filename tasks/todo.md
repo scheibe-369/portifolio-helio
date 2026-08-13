@@ -36,9 +36,13 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] **Spike 1: TLS em subdomínio curinga.** APROVADO, ver abaixo
 - [ ] **Spike 2: cache de resposta de Worker pela Cache API**, medido por
       `X-Portfolio-Cache` num deploy real. É o outro spike que precede código de produto
-- [ ] Resend no domínio: DKIM, e reescrever o SPF e o DMARC atuais, que hoje dizem
-      "este domínio não manda e-mail" e rejeitariam o código de acesso. **É o próximo
-      bloqueio de infra**, e depende de você criar a conta e me passar as chaves
+- [x] **Resend: FEITO e provado.** Conta separada (`heliomonteiroprofissional@gmail.com`),
+      domínio `mail.myportifolio.com.br` verificado em São Paulo, DKIM e SPF no subdomínio
+      de envio, chave com permissão só de envio guardada em `.env.local`. Dois e-mails
+      reais entregues no Gmail. O SPF e o DMARC do apex **não** foram tocados, e isso está
+      certo: o envio sai do subdomínio e o DKIM alinha por domínio organizacional
+- [ ] Confirmar que o e-mail de teste caiu na **caixa de entrada** e não no spam. É a
+      única parte que eu não consigo verificar daqui
 - [ ] Projeto Supabase novo, já no plano Pro
 - [x] Criar os SKUs na Hubla. Links prontos: principal (com o order bump dentro)
       `pay.hub.la/U9cuWxeCOsTvt4urY5vS`, facilitação `pay.hub.la/q7IxDLHWM6OI8EBmrreo`
