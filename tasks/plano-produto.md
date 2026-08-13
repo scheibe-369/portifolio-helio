@@ -798,7 +798,7 @@ O que cada item obriga, com o detalhe que costuma ser esquecido:
 | Componente | Onde vive | Responsabilidade |
 |---|---|---|
 | **Vitrine** | `worker/rotas/apex.js`, rota `/` | Portfólio do Helio renderizado no servidor pelo mesmo caminho de tenant, com CTA de compra |
-| **Página de oferta** | `worker/rotas/apex.js`, rota `/comprar` | Os três SKUs, links de checkout de `src/modules/checkout/config/checkoutLinks.js`. Nunca linkar `pay.hub.la` direto do portfólio |
+| **Página de oferta** | `worker/rotas/apex.js`, rota `/comprar` | **Um** botão, o do principal a R$ 47,90, que já carrega o order bump de personalização dentro. A facilitação não aparece aqui (9.2). Link vem de `src/modules/checkout/config/checkoutLinks.js`, nunca `pay.hub.la` hard-coded numa rota |
 | **Checkout** | Hubla | Cobrança única. O e-mail digitado aqui é a identidade do cliente para sempre |
 | **Webhook** | `supabase/functions/hubla-webhook/index.ts` mais `productFlags.ts` | Valida `x-hubla-token` com comparação em tempo constante, deduplica por `x-hubla-idempotency` **sem engolir retentativa**, concede a flag do produto, pré-cria o usuário, abre a linha de `setup_requests`, dispara boas-vindas |
 | **Pedido de código** | `supabase/functions/request-access-code/index.ts` | Rede de segurança caso o webhook tenha falhado. Turnstile obrigatório, rate limit por IP e por e-mail, e **resposta uniforme** para não virar oráculo de enumeração de clientes (achado 8) |
@@ -4573,9 +4573,30 @@ dois aliases por produto do AI Block (o id da listagem e o id da URL de edição
 ```ts
 export type Flag = 'main' | 'custom' | 'setup';
 export const PRODUCT_FLAG_MAP: Record<string, Flag> = {
-  // preencher com os ids reais do painel Hubla ANTES do primeiro deploy
+  // AINDA VAZIO. Os links de checkout ja existem (ver abaixo), mas o que casa aqui NAO e
+  // o slug da URL de pagamento, e sim o `productId` que vem no corpo do evento. Sao coisas
+  // diferentes, e preencher isto com o slug da URL faz todo evento chegar sem casar flag
+  // nenhuma, que e o modo de falha "pagou e nao entrou" mais bobo possivel.
+  // Preencher com os ids reais do painel Hubla ANTES do primeiro deploy.
 };
 ```
+
+**Links de checkout já criados pelo dono em 2026-08-13**, e eles moram em
+`src/modules/checkout/config/checkoutLinks.js` (nunca no portfólio, nunca hard-coded numa
+rota):
+
+| SKU | Link | Observação |
+|---|---|---|
+| Principal, R$ 47,90 | `https://pay.hub.la/U9cuWxeCOsTvt4urY5vS` | **Já carrega o order bump de personalização dentro dele.** É o único link que a página `/comprar` mostra |
+| Facilitação, R$ 297 | `https://pay.hub.la/q7IxDLHWM6OI8EBmrreo` | Upsell dentro do editor, nunca no `/comprar` (9.2) |
+
+O bump de personalização **não tem link próprio**: ele é marcado dentro do checkout do
+principal. Isso não muda nada no webhook, que continua recebendo um evento por produto, mas
+muda o que a página de oferta renderiza, que é **um** botão e não dois.
+
+Consequência para o teste da fase 1: a compra de teste do principal precisa ser feita
+**duas vezes**, uma com o bump marcado e outra sem, porque é a marcação no checkout que
+decide se chegam dois eventos ou um só.
 
 A RPC é `grant_or_revoke_member_access(p_email, p_product, p_granted)`, uma flag por
 chamada, escrita em 4.2. Ela nunca exige `has_main` para gravar `has_custom` ou
@@ -6540,7 +6561,7 @@ portifolio-helio/
 │   │   │                                      (são o experience.data.js e o experience.en.js
 │   │   │                                       de hoje, renomeados como os de projeto)
 │   │   ├── stacks/components/stacksMarquee.js [iso] MODIFICADO: (stacks, lang)
-│   │   ├── checkout/config/checkoutLinks.js   [browser] 3 SKUs da Hubla
+│   │   ├── checkout/config/checkoutLinks.js   [browser] links de checkout da Hubla
 │   │   ├── legal/                             [browser] fase 1, achado 27
 │   │   │   ├── content/termos.js  privacidade.js
 │   │   │   └── components/legalPage.js  consentBox.js

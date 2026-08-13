@@ -40,7 +40,13 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       "este domínio não manda e-mail" e rejeitariam o código de acesso. **É o próximo
       bloqueio de infra**, e depende de você criar a conta e me passar as chaves
 - [ ] Projeto Supabase novo, já no plano Pro
-- [ ] Criar os 3 SKUs na Hubla e preencher o `PRODUCT_FLAG_MAP` com os ids reais
+- [x] Criar os SKUs na Hubla. Links prontos: principal (com o order bump dentro)
+      `pay.hub.la/U9cuWxeCOsTvt4urY5vS`, facilitação `pay.hub.la/q7IxDLHWM6OI8EBmrreo`
+- [ ] Pegar os `productId` reais no painel da Hubla para o `PRODUCT_FLAG_MAP`. **Não é o
+      slug da URL de pagamento**, é o id que vem no corpo do evento. Confundir os dois faz
+      todo evento chegar sem casar flag, ou seja, pagou e não entrou
+- [ ] Ler a taxa da Hubla (percentual e parcela fixa). No low ticket ela decide o ponto de
+      equilíbrio, e a conta do plano usa 10% como estimativa (suposição S29)
 - [ ] Turnstile: site key e secret
 
 ### Higiene do repo
