@@ -14,8 +14,11 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 2. **Marca e domínio:** `myportifolio.com.br`, zona já criada na Cloudflare, produto
    chamado **MyPortifolio**.
 3. **URL do comprador:** subdomínio `fulano.myportifolio.com.br`, nunca caminho.
-4. **Customização:** a base é só conteúdo (mesmo layout, mesmo visual), com order bumps de
-   personalização e de facilitação em cima.
+4. **Customização:** a base é só conteúdo (mesmo layout, mesmo visual), com personalização
+   e facilitação vendidas em cima.
+5. **Preço, low ticket:** principal a R$ 47,90, order bump de personalização a R$ 37,00, e
+   facilitação a R$ 297 como upsell dentro do editor, fora do checkout, porque é hora de
+   trabalho humano e não escala no preço de um bump (ver 9.2).
 
 ## Índice
 
@@ -87,6 +90,7 @@ O que sobreviveu do v1 foi o detalhe técnico: SQL, mapeamento de campo e desenh
 | S26 | **Workers tem versões, deploy gradual e `wrangler rollback`**, e dá para voltar a versão anterior sem rebuild. O risco R9 (ponto único de falha global) depende inteiro disso, e S4 cobre só a URL de preview por versão | Depois do primeiro deploy do Worker: `npx wrangler deployments list` e `npx wrangler rollback --help`, mais um rollback de mentira entre duas versões triviais, cronometrado. Plano B se não existir como descrito: o rollback passa a ser `git checkout <tag anterior> && npm run build && npx wrangler deploy`, o que exige que **toda** publicação saia de uma tag, e o tempo de recuperação sobe de segundos para minutos, o que muda o texto do R9 e não a arquitetura |
 | S27 | **A thumb `https://i.ytimg.com/vi/<id>/hqdefault.jpg` de um ID inexistente devolve um placeholder cinza de 120x90 em vez de `404`**, ou seja, imagem quebrada no card não é sinal de ID errado | Um `curl -sI` com um ID de 11 caracteres inventado, lendo status e `Content-Length`. É o menos grave da tabela porque a defesa já está desenhada ao lado (6.6): o editor confere o ID pelo oEmbed (suposição S13) e não confia na thumb. Plano B: se a thumb devolver `404` de verdade, o editor pode usar o próprio status da thumb como checagem barata e o oEmbed vira redundância |
 | S28 | **Dá para assinar uma URL de leitura de objeto em bucket privado com a service role** (`POST /storage/v1/object/sign/portfolio-docs/<caminho>` com validade em segundos), e a URL assinada serve o arquivo com o `content-type` gravado no upload. É disso que depende a rota `/certificado/` (4.7.1), que é o único caminho pelo qual um certificado chega ao visitante. A seção 5.9 já cita URL assinada para o export de dados, mas lá o bucket é público e aqui não é, e é a parte privada que não foi lida na documentação | Subir um PDF de teste em `portfolio-docs` e conferir quatro coisas com `curl`, em ordem: a URL **não** assinada do objeto responde erro; a URL assinada com validade de 300 s responde `200` com `content-type: application/pdf`; a mesma URL depois do vencimento responde erro; e um `GET` do mesmo caminho com a anon key responde erro. **Momento:** fase 1, no primeiro upload de certificado, antes de a rota `/certificado/` existir. **Plano B, sem mexer em uma coluna sequer:** a rota deixa de responder `302` e passa a devolver os bytes lidos pelo Worker com a service key, sempre com `content-disposition: attachment` e `cache-control: private, no-store`, o que mantém o PDF fora do nosso origin como conteúdo ativo e troca a assinatura por banda de Worker |
+| S29 | **A taxa da Hubla por venda**, que no low ticket decide o ponto de equilibrio. A conta de 9.2 usa 10% como estimativa conservadora e o numero real nunca foi lido | Abrir o painel da Hubla e ler a taxa vigente (percentual e parcela fixa, que em ticket de R$ 47,90 pesa proporcionalmente muito mais que em ticket alto), **antes** de fechar o preco. Registrar o valor lido em `tasks/_plano/medicoes.md`. Se a parcela fixa for alta o suficiente para derrubar o liquido abaixo de R$ 38, a decisao de preco de 9.2 volta para a mesa, porque o ponto de equilibrio sai de 30 para mais de 45 vendas por ano |
 
 Regra que vale para o documento inteiro: número de performance mora **só** em
 `tasks/_plano/medicoes.md`, gerado por `scripts/medir-render.mjs`. O plano v1 citava dois
@@ -143,18 +147,22 @@ que hoje usa Linktree ou um PDF e quer algo que pareça caro.
 
 ### Os três SKUs na Hubla
 
-A venda é um produto principal com dois order bumps, o formato já provado no AI Block.
-**A Hubla manda um evento por produto**: compra com os dois bumps gera **três** chamadas
+São três produtos na Hubla, mas eles **não são vendidos no mesmo lugar**, e a diferença é
+de margem, não de arrumação (ver 9.2).
+
+| SKU | Preço | Onde é vendido | O que é | Flag | Natureza |
+|---|---|---|---|---|---|
+| **Principal** | R$ 47,90 | Checkout | O portfólio em si, vitalício, no subdomínio próprio | `has_main` | Software |
+| **Personalização** | R$ 37,00 | **Order bump** no checkout | Cor de destaque e as variações visuais que não deixam o comprador estragar o layout | `has_custom` | Software |
+| **Facilitação** | R$ 297 | **Upsell dentro do editor** | Nós montamos o portfólio a partir do material que ele mandar | `has_setup` | Trabalho humano |
+
+**A Hubla manda um evento por produto**: uma compra com o bump marcado gera **duas** chamadas
 `POST` independentes ao webhook, cada uma com seu `x-hubla-idempotency`, em ordem não
 garantida e possivelmente concorrentes. Não é hipótese, é lição registrada no `CLAUDE.md`
 do AI Block depois de uma venda real ter se perdido (incidente 03/08/2026,
-`PGRST303 "JWT issued at future"`).
-
-| SKU | O que é | Flag concedida | Natureza |
-|---|---|---|---|
-| **Principal** | O portfólio em si, vitalício, no subdomínio próprio | `has_main` | Software |
-| **Bump personalização** | Cor de destaque e as variações visuais que não deixam o comprador estragar o layout | `has_custom` | Software |
-| **Bump facilitação** | Nós montamos o portfólio a partir do material que ele mandar | `has_setup` | Trabalho humano |
+`PGRST303 "JWT issued at future"`). A facilitação, por ser upsell posterior, chega como uma
+**terceira** chamada avulsa, dias depois, com o mesmo e-mail. O webhook não distingue os dois
+casos e não precisa: flag booleana por produto absorve as duas formas sem código extra.
 
 Consequência estrutural, travada: **entitlement é flag booleana por produto, nunca um
 `plan_code` escalar com rank.** `public.member_access` tem `has_main`, `has_custom` e
@@ -924,13 +932,13 @@ sequenceDiagram
     actor V as Visitante
 
     C->>AP: GET / na vitrine e clica no CTA
-    AP-->>C: /comprar com os 3 SKUs
-    C->>HB: paga uma vez: principal mais os bumps escolhidos
+    AP-->>C: /comprar: principal a 47,90 com order bump de personalizacao a 37
+    C->>HB: paga uma vez
 
-    Note over HB,WH: 1 evento por produto: de 1 a 3 POSTs independentes
+    Note over HB,WH: 1 evento por produto: 1 ou 2 POSTs independentes no checkout
     HB->>WH: customer.member_added produto principal
     HB->>WH: customer.member_added bump personalizacao
-    HB->>WH: customer.member_added bump facilitacao
+    Note over HB,WH: facilitacao NAO passa por aqui: e upsell no editor,<br/>compra avulsa depois, e chega como um terceiro POST isolado
 
     loop para cada evento, com seu proprio x-hubla-idempotency
         WH->>WH: compara x-hubla-token em tempo constante
@@ -5217,7 +5225,7 @@ grant execute on function public.admin_close_setup_grant(uuid) to authenticated;
 -- ESTORNO DO BUMP TIRA O PEDIDO DA FILA --------------------------------------
 -- Revogar has_setup mexia so em member_access. setup_requests nao tinha trigger nenhum, a
 -- fila ordena por opened_at e nao olha flag, e o resultado era o dono entregando trabalho
--- humano de R$ 497 ja estornado, sem nada na tela avisando. Aqui a fila passa a saber que a
+-- humano de R$ 297 ja estornado, sem nada na tela avisando. Aqui a fila passa a saber que a
 -- compra caiu, e a concessao de escrita cai junto: nao existe motivo para alguem continuar
 -- com acesso a conta de quem pediu o dinheiro de volta.
 create or replace function public.setup_request_sync_acesso() returns trigger
@@ -7072,8 +7080,11 @@ meio do caminho, e inventar valor aqui é pior do que parar:
      pedido.
    - Fluxo de arrependimento de 7 dias (CDC art. 49) escrito nos termos, com o botão no
      editor lendo `main_granted_at` e gravando em `refund_requests`.
-10. **`/comprar` e os 3 SKUs (P).** Página de oferta no apex com os 3 links de checkout da
-    Hubla, e a linha de crédito no rodapé.
+10. **`/comprar` (P).** Página de oferta no apex com **um** link de checkout da Hubla, o do
+    principal a R$ 47,90, que já carrega o order bump de personalização a R$ 37,00 dentro
+    dele. **A facilitação não aparece aqui**: ela é upsell dentro do editor (9.2 e 9.3), e
+    pôr um SKU de R$ 297 na página de um produto de R$ 47,90 estraga a leitura de preço do
+    funil principal. Mais a linha de crédito no rodapé.
 11. **Fila do bump de facilitação (P).** `/app/admin/fila` listando `setup_requests` com
     estado e data, mais os cartões de `compras_incompletas` e de eventos travados. Sem isso,
     vende e não entrega (risco R6). A mesma tela traz, no topo, a **fila de primeira
@@ -7088,9 +7099,13 @@ meio do caminho, e inventar valor aqui é pior do que parar:
 
 - Compra de teste com `x-hubla-sandbox: true` grava em `hubla_events` e **não** concede
   acesso.
-- Compra de teste real dos 3 SKUs de uma vez gera 3 chamadas de webhook e resulta em
-  `has_main = true, has_custom = true, has_setup = true` para o mesmo e-mail. Reenviar as 3
-  responde 200 sem duplicar nada.
+- Compra de teste real do principal **com o bump marcado** gera 2 chamadas de webhook e
+  resulta em `has_main = true, has_custom = true, has_setup = false`. Reenviar as 2 responde
+  200 sem duplicar nada.
+- Compra avulsa da facilitação **depois**, com o mesmo e-mail, gera a terceira chamada e leva
+  a `has_setup = true` sem tocar nas outras duas flags. Este passo é separado de propósito:
+  ele prova que o upsell fora do checkout funciona pelo mesmo caminho, que é a premissa da
+  decisão de preço de 9.2.
 - Simular falha: derrubar a RPC de grant, mandar `member_added`, confirmar que a linha em
   `hubla_events` fica com `processed_at is null`, reenviar o mesmo evento com o mesmo
   `x-hubla-idempotency` e confirmar que **desta vez o acesso é concedido** (achado 5). Se o
@@ -7497,13 +7512,33 @@ e-mail do registrador.
 
 ### 9.2. Preço dos 3 SKUs
 
-**Recomendação:**
+**DECIDIDO pelo dono em 2026-08-12. É low ticket, e isso não se reabre.**
 
-| SKU | Preço | O que é |
-|---|---|---|
-| Principal (portfólio vitalício) | R$ 297 | O portfólio, o subdomínio, o editor, para sempre |
-| Bump personalização | R$ 97 | Cor de destaque e as variações visuais que não deixam estragar o layout |
-| Bump facilitação | R$ 497 | Nós montamos o portfólio a partir do material dele (ver 9.3) |
+| SKU | Preço | Onde aparece | O que é |
+|---|---|---|---|
+| Principal (portfólio vitalício) | **R$ 47,90** | Checkout | O portfólio, o subdomínio, o editor, para sempre |
+| Personalização | **R$ 37,00** | **Order bump** no checkout | Cor de destaque e as variações visuais que não deixam estragar o layout |
+| Facilitação | **R$ 297** | **Upsell dentro do editor**, não no checkout | Nós montamos o portfólio a partir do material dele (ver 9.3) |
+
+**Por que a facilitação saiu do checkout.** O dono pediu low ticket com "bumps não muito
+acima disso". Personalização obedece sem problema: é código que já existe, custo marginal
+zero, e a R$ 37 é compra por impulso. Facilitação não obedece, porque **não é software, é
+hora de trabalho humano**: 10 projetos, upload das imagens e uma rodada de ajuste consomem
+de 2 a 3 horas. Precificar isso perto de R$ 47,90 é vender a própria hora abaixo do salário
+mínimo, com prazo prometido nos termos. Então ele fica caro e sai do checkout: vira upsell
+apresentado **dentro do editor**, para quem já entrou e travou no meio, que é exatamente
+quem tem disposição de pagar 6x o produto principal para não montar sozinho.
+
+**Consequência técnica, e ela simplifica:** no checkout chegam no máximo **dois** eventos
+da Hubla (principal e personalização), não três. A facilitação vira uma compra separada,
+depois, com o mesmo e-mail. O maquinário não muda em nada, porque a Hubla sempre mandou um
+evento por produto e `member_access` sempre foi flag booleana por produto. O que muda é que
+o pior caso de concorrência no webhook encolhe.
+
+**Consequência de produto, e ela aperta:** a R$ 47,90 o produto **tem que ser
+self-service**. Um comprador que abre dois tickets de suporte já custou mais do que pagou.
+Isso promove o onboarding e o texto de erro do editor de "acabamento" para requisito de
+margem.
 
 A conta que sustenta o número, e que o dono precisa assinar embaixo: com pagamento único, a
 receita é uma e o custo é eterno. O custo fixo dominante é o Supabase Pro, 25 dólares por
@@ -7540,25 +7575,53 @@ que é o único item cujo custo cresce com o sucesso do cliente. Nenhum deles mu
 grandeza com 20 clientes; com 500, o egress e o Cloudflare for SaaS são os dois que decidem
 se o modelo fecha.
 
-Com 20 clientes e ticket de R$ 297, o custo fixo consome mais de 100% da receita em 5 anos.
-Com 50, consome pouco mais da metade. Com 200, é ruído **na coluna da esquerda**. Duas
-conclusões práticas:
+#### O ponto de equilíbrio no low ticket
 
-- O modelo só fecha com volume, então o preço não pode ser alto a ponto de travar volume.
-  R$ 297 é o ponto onde uma pessoa compra por impulso sem pedir reunião.
-- Todo custo **variável** por visita tem que ser cortado até virar zero. É isso que faz do
-  cache na borda (spike 2) e da cota de mídia aplicada no servidor (fase 1, item 8) itens de
-  sobrevivência do modelo de negócio, não otimização.
+O que sustenta a operação não é o preço do principal, é a **taxa de marcação do bump**.
 
-**Custo dos outros caminhos.** Preço mais alto (R$ 597) reduz volume e piora a diluição do
-custo fixo, que é o oposto do que o modelo precisa. Preço mais baixo (R$ 97) atrai um perfil
-que gera mais suporte por real de receita, e suporte é o custo que não aparece na planilha.
+Descontada a taxa da Hubla (percentual ainda não confirmado no painel, ver S29; a conta
+abaixo usa 10% como estimativa conservadora), sobram cerca de R$ 43 numa venda só do
+principal e cerca de R$ 76 numa venda com o bump. Com 40% de marcação, o líquido médio por
+comprador fica em torno de **R$ 56**.
+
+| Vendas no ano | Líquido a R$ 43 (zero bump) | Líquido a ~R$ 56 (40% marcam o bump) |
+|---|---|---|
+| 30 | R$ 1.290, abaixo do custo fixo | R$ 1.680, empata |
+| 50 | R$ 2.150, sobram R$ 450 | R$ 2.800, sobram R$ 1.100 |
+| 100 | R$ 4.300, sobram R$ 2.600 | R$ 5.600, sobram R$ 3.900 |
+| 300 | R$ 12.900, sobram R$ 11.200 | R$ 16.800, sobram R$ 15.100 |
+
+Ponto de equilíbrio: **cerca de 40 vendas por ano sem bump, cerca de 30 com 40% de
+marcação**. E ele **se repete todo ano**, porque comprador vitalício não paga de novo e o
+servidor não para de rodar. Três conclusões práticas, e as três viram requisito de
+engenharia, não conselho:
+
+- **O bump é o lucro.** Subir a marcação de 30% para 50% vale mais que subir o preço do
+  principal, e não custa nada por não ter custo marginal. Isso faz da tela de checkout e da
+  copy do bump trabalho de margem, não enfeite.
+- **Todo custo variável por visita tem que ir a zero.** É isso que faz do cache na borda
+  (spike 2) e da cota de mídia aplicada no servidor (fase 1, item 8) itens de sobrevivência
+  do modelo, não otimização. A R$ 43 líquidos vitalícios, um cliente cuja página faz o
+  Postgres trabalhar a cada visita consome a própria receita em poucos anos.
+- **Suporte é o custo que mata low ticket, e ele não aparece em tabela nenhuma.** A R$ 43,
+  dois atendimentos por WhatsApp já viraram prejuízo. O produto precisa ser self-service de
+  verdade: onboarding que não trava, mensagem de erro que resolve sozinha, e nenhum passo
+  que exija explicação.
+
+**Custo dos outros caminhos.** Preço mais alto (R$ 297, que era a recomendação anterior)
+melhora a margem por venda e piora o volume, que é o motor do modelo. Preço mais baixo
+(abaixo de R$ 30) não paga o custo de suporte de um público que compra por impulso e espera
+atendimento.
 
 ---
 
-### 9.3. O que exatamente o bump de facilitação entrega, e em quanto tempo
+### 9.3. O que exatamente a facilitação entrega, e em quanto tempo
 
-**Recomendação, e o texto vai literal na página de oferta e nos termos:**
+Este é o SKU que **não** está no checkout: ele é upsell dentro do editor, a R$ 297 (9.2).
+Quem vê a oferta já entrou, já mexeu e já sabe que não vai montar sozinho, o que muda o
+texto: não é "compre também", é "quer que a gente monte pra você".
+
+**Recomendação, e o texto vai literal na tela de upsell e nos termos:**
 
 - **Escopo:** montagem do portfólio a partir do material enviado pelo comprador. Inclui
   perfil, até **10 projetos**, upload e recorte das imagens, organização da ordem, e a
@@ -7571,11 +7634,13 @@ que gera mais suporte por real de receita, e suporte é o custo que não aparece
   registra isso.
 - **Vagas:** o SKU tem estoque limitado na Hubla, com teto de pedidos abertos ao mesmo tempo
   (recomendo começar em 5). Esgotou, o botão some até liberar vaga. É a única defesa real
-  contra o risco R6, porque o gargalo é o tempo do dono e ele não escala com o checkout.
+  contra o risco R6, porque o gargalo é o tempo do dono e ele não escala com a venda.
+  Estar no editor em vez do checkout ajuda aqui: dá para esconder a oferta quando a fila
+  está cheia sem mexer na página de compra, que é o funil principal e não pode piscar.
 
 **Custo de cada caminho.** Prazo sem lista de material obrigatória vira negociação infinita
 por WhatsApp e o SLA é descumprido na primeira venda. Escopo sem teto de projetos faz um
-comprador com 40 cases consumir uma semana inteira por R$ 497. Vagas sem teto é o risco R6
+comprador com 40 cases consumir uma semana inteira por R$ 297. Vagas sem teto é o risco R6
 acontecendo.
 
 ---

@@ -39,9 +39,17 @@ O comprador paga uma vez e fica com o portfólio para sempre. Mesmo modelo do AI
   `serenity.ns.cloudflare.com`. Universal SSL emitido na ativação, pela Google Trust
   Services, válido até 2026-11-10.
 - Registros hoje: os três que a Cloudflare cria sozinha para domínio sem e-mail
-  (`MX .`, `TXT v=spf1 -all`, `TXT _dmarc p=reject`), mais o `AAAA *` proxiado criado
-  pelo spike de TLS (ver decisão 3). **Não existe registro no apex ainda**, então
-  `myportifolio.com.br` não resolve. Quem cria o apex é o deploy do Worker.
+  (`MX .`, `TXT v=spf1 -all`, `TXT _dmarc p=reject`), o `AAAA *` proxiado criado pelo
+  spike de TLS (ver decisão 3), e dois `CNAME` proxiados (`@` e `www`) apontando para
+  `helioportifolio.pages.dev`.
+- **O portfólio do Helio já está no ar no apex desde 2026-08-12**, servido pelo projeto
+  Pages `helioportifolio`, que ganhou `myportifolio.com.br` e `www` como custom domains.
+  Isso é **provisório de propósito**: quando o Worker de tenant nascer (fase 1), ele assume
+  o apex e os dois `CNAME` viram o que a rota do Worker exigir. Está assim porque o dono
+  pediu o portfólio no domínio novo antes do produto existir, e Pages entrega isso hoje
+  sem escrever uma linha de código.
+- O domínio antigo `helioportifolio.methodgrowthhub.com.br` continua ativo e servindo o
+  mesmo conteúdo, para não quebrar link já distribuído. O 301 entra junto com o Worker.
 - **O token MASTER escreve DNS.** Testado com criação e remoção de um TXT de sondagem. O
   CLAUDE.md global descreve ele como read-only, e isso está errado. O token DEPLOY, ao
   contrário, **não** lê nem escreve DNS (`Authentication error` na zona).
@@ -146,13 +154,20 @@ facilitação e de personalização**.
 
 **Consequências:**
 
-- São no mínimo três SKUs na Hubla, e isso encaixa exatamente no padrão já provado no
-  AI Block, que hoje vende um principal mais dois bumps e mapeia `productId` para tier:
-  - **Principal**: o portfólio em si, vitalício.
-  - **Bump personalização**: cor de destaque e as variações visuais que não deixam o
-    cliente estragar o layout.
-  - **Bump facilitação**: nós montamos o portfólio para o comprador (serviço, não
-    software), a partir do material que ele mandar.
+- São três SKUs na Hubla, e isso encaixa no padrão já provado no AI Block, que hoje vende
+  um principal mais dois bumps e mapeia `productId` para tier. **Preço definido em
+  2026-08-12, e é low ticket:**
+  - **Principal, R$ 47,90**: o portfólio em si, vitalício. Vai no checkout.
+  - **Personalização, R$ 37,00**: cor de destaque e as variações visuais que não deixam o
+    cliente estragar o layout. Vai como **order bump** no mesmo checkout.
+  - **Facilitação, R$ 297**: nós montamos o portfólio para o comprador (serviço, não
+    software). **Sai do checkout e vira upsell dentro do editor.** O motivo é aritmético e
+    não de gosto: é hora de trabalho humano, de 2 a 3 horas por cliente, e no preço de um
+    bump de low ticket seria vender a própria hora abaixo do salário mínimo. Quem paga 6x o
+    produto principal é quem já entrou, travou no meio e não quer montar sozinho.
+  - Consequência boa: no checkout chegam no máximo **dois** eventos da Hubla, e a
+    facilitação vira uma terceira chamada avulsa depois. Nenhuma linha de código muda,
+    porque entitlement sempre foi flag booleana por produto.
 - A Hubla manda **um evento por produto**. Compra com dois bumps gera três chamadas
   independentes de webhook, cada uma com seu `x-hubla-idempotency`. Isso não é hipótese,
   é lição registrada no CLAUDE.md do AI Block depois de uma venda real ter se perdido.
