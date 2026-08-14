@@ -1,3 +1,25 @@
+// ATENCAO, LEIA ANTES DE RODAR COM --aplicar.
+//
+// A configuracao de Auth do Supabase e por PROJETO, e este projeto e COMPARTILHADO com o
+// AI Block, que tem clientes pagantes. Medido em 2026-08-14, a config viva e inteira dele:
+// remetente 'AI Block <acesso@mail.methodcipher.com>', site_url da area de membros dele,
+// OTP de 8 digitos e CAPTCHA nativo DESLIGADO.
+//
+// Aplicar o bloco de SMTP faria os e-mails do AI Block sairem com a marca do MyPortifolio,
+// e ligar o CAPTCHA derrubaria o login deles na hora, porque a tela deles nao manda token.
+// Nao existe configuracao unica que sirva aos dois produtos.
+//
+// POR ISSO O PRODUTO NAO USA MAIS O E-MAIL DO SUPABASE. A Edge Function request-access-code
+// chama generateLink com a service role (ele devolve o codigo em properties.email_otp e NAO
+// dispara e-mail) e manda pelo nosso Resend. O Turnstile fica na function, que e nossa.
+//
+// O que foi aplicado, e e tudo que pode ser aplicado com seguranca:
+//   uri_allow_list  ganhou myportifolio.com.br SEM perder area.methodcipher.com
+//   rate_limit_email_sent  30 -> 100 (ajuda os dois, nao muda comportamento de nenhum)
+//
+// O bloco abaixo fica como REGISTRO do que seria necessario num projeto proprio, e do que
+// vira pendencia no dia em que o MyPortifolio migrar para projeto separado.
+
 // Configuracao do Supabase Auth deste produto, escrita como codigo e nao como instrucao
 // solta, porque cada campo abaixo e um pre requisito da primeira venda e nenhum deles vive
 // no repositorio: eles vivem no projeto, e projeto configurado a mao esquece um campo.

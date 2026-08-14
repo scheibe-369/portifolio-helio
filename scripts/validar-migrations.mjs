@@ -29,7 +29,15 @@ if (!TOKEN || !REF) {
   process.exit(2);
 }
 
-const arquivos = (await readdir(DIR)).filter((f) => f.endsWith('.sql')).sort();
+// --somente <prefixo> valida so o que casar. Existe porque, depois que as migrations sao
+// aplicadas, reroda-las inteiras dentro da transacao esbarra em 'already exists' de objeto
+// que nao aceita 'if not exists' (policy, por exemplo). O erro seria de reexecucao e nao
+// da migration nova, e confundir os dois faz perder tempo procurando defeito onde nao ha.
+const iSomente = process.argv.indexOf('--somente');
+const somente = iSomente >= 0 ? process.argv[iSomente + 1] : null;
+const arquivos = (await readdir(DIR))
+  .filter((f) => f.endsWith('.sql') && (!somente || f.startsWith(somente)))
+  .sort();
 const partes = [];
 for (const f of arquivos) partes.push(`-- ===== ${f} =====\n` + (await readFile(resolve(DIR, f), 'utf8')));
 const corpo = partes.join('\n\n');

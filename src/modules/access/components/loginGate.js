@@ -184,13 +184,12 @@ export async function initLoginGate({ aoEntrar } = {}) {
     }, 1000);
   }
 
-  // Dois tokens, um por chamada: o do request-access-code e o do /auth/v1/otp. Token de
-  // Turnstile e de uso unico, entao reaproveitar derrubaria a segunda chamada, que e
-  // justamente a que manda o e-mail.
+  // UM token so: existe uma chamada so. O desenho anterior emitia dois porque a segunda ia
+  // para o /auth/v1/otp do Supabase; agora quem manda o e-mail e a nossa function, e o
+  // endpoint publico saiu do caminho.
   async function enviarCodigo(email) {
-    const tokenFuncao = await obterTokenTurnstile(idTurnstile);
-    const tokenCaptcha = await obterTokenTurnstile(idTurnstile);
-    await pedirCodigo(email, tokenFuncao, tokenCaptcha);
+    const token = await obterTokenTurnstile(idTurnstile);
+    await pedirCodigo(email, token);
   }
 
   formEmail.addEventListener('submit', async (e) => {

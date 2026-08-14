@@ -79,19 +79,20 @@ export async function initAccess() {
 
 // ---------------------------------------------------------------- codigo de acesso (OTP)
 
-// Pedir codigo sao DUAS chamadas, e as duas sao obrigatorias:
+// Pedir codigo e UMA chamada so: request-access-code.
 //
-// 1. request-access-code, que valida o Turnstile no servidor, consome o rate limit em
-//    myportifolio.consume_access_quota e garante a conta de quem tem compra. Ela responde
-//    SEMPRE a mesma coisa, tenha o e-mail compra ou nao.
-// 2. signInWithOtp, que e quem de fato manda o e-mail. Ele bate no /auth/v1/otp do Supabase
-//    com a anon key, que e PUBLICA, entao Turnstile so na Edge Function nao protege nada:
-//    o atacante nunca chamaria a nossa function, ele bateria direto aqui (achado 1 da
-//    verificacao 1). Quem protege este endpoint e o CAPTCHA NATIVO do Auth, ligado na
-//    configuracao do projeto, e e por isso que o captchaToken vai aqui embaixo.
+// Ela valida o Turnstile no servidor, consome o rate limit em
+// myportifolio.consume_access_quota, garante a conta de quem tem compra, gera o codigo com
+// generateLink (que devolve o codigo SEM disparar e-mail) e manda pelo Resend com a marca
+// deste produto. Ela responde SEMPRE a mesma coisa, tenha o e-mail compra ou nao.
 //
-// Os dois tokens de Turnstile sao DIFERENTES: token de Turnstile e de uso unico.
-export async function pedirCodigo(email, tokenFuncao, tokenCaptcha) {
+// Um desenho anterior tinha uma segunda chamada, o signInWithOtp, e ele era um buraco: o
+// /auth/v1/otp e chamado do browser com a anon key, que e PUBLICA, entao Turnstile so na
+// Edge Function nao protegia nada, porque o atacante nunca chamaria a nossa function. A
+// saida obvia seria o CAPTCHA nativo do Auth, mas ele e por PROJETO e este projeto e
+// compartilhado com o AI Block, cujo login nao manda token: liga-lo derrubaria o login
+// deles. Mandando o e-mail nos mesmos, o endpoint some do caminho e o problema com ele.
+export async function pedirCodigo(email, tokenFuncao) {
   const alvo = email.trim().toLowerCase();
 
   const r = await chamarFuncao(FN_PEDIR_CODIGO, { email: alvo, turnstileToken: tokenFuncao });
@@ -102,20 +103,22 @@ export async function pedirCodigo(email, tokenFuncao, tokenCaptcha) {
     throw erro;
   }
 
-  // shouldCreateUser: false porque signup publico esta desligado no projeto. Quem nao
-  // comprou nao ganha conta batendo aqui, e a mensagem de erro nao volta para a tela: o
-  // front avanca para a tela de codigo do mesmo jeito, senao o erro daqui vira o oraculo
-  // que a resposta uniforme da function existe para fechar.
-  const { error } = await supabase.auth.signInWithOtp({
-    email: alvo,
-    options: { shouldCreateUser: false, captchaToken: tokenCaptcha },
-  });
-  if (error) console.warn('signInWithOtp recusou (a tela segue igual, de proposito)', error.message);
-
+  // NAO existe signInWithOtp aqui, e a ausencia e proposital.
+  //
+  // Quem gera e envia o codigo e a Edge Function, que chama generateLink com a service role
+  // (ele devolve o codigo sem disparar e-mail) e manda pelo Resend com a marca deste
+  // produto. O motivo e que o projeto Supabase e compartilhado com o AI Block e a
+  // configuracao de Auth e por PROJETO: o remetente configurado la e o dele, e ligar o
+  // CAPTCHA nativo derrubaria o login dele, que nao manda token.
+  //
+  // Isso fecha de quebra o achado 1 da verificacao: nao existe mais uma chamada ao
+  // /auth/v1/otp partindo do browser com a anon key publica, entao nao ha o que contornar
+  // por fora do Turnstile, e o teto de e-mail do Supabase deixa de ser o teto de login do
+  // produto.
   return { status: 'ok' };
 }
 
-// Troca o codigo de 6 digitos por sessao. type 'email' e o que o Supabase usa para o OTP de
+// Troca o codigo por sessao (o projeto esta configurado com 8 digitos). type 'email' e o que o Supabase usa para o OTP de
 // magic link com {{ .Token }}.
 export async function confirmarCodigo(email, codigo) {
   const { error } = await supabase.auth.verifyOtp({

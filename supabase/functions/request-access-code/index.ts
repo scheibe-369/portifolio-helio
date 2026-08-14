@@ -216,15 +216,48 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (acesso?.has_main && !acesso.blocked) {
-      // Garante a conta ANTES do signInWithOtp do browser, porque ele vai com
-      // shouldCreateUser: false (signup publico desligado). Sem esta linha, o comprador
-      // novo pediria codigo e nunca receberia nada.
-      const { error } = await admin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-      });
+      // Garante a conta antes de gerar o codigo: generateLink so funciona para usuario que
+      // ja existe, e o comprador novo nunca passou por aqui.
+      const { error } = await admin.auth.admin.createUser({ email, email_confirm: true });
       // email_exists e o caso NORMAL do segundo login em diante, nao um erro.
       if (error && !/exist/i.test(error.message)) console.error('createUser falhou', error.message);
+
+      // NOS mandamos o codigo, e o Supabase nao manda e-mail nenhum.
+      //
+      // POR QUE, e esta e a decisao que destravou a fase: o projeto Supabase e COMPARTILHADO
+      // com o AI Block, e a configuracao de Auth e por PROJETO, nao por produto. O remetente
+      // configurado la e "AI Block <acesso@mail.methodcipher.com>", o site_url e o da area
+      // de membros dele, e o CAPTCHA nativo esta desligado. Apontar isso para o MyPortifolio
+      // faria os e-mails do AI Block sairem com a nossa marca, e ligar o CAPTCHA derrubaria
+      // o login deles, que nao manda token. Nao ha configuracao que sirva aos dois.
+      //
+      // generateLink resolve: com a service role ele DEVOLVE o codigo (properties.email_otp)
+      // e NAO dispara e-mail. Entao o Turnstile fica nesta function, que e nossa, o e-mail
+      // sai pelo nosso Resend com a nossa marca, e nada da configuracao compartilhada muda.
+      //
+      // Efeito colateral bom: rate_limit_email_sent do Supabase deixa de ser o teto de login
+      // do produto (risco R3), porque quem envia somos nos.
+      const { data: link, error: erroLink } = await admin.auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+        options: { redirectTo: `https://${APEX}/app` },
+      });
+      const codigo = link?.properties?.email_otp;
+      if (erroLink || !codigo) {
+        console.error('generateLink falhou', erroLink?.message);
+      } else {
+        await enviarEmail(
+          email,
+          `${codigo} e seu codigo de acesso`,
+          `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:420px">
+             <h2 style="margin:0 0 4px">Seu codigo de acesso</h2>
+             <p style="font-size:30px;letter-spacing:8px;margin:12px 0"><strong>${codigo}</strong></p>
+             <p style="color:#666;margin:0 0 8px">Ele vale por pouco tempo e serve uma vez so.</p>
+             <p style="color:#666;margin:0">Se nao foi voce que pediu, ignore esta mensagem: ninguem entrou na sua conta.</p>
+             <p style="color:#999;font-size:12px;margin-top:20px">MyPortifolio</p>
+           </div>`,
+        );
+      }
     }
   } catch (e) {
     console.error('ramo de concessao falhou', e);
