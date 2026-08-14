@@ -1,11 +1,13 @@
 // Widget do Cloudflare Turnstile, em modo EXPLICITO.
 //
-// POR QUE EXPLICITO E NAO O data-sitekey automatico: cada pedido de codigo consome DOIS
-// tokens, um para a Edge Function (request-access-code) e outro para o /auth/v1/otp do
-// Supabase, que e quem realmente manda o e-mail. Token de Turnstile e de uso unico: se os
-// dois lados receberem o mesmo, o segundo siteverify falha e o comprador nunca recebe o
-// codigo. Com render explicito da para resetar e executar de novo, e emitir um token novo
-// por chamada, que e uma linha e nao um problema de desenho.
+// POR QUE EXPLICITO E NAO O data-sitekey automatico: token de Turnstile e de USO UNICO, e o
+// mesmo visitante pode pedir codigo mais de uma vez (errou o e-mail, clicou em reenviar).
+// Com render explicito da para emitir um token novo a cada pedido, sem recarregar a pagina.
+//
+// (Ate a mudanca do login, cada pedido gastava DOIS tokens, um para a Edge Function e outro
+// para o /auth/v1/otp do Supabase. Hoje o /auth/v1/otp saiu do caminho e sobrou um so. O
+// comentario antigo dizia dois, e foi lido como justificativa para o reset que quebrava o
+// widget, entao ele fica registrado aqui em vez de sumir.)
 //
 // A sitekey e publica de proposito (ela vai no HTML). O segredo mora so no servidor.
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -68,13 +70,33 @@ export async function montarTurnstile(elemento) {
 
 // Emite UM token novo. Chamar duas vezes seguidas devolve dois tokens diferentes, que e
 // exatamente o que o fluxo de pedir codigo precisa.
+// Widgets que ja emitiram um token pelo menos uma vez. So eles precisam de reset.
+const jaExecutou = new Set();
+
+// Emite UM token novo.
+//
+// O `reset` SO ENTRA A PARTIR DA SEGUNDA VEZ, e essa condicao e o conserto de um defeito que
+// travava o login inteiro: resetar um widget `execution: 'execute'` que ainda nao executou
+// derruba ele com "Turnstile Widget seem to have crashed" e o erro 300031. Sem token, o
+// pedido de codigo nao sai, e o visitante fica olhando uma tela que nao responde.
+//
+// O TIMEOUT existe pelo mesmo motivo: quando o widget morre daquele jeito, ele nao chama nem
+// `callback` nem `error-callback`, entao a promessa ficaria pendurada para sempre e o botao
+// nunca voltaria. Falhar em 20 s com mensagem e melhor do que nao falhar nunca.
 export function obterTokenTurnstile(id) {
   return new Promise((ok, erro) => {
-    pendentes.set(id, { ok, erro });
+    const relogio = setTimeout(() => {
+      pendentes.delete(id);
+      erro(new Error('turnstile-sem-resposta'));
+    }, 20000);
+    const fim = (fn) => (v) => { clearTimeout(relogio); fn(v); };
+    pendentes.set(id, { ok: fim(ok), erro: fim(erro) });
     try {
-      window.turnstile.reset(id);
+      if (jaExecutou.has(id)) window.turnstile.reset(id);
+      jaExecutou.add(id);
       window.turnstile.execute(id);
     } catch (e) {
+      clearTimeout(relogio);
       pendentes.delete(id);
       erro(e);
     }
@@ -83,6 +105,7 @@ export function obterTokenTurnstile(id) {
 
 export function removerTurnstile(id) {
   pendentes.delete(id);
+  jaExecutou.delete(id);
   try {
     window.turnstile.remove(id);
   } catch {

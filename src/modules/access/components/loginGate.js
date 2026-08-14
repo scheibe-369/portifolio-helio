@@ -247,8 +247,15 @@ export async function initLoginGate({ aoEntrar } = {}) {
     }
   });
 
+  // Trava de reentrada. O log de producao mostrou QUATRO chamadas a /verify no mesmo
+  // segundo, e `btnConfirmar.disabled` nao segurou porque ele so e ligado depois do primeiro
+  // `await`: dois submits disparados no mesmo tick passam os dois pelo teste. Quatro
+  // tentativas para um codigo de uso unico tambem gastam o balde de rate limit a toa.
+  let confirmando = false;
   formCodigo.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (confirmando) return;
+    confirmando = true;
     esconder(erroCodigo);
     btnConfirmar.disabled = true;
     btnConfirmar.textContent = 'Entrando...';
@@ -265,6 +272,7 @@ export async function initLoginGate({ aoEntrar } = {}) {
         `Codigo invalido ou expirado. Use o do e-mail MAIS RECENTE (pedir um novo cancela o anterior), ou peca outro. O codigo tem ${TAMANHO_CODIGO} digitos.`,
       );
     } finally {
+      confirmando = false;
       btnConfirmar.disabled = false;
       btnConfirmar.textContent = 'Entrar';
     }
