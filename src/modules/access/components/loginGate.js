@@ -88,7 +88,6 @@ export function renderLoginGate() {
             required
             inputmode="numeric"
             autocomplete="one-time-code"
-            maxlength="${TAMANHO_CODIGO_MAX}"
             pattern="[0-9]{${TAMANHO_CODIGO_MIN},${TAMANHO_CODIGO_MAX}}"
             placeholder="${'0'.repeat(TAMANHO_CODIGO)}"
             class="campo-acesso campo-codigo mb-3"
@@ -136,6 +135,18 @@ export async function initLoginGate({ aoEntrar } = {}) {
   const formSenha = document.querySelector('#acesso-form-senha');
   const inputEmail = document.querySelector('#acesso-email');
   const inputCodigo = document.querySelector('#acesso-codigo');
+  // O campo mostra SO digitos, e limpa na hora da colagem.
+  //
+  // POR QUE ISSO IMPORTA: o assunto do e-mail e "<codigo> e seu codigo de acesso", entao
+  // copiar do assunto (que e o gesto natural, porque o numero aparece la primeiro) traz
+  // texto junto. Antes, o campo tinha maxlength, cortava a colagem no meio e mandava lixo
+  // para o servidor, que respondia "token invalido" e jogava a culpa no codigo. Limpar aqui
+  // deixa a colagem inteira funcionar; a limpeza tambem existe do outro lado, em
+  // confirmarCodigo, porque campo e a camada errada para ser a unica defesa.
+  inputCodigo?.addEventListener('input', () => {
+    const limpo = inputCodigo.value.replace(/\D/g, '').slice(0, TAMANHO_CODIGO_MAX);
+    if (inputCodigo.value !== limpo) inputCodigo.value = limpo;
+  });
   const inputSenha = document.querySelector('#acesso-senha');
   const btnEnviar = document.querySelector('#acesso-enviar');
   const btnConfirmar = document.querySelector('#acesso-confirmar');
@@ -246,7 +257,13 @@ export async function initLoginGate({ aoEntrar } = {}) {
       if (aoEntrar) await aoEntrar();
       else window.location.reload();
     } catch {
-      mostrar(erroCodigo, 'Codigo invalido ou expirado. Peca um novo.');
+      // Duas causas, e a segunda pega muita gente: pedir um codigo novo INVALIDA o
+      // anterior, entao quem clicou em reenviar e depois digitou o do primeiro e-mail recebe
+      // exatamente este erro sem ter errado nada.
+      mostrar(
+        erroCodigo,
+        `Codigo invalido ou expirado. Use o do e-mail MAIS RECENTE (pedir um novo cancela o anterior), ou peca outro. O codigo tem ${TAMANHO_CODIGO} digitos.`,
+      );
     } finally {
       btnConfirmar.disabled = false;
       btnConfirmar.textContent = 'Entrar';

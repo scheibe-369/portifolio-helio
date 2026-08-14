@@ -22,6 +22,7 @@ const casos = [
   ['/app/admin/fila', '/admin/fila'],
   ['/app/admin/fila/', '/admin/fila'],
   ['/app/admin/acessos', '/admin/acessos'],
+  ['/app/admin/mfa', '/admin/mfa'],
   // As duas juridicas moram no apex, fora do prefixo, e tem que atravessar intactas.
   ['/termos', '/termos'],
   ['/privacidade', '/privacidade'],

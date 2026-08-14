@@ -82,14 +82,19 @@ export function renderMfaDesafio() {
     <p id="mfa-erro" class="hidden text-xs text-red-400"></p>`);
 }
 
-// Decide qual dos tres estados vale AGORA. Devolve o que a camada de rotas deve pintar.
+// Decide se a area de admin abre.
+//
+// O SEGUNDO FATOR NAO E MAIS EXIGIDO (migration 0012, decisao do dono). A unica pergunta e
+// se o e-mail esta em admin_users, e quem responde de verdade e o banco: toda funcao admin_*
+// comeca com `if not is_admin() then raise`. Este ramo so decide QUAL TELA pintar.
+//
+// O cadastro do app continua existindo e continua funcionando, em /app/admin/mfa. Ele virou
+// opcional em vez de obrigatorio, e por isso a tela de desafio saiu do caminho: cobrar o
+// codigo de quem cadastrou por conta propria seria transformar a escolha dele em punicao.
 export async function estadoDoAdmin() {
   const st = await adminStatus();
   if (!st?.naListaDeAdmin) return { tela: 'nao-autorizado', email: st?.email };
-  const nivel = await nivelDaSessao();
-  if (!st.temSegundoFator) return { tela: 'cadastro', email: st.email };
-  if (nivel.atual !== 'aal2') return { tela: 'desafio', email: st.email };
-  return { tela: 'ok', email: st.email };
+  return { tela: 'ok', email: st.email, temSegundoFator: st.temSegundoFator };
 }
 
 function ligarErro() {

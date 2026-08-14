@@ -20,9 +20,7 @@ import {
   estadoDoAdmin,
   renderMfaNaoAutorizado,
   renderMfaCadastro,
-  renderMfaDesafio,
   initMfaCadastro,
-  initMfaDesafio,
 } from '../modules/admin/components/mfaGate.js';
 import { rotaInterna, BASE } from './rotaInterna.js';
 
@@ -135,6 +133,10 @@ async function rodar() {
   const TELAS_ADMIN = {
     '/admin/fila': { render: renderFilaPanel, init: initFilaPanel },
     '/admin/acessos': { render: renderAcessosPanel, init: initAcessosPanel },
+    // OPCIONAL. Ninguem e mandado para ca: quem quiser proteger a conta com um app
+    // autenticador digita o endereco. Deixar a tela viva custa nada e mantem a porta de
+    // volta aberta, caso o dia em que existir um segundo administrador chegue.
+    '/admin/mfa': { render: renderMfaCadastro, init: () => initMfaCadastro({ aoConcluir: async () => { window.location.href = '/app/admin/acessos'; } }) },
   };
   const tela = TELAS_ADMIN[caminho];
   if (tela) {
@@ -153,14 +155,6 @@ async function rodar() {
     }
 
     if (estadoAdmin.tela === 'nao-autorizado') return pintar(renderMfaNaoAutorizado(estadoAdmin.email));
-    if (estadoAdmin.tela === 'cadastro') {
-      pintar(renderMfaCadastro());
-      return initMfaCadastro({ aoConcluir: async () => { await rodar(); } });
-    }
-    if (estadoAdmin.tela === 'desafio') {
-      pintar(renderMfaDesafio());
-      return initMfaDesafio({ aoConcluir: async () => { await rodar(); } });
-    }
 
     pintar(tela.render());
     await tela.init();

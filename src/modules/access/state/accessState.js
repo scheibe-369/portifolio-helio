@@ -121,9 +121,16 @@ export async function pedirCodigo(email, tokenFuncao) {
 // Troca o codigo por sessao (o projeto esta configurado com 8 digitos). type 'email' e o que o Supabase usa para o OTP de
 // magic link com {{ .Token }}.
 export async function confirmarCodigo(email, codigo) {
+  // SO OS DIGITOS. `.trim()` nao bastava, e o defeito era invisivel de um jeito cruel: o
+  // assunto do e-mail e "19132598 e seu codigo de acesso", entao quem copia do assunto (que e
+  // o gesto natural, porque o codigo aparece ali primeiro) traz texto junto. O campo tinha
+  // maxlength, cortava a colagem em "19132598 e", e o Supabase respondia "token has expired
+  // or is invalid", que manda a pessoa procurar problema no codigo quando o problema era a
+  // colagem.
+  const limpo = String(codigo ?? '').replace(/\D/g, '');
   const { error } = await supabase.auth.verifyOtp({
     email: email.trim().toLowerCase(),
-    token: codigo.trim(),
+    token: limpo,
     type: 'email',
   });
   if (error) throw error;
