@@ -68,7 +68,7 @@ function montarPortfolio(cfg, payload, { origem }) {
   };
 }
 
-export function montarCtx(cfg, { payload, payloadV, slug, url, isPreview = false, payloadVCorrente }) {
+export function montarCtx(cfg, { payload, payloadV, slug, url, isPreview = false, payloadVCorrente, vitrine = false }) {
   const adaptado = adaptarPayload(payload, payloadV, payloadVCorrente);
   if (!adaptado) return null;
 
@@ -87,6 +87,9 @@ export function montarCtx(cfg, { payload, payloadV, slug, url, isPreview = false
     mediaBase: cfg.mediaBase,
     flags: { hasCustom: Boolean(adaptado.theme && Object.keys(adaptado.theme).length), englishEnabled: Boolean(idioma.englishEnabled) },
     isPreview,
+    // Vem por parametro e nao e deduzido aqui: quem sabe qual slug e a vitrine e o Worker
+    // (APEX_SLUG), e o navegador so sabe o que foi injetado no payload.
+    vitrine,
     seo: adaptado.seo || {},
   });
 }

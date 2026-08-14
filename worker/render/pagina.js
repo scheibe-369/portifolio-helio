@@ -81,8 +81,12 @@ export function montarHtml(ctx, { payloadBruto }) {
     lang: ctx.lang,
     origin: ctx.origin,
     mediaBase: ctx.mediaBase,
+    // apexHost nao era injetado, e o navegador lia undefined. Nao doia enquanto nada no HTML
+    // dependia dele; a faixa de compra depende, e sem ele o botao sumiria na hidratacao.
+    apexHost: ctx.apexHost,
     flags: ctx.flags,
     isPreview: ctx.isPreview,
+    vitrine: ctx.vitrine,
     payload: payloadBruto,
   });
 

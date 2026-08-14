@@ -42,6 +42,7 @@ const montarCtx = () =>
           url: new URL(window.location.href),
           isPreview: injetado.isPreview,
           payloadVCorrente: injetado.payloadV ?? 2,
+          vitrine: Boolean(injetado.vitrine),
         },
       )
     : {
@@ -50,6 +51,11 @@ const montarCtx = () =>
         slug: 'helio',
         flags: { hasCustom: false, englishEnabled: true },
         isPreview: false,
+        // Este ramo so roda em desenvolvimento local, onde nao existe payload injetado. A
+        // vitrine fica ligada para a faixa de compra ser vista sem subir nada, e o apexHost
+        // e o de producao porque o botao aponta para o checkout de verdade nos dois casos.
+        vitrine: true,
+        apexHost: 'myportifolio.com.br',
       };
 
 // Re-renderiza a página inteira (usado no load e na troca de idioma, sem reload).

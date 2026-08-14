@@ -5,6 +5,7 @@ import { renderProjectsSection } from '../modules/projects/components/projectsSe
 import { renderExperienceSection } from '../modules/experience/components/experienceSection.js';
 import { renderProjectModalRoot } from '../modules/projects/components/projectModal.js';
 import { renderSiteFooter } from '../modules/portfolio/components/siteFooter.js';
+import { renderVitrineCta } from '../modules/oferta/components/vitrineCta.js';
 
 // Composição da página. Zona [iso]: este mesmo código roda no navegador e, a partir da
 // fase 1, dentro do Worker para montar o HTML de cada comprador no servidor.
@@ -21,6 +22,10 @@ import { renderSiteFooter } from '../modules/portfolio/components/siteFooter.js'
 //   a vitrine e ficam logo depois das stacks; a experiência fecha a página.
 export function renderPortfolioPage(ctx) {
   const { lang, portfolio } = ctx;
+  // So a vitrine leva a faixa de compra, e quem decide isso e o SLUG (ver vitrineCta.js): o
+  // documento e cacheado por (portfolio_id, content_hash), identico para o apex e para o
+  // subdominio da vitrine, entao conteudo que dependesse do host colidiria em cache.
+  const cta = ctx.vitrine ? renderVitrineCta(lang, ctx.apexHost) : '';
   const { profile, projects, stacks, experience, projectGroups, filterGroups } = portfolio;
   return `
 <section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8">
@@ -34,6 +39,7 @@ export function renderPortfolioPage(ctx) {
   ${renderProjectsSection(projects, lang, { projectGroups, filterGroups })}
   ${renderExperienceSection(experience, lang)}
 </section>
+${cta}
 ${renderSiteFooter(lang)}
 ${renderProjectModalRoot()}`;
 }

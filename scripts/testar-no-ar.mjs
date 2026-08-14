@@ -129,6 +129,19 @@ const cb = (u) => `${u}${u.includes('?') ? '&' : '?'}cb=${Math.floor(Math.random
   const texto = await p.locator('body').innerText();
   conferir('a secao de experiencia esta na pagina', /experi/i.test(texto), '');
 
+  // A faixa de compra. Sem ela, /comprar existe e nada no site leva ate la, que foi
+  // exatamente o estado em que este produto passou o dia.
+  const cta = p.locator('a[href$="/comprar"]');
+  conferir('a vitrine tem o botao de compra', (await cta.count()) >= 1, `${await cta.count()} botao`);
+  if (await cta.count()) {
+    conferir('o botao aparece na tela', await cta.first().isVisible(), (await cta.first().textContent())?.trim());
+    // Absoluto para o apex: no subdominio da vitrine um link relativo cairia em 404, porque
+    // la o Worker so serve a raiz.
+    const href = await cta.first().getAttribute('href');
+    conferir('o botao aponta para o apex, e nao relativo', href.startsWith('https://'), href);
+  }
+  conferir('o preco esta no botao', /47,90/.test(texto), '');
+
   conferir('apex sem erro de console', erros.length === 0, erros.join(' | '));
   await p.close();
 }
@@ -145,6 +158,19 @@ const cb = (u) => `${u}${u.includes('?') ? '&' : '?'}cb=${Math.floor(Math.random
   // deixou de ler.
   const temPayload = await p.locator('#pf-payload').count();
   conferir('o payload do banco esta injetado', temPayload === 1, `${temPayload}`);
+
+  // O MESMO slug da vitrine, servido pelo subdominio, tem que trazer a MESMA faixa. Se as
+  // duas versoes divergissem, elas colidiriam na chave de cache (portfolio_id, content_hash)
+  // e cada visitante receberia a que tivesse sido gravada primeiro.
+  const ctaTenant = await p.locator('a[href$="/comprar"]').count();
+  conferir('o subdominio da vitrine traz a mesma faixa', ctaTenant >= 1, `${ctaTenant}`);
+
+  // E a faixa precisa sobreviver a hidratacao: o bundle publico repinta o #app inteiro, e um
+  // ctx sem `vitrine` faria o botao aparecer e sumir sozinho, sem erro nenhum no console.
+  await p.waitForTimeout(1200);
+  const ctaDepois = await p.locator('a[href$="/comprar"]').count();
+  conferir('a faixa sobrevive a hidratacao do bundle', ctaDepois >= 1, `${ctaDepois} depois do JS`);
+
   conferir('tenant sem erro de console', erros.length === 0, erros.join(' | '));
   await p.close();
 }

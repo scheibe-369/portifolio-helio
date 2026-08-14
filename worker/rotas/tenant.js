@@ -109,7 +109,9 @@ export async function servirTenant({ request, url, slug, cfg, ctx }) {
 
   // payload_v maior que o corrente e Worker mais velho que o banco (janela de deploy). Nunca
   // renderizar formato do futuro: serve o que houver em cache, e senao 503 (secao 4.9).
-  const pagina = montarCtx(cfg, { payload: r.payload, payloadV: r.payloadV, slug, url, payloadVCorrente: PAYLOAD_V_CORRENTE });
+  // A faixa de compra sai daqui: e o slug da vitrine que a liga, nunca o hostname, senao as
+  // duas versoes da MESMA pagina disputariam a mesma chave de cache.
+  const pagina = montarCtx(cfg, { payload: r.payload, payloadV: r.payloadV, slug, url, payloadVCorrente: PAYLOAD_V_CORRENTE, vitrine: slug === cfg.apexSlug });
   if (!pagina) {
     const doc = await lerDocumento(cfg, r.portfolioId, r.contentHash);
     if (doc) return carimbar(doc, { 'X-Portfolio-Cache': 'hit', 'cache-control': CACHE_VISITANTE });
