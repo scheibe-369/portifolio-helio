@@ -185,3 +185,37 @@ id do painel e chamei de aposta informada. A aposta ate acertou o **valor**; err
   teste para falar a lingua do payload real, e nao o contrario.
 - Preco em pagina publica sai da NOTA, nao do painel nem da memoria. A fatura veio com
   `totalCents: 8580`; 85,80 menos 47,90 da 37,90, e o `/comprar` anunciava 37,00.
+
+
+## A service role nao e toda-poderosa neste schema (14/08/2026)
+
+**O que aconteceu:** a tela de aceite dos termos falhou em producao com
+`permission denied for table terms_consents`. A Edge Function escrevia direto na tabela
+usando a service role key.
+
+**A causa:** as migrations fazem `revoke ... from public` nas tabelas, e isso tira junto o
+privilegio que `service_role` recebia por HERANCA de `public`. A chave tem cara de
+toda-poderosa (ela ignora RLS) e nao e: RLS e privilegio de tabela sao coisas diferentes, e
+ela so escapa da primeira.
+
+**Ja tinha acontecido antes, com outro nome:** em 12/08 nenhuma venda liberava acesso, e a
+causa era a mesma, `service_role` sem execute na RPC de concessao. Consertei o caso e nao a
+classe, entao a classe voltou.
+
+**O que a busca sistematica achou depois:** so `hubla_events`, `setup_requests` e
+`vendas_conferidas` tem grant para a service role. E a `request-refund` escrevia direto em
+`refund_requests` e `portfolio_publications`. Ou seja, **o botao de arrependimento de 7 dias
+(CDC art. 49) estava quebrado desde que foi escrito**, e ninguem tinha visto porque ninguem
+tinha pedido reembolso. O comprador clicaria, receberia "nao foi possivel registrar", e o
+pedido nao existiria em lugar nenhum.
+
+**Regra pra proxima vez:**
+- Edge Function com service role **nao escreve em tabela**. Ela chama RPC `security definer`.
+  Isso resolve a permissao de uma vez e, de quebra, mantem regra de negocio no banco: "o que
+  conta como dentro do prazo" nao pertencia a uma funcao de transporte.
+- Quando um defeito de permissao aparecer, **listar a classe inteira antes de fechar**. A
+  consulta que resolveu isto em um minuto:
+  `select table_name, privilege_type from information_schema.role_table_grants where grantee='service_role' and table_schema='myportifolio'`.
+- Caminho que so roda em situacao rara (reembolso, chargeback, exclusao de conta) precisa de
+  teste de fumaca no dia em que e escrito. Ele nao tem usuario para descobrir o defeito, e
+  quando tiver, a pessoa ja vai estar irritada e com razao.

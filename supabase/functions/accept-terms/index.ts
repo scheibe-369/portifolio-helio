@@ -69,12 +69,25 @@ Deno.serve(async (req) => {
   // pode reescrever a data do primeiro aceite. E pelo mesmo motivo que NUNCA existe update
   // aqui: a prova de que alguem aceitou a versao 1 nao pode ser sobrescrita no dia em que a
   // versao 2 entrar no ar, que e exatamente a pergunta que aparece quando ela e questionada.
-  const { error } = await serv
-    .from('terms_consents')
-    .upsert(
-      { email, terms_version: versao, ip, user_agent: ua },
-      { onConflict: 'email,terms_version', ignoreDuplicates: true },
-    );
+  // PELA RPC, e nao por insert direto na tabela.
+  //
+  // O insert direto estava dando `permission denied for table terms_consents` em producao, e
+  // o motivo e o mesmo que ja tinha travado TODA venda no webhook: `service_role` nao herda
+  // privilegio de tabela neste schema (as migrations dao `revoke ... from public`, e isso
+  // tira junto o que o service_role pegava por heranca). O sintoma e cruel porque a chave
+  // parece toda-poderosa e nao e.
+  //
+  // A funcao certa ja existia desde a 0008, escrita exatamente para este caminho: ela e
+  // SECURITY DEFINER (entao roda com o dono do schema), recebe o e-mail por parametro (porque
+  // aqui auth.uid() e nulo, a chamada e com service_role) e recusa e-mail sem compra. Chamar
+  // ela em vez de escrever na tabela tambem tira uma regra de negocio de dentro da Edge
+  // Function e devolve para o banco, que e onde ela e obrigatoria.
+  const { error } = await serv.rpc('record_terms_consent', {
+    p_email: email,
+    p_version: versao,
+    p_ip: ip,
+    p_user_agent: ua,
+  });
   if (error) {
     console.error('falhou gravar consentimento', error.message);
     return json({ error: 'nao-foi-possivel-registrar' }, 500);

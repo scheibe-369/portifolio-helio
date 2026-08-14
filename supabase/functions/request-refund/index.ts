@@ -55,40 +55,26 @@ Deno.serve(async (req) => {
   if (erroEmail) return json({ error: 'sessao-invalida' }, 401);
   if (!email) return json({ error: 'sem-compra' }, 403);
 
-  const { data: acesso } = await serv
-    .from('member_access')
-    .select('main_granted_at')
-    .eq('email', email)
-    .maybeSingle();
-
-  const concedido = acesso?.main_granted_at ? new Date(acesso.main_granted_at).getTime() : null;
-  const dentroDoPrazo =
-    concedido !== null && Date.now() - concedido < DIAS_CDC * 24 * 60 * 60 * 1000;
-
-  // ignoreDuplicates: o pedido e um fato datado. Clicar de novo nao pode reescrever a data
-  // nem o within_cdc do primeiro pedido, que sao justamente a prova do prazo.
-  const { error } = await serv
-    .from('refund_requests')
-    .upsert(
-      { email, reason: motivo, within_cdc: dentroDoPrazo },
-      { onConflict: 'email', ignoreDuplicates: true },
-    );
+  // TUDO PELA RPC, e nao por escrita direta nas tabelas.
+  //
+  // A versao anterior lia member_access, escrevia em refund_requests e depois tirava as
+  // publicacoes do ar, tres acessos diretos com a service role. Nenhum deles funcionava: a
+  // service role NAO tem privilegio de tabela neste schema (as migrations fazem
+  // `revoke ... from public` e isso tira junto o que ela pegava por heranca). Ou seja, o
+  // botao de arrependimento de 7 dias respondia "nao foi possivel registrar" desde sempre, e
+  // ninguem tinha visto porque ninguem pediu reembolso ainda.
+  //
+  // A funcao do banco (0013) faz os tres passos numa transacao so e decide o que e "dentro
+  // do prazo", que e regra de negocio e nao pertencia a uma Edge Function.
+  const { data: resultado, error } = await serv.rpc('request_refund', {
+    p_email: email,
+    p_reason: motivo,
+  });
   if (error) {
     console.error('falhou registrar reembolso', error.message);
     return json({ error: 'nao-foi-possivel-registrar' }, 500);
   }
-
-  // O portfolio sai do ar no ato do pedido (decisao 9.5). unlive_reason = 'dono' porque a
-  // saida foi por vontade de quem manda na pagina, e nao revogacao nossa: se o pedido for
-  // desfeito, e o dono quem republica.
-  const { data: portfolios } = await serv.from('portfolios').select('id').eq('owner_email', email);
-  for (const p of portfolios ?? []) {
-    await serv
-      .from('portfolio_publications')
-      .update({ is_live: false, unlive_reason: 'dono' })
-      .eq('portfolio_id', p.id)
-      .eq('is_live', true);
-  }
+  const dentroDoPrazo = Boolean(resultado?.dentroDoPrazo);
 
   // O estorno em si e manual na Hubla, entao o aviso ao dono nao e cortesia: sem ele, o
   // pedido fica numa tabela que ninguem olha, e o prazo do CDC corre contra nos.
