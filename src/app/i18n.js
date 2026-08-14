@@ -18,7 +18,6 @@ const ui = {
   cases: { pt: 'cases', en: 'cases' },
   stacks: { pt: 'Stacks Dominadas', en: 'Tech Stack' },
   experience: { pt: 'Experiência', en: 'Experience' },
-  experienceCount: { pt: 'passagens', en: 'roles' },
   periodTo: { pt: 'a', en: 'to' },
   since: { pt: 'Desde', en: 'Since' },
   current: { pt: 'Atual', en: 'Present' },
@@ -42,3 +41,18 @@ const ui = {
 };
 
 export const tui = (chave, lang) => t(ui[chave], lang);
+
+// Rotulos contaveis, resolvidos pela contagem. Zona [iso], mesma pureza do resto.
+//
+// POR QUE ISTO NASCEU: o cabecalho da experiencia imprimia "5 passagens" e o defeito nunca
+// apareceu porque o Helio tem cinco entradas. O comprador comeca com UMA e le "1 passagens",
+// na primeira tela do produto que ele acabou de pagar. Rotulo contavel e plural e dado, nao
+// texto fixo, e por isso ele tem forma propria em vez de um `if` solto no componente.
+const uiContavel = {
+  experienceCount: { pt: { um: 'passagem', outros: 'passagens' }, en: { um: 'role', outros: 'roles' } },
+};
+
+export const tuin = (chave, n, lang) => {
+  const forma = uiContavel[chave][normalizar(lang)];
+  return Number(n) === 1 ? forma.um : forma.outros;
+};

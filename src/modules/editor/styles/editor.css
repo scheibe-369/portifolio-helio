@@ -1,0 +1,1018 @@
+/*
+  As regras de formulario do editor. Zona [browser], importadas SO por app.html.
+
+  POR QUE NAO ESTAO NO global.css: o global.css e carregado pela pagina publica de todo
+  comprador, e ela nao tem um unico input, textarea ou select. Regra de formulario la dentro
+  seria CSS baixado por todo visitante de todo tenant, para sempre, sem uso. O criterio 1 de
+  6.11 verifica isso por grep ancorado em linha de seletor, e ele reprova se um seletor de
+  `input`, `textarea`, `select`, `label` ou `form` aparecer no global.css.
+
+  Sao seis primitivos e nada alem: .ed-field, .ed-input/.ed-textarea, .ed-select, .ed-chips,
+  .ed-drop e .ed-switch. O resto daqui e casca (gaveta, barra, lista) ou variacao dos seis.
+*/
+
+/* ------------------------------------------------------------------ casca */
+
+.ed-barra {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ed-barra-esq,
+.ed-barra-dir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ed-barra-marca {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ed-barra-endereco {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+.ed-barra-status {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.45);
+}
+.ed-barra-status.e-ok {
+  color: #6ee7a8;
+  border-color: rgba(110, 231, 168, 0.3);
+}
+
+.ed-barra-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.ed-barra-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.ed-barra-btn.e-primario {
+  background: #7c5cfc;
+  border-color: transparent;
+  color: #fff;
+}
+.ed-barra-btn.e-fantasma {
+  background: transparent;
+}
+
+.ed-canvas {
+  position: relative;
+}
+
+/* --------------------------------------------------- pontos de edicao */
+
+/*
+  Eles so existem sob .is-editing. "Ver como visitante" e tirar essa classe do body: sem
+  re-render, sem piscada, e com a certeza de que o que sobra na tela e exatamente o HTML que o
+  visitante recebe.
+*/
+.ed-alvo {
+  display: none;
+}
+
+body.is-editing .ed-alvo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: rgba(124, 92, 252, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  z-index: 20;
+}
+
+body.is-editing .ed-alvo.e-canto {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+body.is-editing .ed-alvo.e-rodape {
+  margin-top: 10px;
+  width: fit-content;
+}
+
+body.is-editing [data-slug],
+body.is-editing #experiencia li {
+  position: relative;
+}
+
+.ed-bloco-vazio {
+  display: none;
+}
+
+body.is-editing .ed-bloco-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+}
+
+.ed-bloco-vazio-titulo {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+.ed-bloco-vazio-texto {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 46ch;
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------------- gaveta */
+
+.ed-gaveta {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ed-gaveta.is-open {
+  display: block;
+}
+
+.ed-gaveta-painel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: #0b0b12;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 640px) {
+  /* Bottom sheet no celular: gaveta lateral de 440 px num aparelho de 375 e uma gaveta que
+     cobre a tela inteira fingindo que nao cobre. */
+  .ed-gaveta-painel {
+    top: auto;
+    left: 0;
+    width: 100%;
+    height: 88vh;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+.ed-gaveta-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ed-gaveta-titulos {
+  flex: 1;
+  min-width: 0;
+}
+.ed-gaveta-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.ed-gaveta-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+.ed-gaveta-x,
+.ed-gaveta-voltar {
+  font-size: 20px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.ed-gaveta-corpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px 24px;
+}
+.ed-gaveta-rodape {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ------------------------------------------------- primitivo 1: campo */
+
+.ed-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.ed-field.ed-sub {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.ed-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+.ed-req {
+  color: #f87171;
+}
+.ed-lock {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #c4b5fd;
+  background: rgba(124, 92, 252, 0.14);
+  border: 1px solid rgba(124, 92, 252, 0.3);
+  border-radius: 999px;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+
+.ed-help {
+  font-size: 11px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.38);
+}
+.ed-erro {
+  font-size: 11px;
+  color: #f87171;
+  min-height: 0;
+}
+.ed-erro:empty {
+  display: none;
+}
+.ed-erro.e-ok {
+  color: #6ee7a8;
+}
+.ed-nota {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+}
+.ed-nota.e-ok {
+  color: #6ee7a8;
+}
+.ed-contador {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.25);
+  align-self: flex-end;
+}
+.ed-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ed-linha > .ed-input {
+  flex: 1;
+}
+
+/* ----------------------------- primitivos 2 e 3: entrada de texto e select */
+
+.ed-input,
+.ed-textarea,
+.ed-select {
+  width: 100%;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 9px 11px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.ed-input::placeholder,
+.ed-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+.ed-input:focus,
+.ed-textarea:focus,
+.ed-select:focus {
+  outline: none;
+  border-color: rgba(124, 92, 252, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+.ed-input:disabled,
+.ed-textarea:disabled,
+.ed-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ed-textarea {
+  resize: vertical;
+  line-height: 1.6;
+  /* Cresce com o conteudo sem biblioteca: field-sizing onde existe, resize manual onde nao. */
+  field-sizing: content;
+  min-height: 76px;
+  max-height: 40vh;
+}
+
+.ed-select-wrap {
+  position: relative;
+}
+.ed-select {
+  appearance: none;
+  padding-right: 32px;
+}
+/* Seta desenhada em CSS, para o select nativo nao trazer o visual do sistema operacional. */
+.ed-select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.4);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.ed-select option {
+  background: #0b0b12;
+}
+
+.ed-range {
+  width: 100%;
+  accent-color: #7c5cfc;
+}
+
+/* ----------------------------------------------- primitivo 4: chips */
+
+.ed-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.ed-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 3px 4px 3px 10px;
+}
+.ed-chip-x {
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.4);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.ed-chip-input {
+  flex: 1;
+  min-width: 120px;
+  font-size: 12.5px;
+  color: #fff;
+  background: transparent;
+  border: none;
+  padding: 4px;
+}
+.ed-chip-input:focus {
+  outline: none;
+}
+
+/* ------------------------------------- primitivo 5: area de arquivo */
+
+.ed-drop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.ed-drop:hover,
+.ed-drop.e-sobre {
+  border-color: rgba(124, 92, 252, 0.6);
+  background: rgba(124, 92, 252, 0.06);
+}
+.ed-drop-icone {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.ed-drop-texto {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+.ed-drop-previa {
+  width: 64px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+/* A previa da logo mostra a PLACA, com o fundo real e sem padding, porque e assim que ela vai
+   aparecer no card. Sem isso, a limitacao do JPEG com fundo branco so seria descoberta depois
+   de publicar. */
+.ed-drop-previa.e-quadrada {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.ed-drop-input,
+.ed-oculto {
+  display: none;
+}
+
+/* ----------------------------------------------- primitivo 6: switch */
+
+.ed-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: background 0.18s ease;
+  flex-shrink: 0;
+}
+.ed-switch.is-on {
+  background: #7c5cfc;
+  border-color: transparent;
+}
+.ed-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ed-switch-bolinha {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  transition: transform 0.18s ease;
+}
+.ed-switch.is-on .ed-switch-bolinha {
+  transform: translateX(18px);
+}
+
+/* ------------------------------------------------------- variacoes */
+
+.ed-botoes {
+  display: flex;
+  gap: 6px;
+}
+.ed-botao {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 9px;
+  cursor: pointer;
+}
+.ed-botao.is-on {
+  color: #fff;
+  background: rgba(124, 92, 252, 0.18);
+  border-color: rgba(124, 92, 252, 0.55);
+}
+
+.ed-cor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ed-cor-poco {
+  width: 42px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.ed-cor-hex {
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ------------------------------------------------------ certificado */
+
+.ed-anexo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.ed-anexo-mini {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.ed-anexo-icone {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+}
+.ed-anexo-nome {
+  flex: 1;
+  min-width: 120px;
+  font-size: 12px;
+  color: #fff;
+}
+.ed-anexo-tam {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.35);
+}
+.ed-anexo-acao {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.ed-anexo-acao.e-perigo {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.ed-consentimento {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  margin-top: 10px;
+}
+.ed-consentimento.is-on {
+  border-color: rgba(124, 92, 252, 0.4);
+}
+.ed-consentimento-titulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.ed-check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  cursor: pointer;
+}
+.ed-check.is-on {
+  background: #7c5cfc;
+  border-color: transparent;
+}
+.ed-check.is-on::after {
+  content: '✓';
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: #fff;
+}
+.ed-check:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------ passos, lista, botoes */
+
+.ed-recolhivel {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+  margin-bottom: 12px;
+}
+.ed-passo-titulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  list-style: none;
+  padding: 6px 0;
+}
+.ed-passo-titulo::marker,
+.ed-passo-titulo::-webkit-details-marker {
+  display: none;
+}
+.ed-passo-titulo::before {
+  content: '＋ ';
+}
+details[open] > .ed-passo-titulo::before {
+  content: '－ ';
+}
+.ed-passo-corpo {
+  padding-top: 10px;
+}
+
+.ed-lista-ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.ed-lista-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.ed-lista-placa {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ed-lista-placa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ed-lista-texto {
+  flex: 1;
+  min-width: 0;
+}
+.ed-lista-titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-lista-sub {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.35);
+}
+.ed-selos {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
+.ed-selo {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.ed-lista-setas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ed-seta {
+  font-size: 9px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  padding: 3px 5px;
+  cursor: pointer;
+}
+.ed-seta:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.ed-lista-editar {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.ed-vazio {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 18px 0;
+}
+
+.ed-btn {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+.ed-btn.e-primario {
+  background: #7c5cfc;
+  border-color: transparent;
+  color: #fff;
+}
+.ed-btn.e-perigo {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.25);
+}
+.ed-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ed-largo {
+  width: 100%;
+}
+.ed-rodape-botoes {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.ed-rodape-botoes .ed-btn.e-primario {
+  flex: 1;
+}
+
+.ed-link {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.ed-link.e-perigo {
+  color: rgba(248, 113, 113, 0.75);
+}
+.ed-link-perigo {
+  font-size: 11px;
+  color: rgba(248, 113, 113, 0.75);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.ed-msg {
+  font-size: 11.5px;
+}
+.ed-msg:empty {
+  display: none;
+}
+.ed-msg.e-erro {
+  color: #f87171;
+}
+.ed-msg.e-ok {
+  color: #6ee7a8;
+}
+.ed-msg.e-neutro {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* -------------------------------------------------- publicar e bump */
+
+.ed-publicar,
+.ed-bump,
+.ed-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ed-endereco {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+.ed-endereco-rot {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.3);
+}
+.ed-endereco a {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.ed-endereco-apex {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+.ed-endereco-campo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ed-check-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-check-lista li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+.ed-check-lista li.e-ok {
+  color: rgba(255, 255, 255, 0.75);
+}
+.ed-check-lista li.e-trava {
+  color: #f87171;
+}
+.ed-check-marca {
+  color: inherit;
+}
+
+.ed-sugestao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 92, 252, 0.28);
+  background: rgba(124, 92, 252, 0.07);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ed-previa {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ed-previa-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.ed-copiavel {
+  display: flex;
+  gap: 6px;
+}
+
+.ed-bump-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-bump-lista li {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.7);
+  padding-left: 16px;
+  position: relative;
+}
+.ed-bump-lista li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #7c5cfc;
+}
+
+/* ------------------------------------------------------------ wizard */
+
+.ed-wizard {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 56px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ed-wizard header {
+  margin-bottom: 18px;
+}
+.ed-wizard h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.ed-wizard header p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.6;
+}
+
+.ed-voltar {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 16px 20px 0;
+}

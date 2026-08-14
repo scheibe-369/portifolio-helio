@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:worker": "vite build && node scripts/preparar-shell.mjs",
     "preview": "vite preview",
-    "verificar": "node scripts/snapshot.mjs --saida out && node scripts/dom-diff.mjs snapshot/pt.html out/pt.html --allow scripts/expected-diffs.pt.json && node scripts/dom-diff.mjs snapshot/en.html out/en.html --allow scripts/expected-diffs.en.json && node scripts/import-graph.mjs --config scripts/boundary.config.json && node scripts/medir-render.mjs",
+    "verificar": "node scripts/snapshot.mjs --saida out && node scripts/dom-diff.mjs snapshot/pt.html out/pt.html --allow scripts/expected-diffs.pt.json && node scripts/dom-diff.mjs snapshot/en.html out/en.html --allow scripts/expected-diffs.en.json && node scripts/import-graph.mjs --config scripts/boundary.config.json && node scripts/testar-rotas.mjs && node scripts/medir-render.mjs",
     "migrations:validar": "node scripts/validar-migrations.mjs",
     "migrations:aplicar": "node scripts/validar-migrations.mjs --aplicar"
   },

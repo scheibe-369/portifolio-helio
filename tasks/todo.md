@@ -105,17 +105,25 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       Resend. Isso resolveu o conflito de config de Auth com o AI Block (é uma config só
       por projeto) e fechou o desvio pelo `/auth/v1/otp` com a anon key
 - [x] **5. Webhook.** Escrito e testado, deploy pendente (acima)
-- [ ] **6. Editor mínimo.** Canvas vivo com gaveta, `fieldSchema.js` como fonte única
-- [ ] **7. Experiência e certificado no editor**
-- [ ] **8. Cota de mídia.** O gatilho do banco já recusa caminho e nome fora do padrão;
-      falta o lado do cliente
+- [x] **6. Editor mínimo.** Canvas vivo com gaveta, `fieldSchema.js` como fonte única. O
+      canvas usa a **mesma** `renderPortfolioPage()` e o **mesmo** `montarCtx()` da página
+      pública, com os pontos de edição injetados por JS depois do render, e não dentro dos
+      componentes `[iso]` (senão viraria markup de editor no HTML de todo visitante)
+- [x] **7. Experiência e certificado no editor.** Um formulário só para trabalho e estudo,
+      mudando rótulo e ordem. O consentimento de publicar o certificado nasce desligado e
+      fica desabilitado quando quem edita não é o titular, porque quem monta pelo bump de
+      facilitação não pode consentir pela pessoa
+- [x] **8. Cota de mídia.** O gatilho do banco recusa caminho e nome fora do padrão, e o
+      lado do cliente converte para WebP no navegador, com orçamento por destino e hash de
+      conteúdo no nome
 - [x] **9. Pacote jurídico.** Termos, privacidade, consentimento versionado, exportar
       dados, arrependimento de 7 dias e exclusão de conta. As duas páginas legais agora
       são servidas **já pintadas** pelo Worker, e não só pelo bundle
 - [x] **10. `/comprar`.** Um botão só, o principal a R$ 47,90, com o preço do bump dito
       antes do checkout. A facilitação de R$ 490 não aparece (9.2). `/entrar` redireciona
       para `/app`. Links num arquivo só, `src/modules/checkout/config/checkoutLinks.js`
-- [ ] **11. Fila do bump de facilitação** e a fila de primeira publicação
+- [x] **11. Fila do bump de facilitação** e a fila de primeira publicação, em
+      `/app/admin/fila`, mais o alerta por e-mail de 15 em 15 minutos (migration 0009)
 - [x] **12. Conciliação de vendas.** `supabase/operacao/conciliar.mjs` roda contra o banco
       real e imprime as três telas. Zero divergência aberta hoje
 

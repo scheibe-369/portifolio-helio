@@ -1,5 +1,6 @@
 import '../styles/global.css';
 import '../modules/access/styles/access.css';
+import '../modules/editor/styles/editor.css';
 
 import { initAccess, getAccessState } from '../modules/access/state/accessState.js';
 import { renderLoginGate, initLoginGate, renderSemCompra, initSemCompra } from '../modules/access/components/loginGate.js';
@@ -11,6 +12,10 @@ import { renderLegalPage } from '../modules/legal/components/legalPage.js';
 import { termos } from '../modules/legal/data/termos.data.js';
 import { privacidade } from '../modules/legal/data/privacidade.data.js';
 import { precisaAceitarTermos } from '../modules/legal/state/legalState.js';
+import { montarEditor } from '../modules/editor/components/editorApp.js';
+import { fecharGaveta } from '../modules/editor/components/editorDrawer.js';
+import { renderFilaPanel, initFilaPanel } from '../modules/admin/components/filaPanel.js';
+import { rotaInterna, BASE } from './rotaInterna.js';
 
 // Boot do editor. Zona [browser].
 //
@@ -44,7 +49,7 @@ const PAGINAS_JURIDICAS = {
 };
 
 async function rodar() {
-  const caminho = window.location.pathname.replace(/\/+$/, '') || '/';
+  const caminho = rotaInterna(window.location.pathname);
   const doc = PAGINAS_JURIDICAS[caminho];
   if (doc) return pintar(renderLegalPage(doc));
 
@@ -85,13 +90,46 @@ async function rodar() {
     return;
   }
 
-  // Fase 1: o editor de verdade (canvas, perfil, projetos, publicar) e outro item. O que ja
-  // existe atras do login e a area de Conta, que e o pacote juridico executavel: senha
-  // opcional, exportar, arrependimento e apagar a conta.
-  const { email, mainGrantedAt } = getAccessState();
-  pintar(renderContaPanel({ email, mainGrantedAt, slotSenha: renderSetPasswordGate() }));
-  initContaPanel({ email });
-  initSetPasswordGate();
+  // Passado o ultimo portao, o editor. A area de Conta continua existindo e passa a ser uma
+  // rota de dentro dele (/conta e o botao "Conta" da barra), porque o pacote juridico executavel
+  // (senha opcional, exportar, arrependimento, apagar a conta) nao pode depender de o comprador
+  // achar uma tela escondida.
+  const { email, mainGrantedAt, acesso } = getAccessState();
+
+  // O botao de voltar e montado AQUI, e nao dentro de renderContaPanel: aquele componente
+  // pertence ao modulo juridico e nao pode passar a depender da existencia de um editor.
+  const abrirConta = () => {
+    fecharGaveta();
+    document.body.classList.remove('is-editing');
+    pintar(
+      `<div class="ed-voltar"><button type="button" id="conta-voltar" class="ed-link">‹ Voltar para o editor</button></div>` +
+        renderContaPanel({ email, mainGrantedAt, slotSenha: renderSetPasswordGate() }),
+    );
+    initContaPanel({ email });
+    initSetPasswordGate();
+    document.getElementById('conta-voltar')?.addEventListener('click', () => {
+      // BASE e nao '/': a raiz do dominio serve o portfolio do Helio, entao voltar para '/'
+      // deixaria a barra de enderecos apontando para um lugar que, num F5, nao e o editor.
+      window.history.replaceState({}, '', BASE);
+      rodar();
+    });
+  };
+
+  if (caminho === '/conta') return abrirConta();
+
+  // A fila do dono. Ela nao aparece em menu nenhum: quem chega aqui digita o endereco, e
+  // quem nao e admin recebe a explicacao em vez de quatro listas vazias (o `is_admin()`
+  // devolve false enquanto o MFA nao for confirmado, e o sintoma disso parece defeito).
+  if (caminho === '/admin/fila') {
+    fecharGaveta();
+    document.body.classList.remove('is-editing');
+    pintar(renderFilaPanel());
+    await initFilaPanel();
+    return;
+  }
+
+  await montarEditor({ raiz: app, temCustom: Boolean(acesso?.has_custom), aoAbrirConta: abrirConta });
+  requestAnimationFrame(() => app.classList.add('ready'));
 }
 
 rodar();
