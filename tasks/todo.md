@@ -87,9 +87,9 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       conhecer os produtos do MyPortifolio. **Sem isso, a primeira venda entra em laço de
       500 e o comprador paga sem entrar.** Escrito, e provado: 20 de 20 testes passaram
       contra uma cópia deployada com outro nome (`scripts/testar-webhook.mjs`)
-- [ ] **Deployar o `hubla-webhook` por cima do que está no ar.** É o único passo que falta
-      para a primeira venda liberar acesso, e foi barrado pelo classificador de permissões
-      do ambiente. Precisa de autorização explícita do dono
+- [x] **Deployar o `hubla-webhook` por cima do que está no ar.** Feito e verificado: os
+      20 testes rodaram contra a função de PRODUÇÃO, e depois conferi que o AI Block segue
+      com 8 membros, 24 eventos e 8 usuários, sem nenhum resíduo do e-mail de teste
 
 ### Fase 1: o produto vendável
 
@@ -104,7 +104,7 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] **4. Login.** Código de 6 dígitos, gerado por `generateLink` e enviado pelo **nosso**
       Resend. Isso resolveu o conflito de config de Auth com o AI Block (é uma config só
       por projeto) e fechou o desvio pelo `/auth/v1/otp` com a anon key
-- [x] **5. Webhook.** Escrito e testado, deploy pendente (acima)
+- [x] **5. Webhook.** No ar. 20 de 20 testes contra a função de produção
 - [x] **6. Editor mínimo.** Canvas vivo com gaveta, `fieldSchema.js` como fonte única. O
       canvas usa a **mesma** `renderPortfolioPage()` e o **mesmo** `montarCtx()` da página
       pública, com os pontos de edição injetados por JS depois do render, e não dentro dos
@@ -119,6 +119,10 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] **9. Pacote jurídico.** Termos, privacidade, consentimento versionado, exportar
       dados, arrependimento de 7 dias e exclusão de conta. As duas páginas legais agora
       são servidas **já pintadas** pelo Worker, e não só pelo bundle
+- [x] **Virada do apex.** Feita por **rota** de Worker e não por `custom_domain`, que
+      exigiria remover o Pages antes e abriria uma janela com o site fora do ar. Rota tem
+      precedência sobre o Pages na mesma zona, então virou sem queda, e desfazer é apagar
+      uma linha. O projeto Pages ficou de pé, sem tráfego, como rede
 - [x] **10. `/comprar`.** Um botão só, o principal a R$ 47,90, com o preço do bump dito
       antes do checkout. A facilitação de R$ 490 não aparece (9.2). `/entrar` redireciona
       para `/app`. Links num arquivo só, `src/modules/checkout/config/checkoutLinks.js`

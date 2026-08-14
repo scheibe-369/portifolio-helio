@@ -1,4 +1,4 @@
-import { SHELL_PUBLICO, MARCADOR_HEAD } from '../shell.gen.js';
+import { SHELL_ESTATICO, MARCADOR_HEAD } from '../shell.gen.js';
 import { esc } from '../../src/modules/portfolio/lib/sanitize.js';
 
 // As paginas que nao sao portfolio. Elas usam o MESMO shell buildado, porque 404 de
@@ -15,7 +15,7 @@ function pagina({ titulo, robots, corpo }) {
     `<title>${esc(titulo)}</title>`,
     `<meta name="robots" content="${esc(robots)}" />`,
   ].join('\n    ');
-  const html = SHELL_PUBLICO.replace(MARCADOR_HEAD, head).replace(
+  const html = SHELL_ESTATICO.replace(MARCADOR_HEAD, head).replace(
     '<div id="app"></div>',
     `<div id="app" class="ready">${corpo}</div>`,
   );
@@ -39,7 +39,7 @@ export function paginaIndexavel({ head, corpo }) {
     `<meta property="og:description" content="${esc(head.description)}" />`,
     `<meta property="og:url" content="${esc(head.canonical)}" />`,
   ].join('\n    ');
-  return SHELL_PUBLICO.replace(MARCADOR_HEAD, tags).replace(
+  return SHELL_ESTATICO.replace(MARCADOR_HEAD, tags).replace(
     '<div id="app"></div>',
     `<div id="app" class="ready">${corpo}</div>`,
   );

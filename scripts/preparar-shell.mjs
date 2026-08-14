@@ -54,14 +54,45 @@ const m = shellPublico.match(/<script[^>]+src="(\/assets\/[^"]+\.js)"/);
 const assetEntry = m ? m[1] : null;
 if (!assetEntry) throw new Error('nao achei o <script> do bundle publico no shell');
 
+// SHELL SEM O BUNDLE. Este e o shell das paginas que NAO sao portfolio: a oferta, os dois
+// documentos juridicos, o 404, o 410 e o 503.
+//
+// POR QUE ELE PRECISA EXISTIR, e o defeito que ele conserta: src/main.js termina com
+// `app.innerHTML = renderPortfolioPage(ctx)`, sem condicao nenhuma. Numa pagina que nao tem
+// `<script id="pf-payload">` ele cai no dado ESTATICO do Helio e repinta o #app inteiro por
+// cima do que a borda serviu, mais `document.title`. O resultado, no navegador de verdade:
+// /comprar e /termos respondiam o HTML certo no curl e mostravam o portfolio do Helio na
+// tela. O 404 e o 410 tinham o mesmo defeito desde antes, e ninguem tinha visto porque
+// ninguem tinha aberto essas rotas num navegador.
+//
+// A alternativa seria ensinar o main.js a se calar. Ela e pior: exige um marcador no HTML
+// que o Worker precisa lembrar de por, e o modo de falha de esquecer o marcador e este mesmo
+// defeito de volta, silencioso. Nao mandar o bundle nao tem como ser esquecido pela metade.
+//
+// Nenhuma dessas paginas perde nada: o Tailwind ja vem embutido no <style> do shell, e todas
+// elas sao HTML estatico com link. Interatividade zero.
+const shellEstatico = shellPublico
+  .replace(/<script[^>]+type="module"[^>]*><\/script>\s*/gi, '')
+  .replace(/<link[^>]+rel="modulepreload"[^>]*>\s*/gi, '');
+
+if (shellEstatico.includes('type="module"')) {
+  throw new Error('sobrou <script type=module> no shell estatico, o main.js voltaria a repintar');
+}
+
 const conteudo = `// GERADO por scripts/preparar-shell.mjs. NAO EDITE A MAO.
 // Regenerado a cada build: o nome dos assets tem hash de conteudo e muda a cada mudanca.
 //
 // SHELL_PUBLICO ja vem SEM as tags de SEO do Helio, com o marcador HEAD_TENANT no lugar.
 // Quem preenche e worker/render/pagina.js, por tenant, a cada request.
+//
+// SHELL_ESTATICO e o mesmo shell SEM o bundle publico. Ele existe porque src/main.js repinta
+// o #app sem condicao, e numa pagina sem payload ele cairia no dado estatico do Helio e
+// mostraria o portfolio por cima da oferta, dos termos ou do 404. Use ele em TODA pagina que
+// nao for portfolio.
 export const MARCADOR_HEAD = ${JSON.stringify(MARCADOR)};
 export const ASSET_ENTRY = ${JSON.stringify(assetEntry)};
 export const SHELL_PUBLICO = ${JSON.stringify(shellPublico)};
+export const SHELL_ESTATICO = ${JSON.stringify(shellEstatico)};
 export const SHELL_EDITOR = ${JSON.stringify(shellEditor)};
 `;
 

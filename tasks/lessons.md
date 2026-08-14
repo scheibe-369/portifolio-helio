@@ -100,3 +100,43 @@ descrito.
   escreveu ja sabe o que quis dizer e le a intencao no lugar do texto.
 - Todo criterio de pronto tem que ser capaz de **falhar**. "Funciona", "sem erro" e "ficou
   visualmente igual" nao reprovam ninguem e por isso nao provam nada.
+
+
+## curl le bytes, navegador executa (14/08/2026)
+
+**O que aconteceu:** subi `/comprar`, `/termos` e `/privacidade` no apex e conferi com
+`curl`. Titulo certo, canonical certo, dois botoes de checkout, zero travessao, credito no
+rodape. Tudo verde. Aberto num navegador de verdade, as tres paginas mostravam **o
+portfolio do Helio**.
+
+**A causa:** `src/main.js` termina com `app.innerHTML = renderPortfolioPage(ctx)`, sem
+condicao. Numa pagina sem `<script id="pf-payload">` ele cai no dado estatico e repinta o
+`#app` inteiro por cima do que a borda serviu, mais o `document.title`. O HTML que o `curl`
+le esta perfeito; ele so nao sobrevive a primeira linha de JavaScript.
+
+**O que isso revelou de brinde:** as paginas de `404` e `410` tinham o MESMO defeito, desde
+antes deste trabalho. Ninguem tinha visto porque ninguem tinha aberto essas rotas num
+navegador. Um endereco banido respondia `410` no cabecalho e mostrava um portfolio no
+corpo.
+
+**Por que a suite inteira passou:** `build` compila, `import-graph` confere import,
+`dom-diff` compara o HTML da pagina publica consigo mesma, `medir-render` mede tempo.
+Nenhuma das quatro executa a pagina servida. Tres defeitos desta base ja se esconderam
+exatamente nesse vao: o `PER_PAGE` que matava modal, filtro e idioma depois do
+`innerHTML`, o `main.js` que reescrevia o SSR do tenant, e agora este.
+
+**Regra pra proxima vez:**
+- Rota nova que serve HTML so conta como pronta depois de **abrir num navegador** e
+  conferir o que aparece na tela, nao o que vem no corpo da resposta. `npm run
+  verificar:no-ar` existe para isso.
+- A asserção que importa nessas paginas nao e "o conteudo certo esta la", e sim **"o
+  conteudo errado NAO esta"**: o teste procura por "Helio Monteiro" nas paginas que nao sao
+  dele. Afirmacao positiva passa mesmo com a pagina clobberizada, porque o HTML original
+  continua no corpo por alguns milissegundos.
+- Quando a correcao pode ser "ensinar o codigo a se calar" ou "nao mandar o codigo",
+  preferir a segunda. Marcador no HTML que o servidor precisa lembrar de por tem um modo de
+  falha silencioso (esquecer o marcador = defeito de volta); nao mandar o bundle nao tem
+  como ser esquecido pela metade.
+- Depois de deployar, **esperar antes de testar**. A primeira rodada do teste reprovou 8
+  itens porque rodou colada no `wrangler deploy` e pegou a versao anterior no edge. Oito
+  falsos negativos custam a mesma investigacao que oito defeitos.
