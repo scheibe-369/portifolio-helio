@@ -28,23 +28,30 @@ export const PRODUCT_FLAG_MAP: Record<string, Flag> = {
   // myportifolio.setup_requests, porque e trabalho humano e sem fila vende e nao entrega.
   q7IxDLHWM6OI8EBmrreo: 'setup',
 
-  // ATENCAO, BURACO CONHECIDO E DELIBERADO:
+  // Bump de personalizacao (R$ 37,00). Ele vive DENTRO do checkout do principal e nao tem
+  // link proprio, entao nao da para ler o id de uma url como nos dois de cima.
   //
-  // O bump de personalizacao ('custom') NAO TEM ID AQUI, e por isso ele NAO CASA NADA.
-  // Ele vive dentro do checkout do principal e nao tem link proprio, entao o id dele so
-  // aparece no corpo do primeiro evento real com o bump marcado.
+  // ESTE ID VEIO DO PAINEL, E NAO DE UM EVENTO. Em 14/08/2026 nao havia um unico evento em
+  // myportifolio.hubla_events (a tabela estava zerada), entao ele NAO foi conferido contra a
+  // regra de ouro logo abaixo. Esta linha e uma aposta informada, nao um fato verificado.
   //
-  // Consequencia enquanto esta linha nao existir: quem comprar o bump paga e nao recebe
-  // has_custom. O evento cai em unmappedProductIds, o webhook responde 500 de proposito, a
-  // Hubla retenta ate o teto de 10 tentativas e o alarme de "desistiu" avisa o dono. Ou
-  // seja: a venda fica registrada e visivel, nao se perde em silencio.
-  //
-  // COMO PREENCHER: rodar
-  //   select id, product_ids, payload->'event' from myportifolio.hubla_events
-  //   where processed_at is null order by received_at desc;
-  // pegar o id que nao esta neste mapa, acrescentar a linha abaixo e redeployar. A propria
-  // retentativa da Hubla (ou um novo POST com o mesmo x-hubla-idempotency) conclui a venda,
-  // porque processed_at ficou nulo de proposito.
-  //
-  // '<id-do-bump-de-personalizacao>': 'custom',
+  // POR QUE ENTRAR MESMO ASSIM: o risco e assimetrico. Se o id estiver certo, a primeira
+  // venda com o bump ja libera has_custom. Se estiver errado, ele simplesmente nunca casa
+  // nada (nenhum dos 6 ids do AI Block e este, entao nao existe colisao possivel), e o
+  // evento do bump cai no mesmo caminho de antes: 500, retentativa, fila de eventos travados
+  // com o id de verdade em destaque. Ou seja, errar aqui devolve exatamente a situacao
+  // anterior, e acertar economiza uma venda travada.
+  vNYCSzkdxb4ehMKTYLTD: 'custom',
+
+  // COMO CONFIRMAR, na primeira venda de verdade com o bump marcado:
+  //   select product_ids, applied_flags, processed_result
+  //   from myportifolio.hubla_events order by received_at desc limit 5;
+  // Se applied_flags trouxer 'custom', o id acima esta certo e este comentario pode virar
+  // uma frase so. Se o evento estiver com processed_at nulo e um id desconhecido em
+  // product_ids, o id certo e ESSE: troque a linha acima por ele e redeploye. A venda se
+  // conclui sozinha na retentativa, porque processed_at fica nulo de proposito.
+
+  // REGRA DE OURO, repetida aqui porque e o que separa "pagou e entrou" de "pagou e nao
+  // entrou": o unico id em que se pode confiar de verdade e o que chega no corpo de um
+  // evento real. Painel e chute educado.
 };

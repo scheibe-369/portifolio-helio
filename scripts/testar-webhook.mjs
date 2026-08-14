@@ -41,6 +41,11 @@ const TOKEN_MP = (
 const EMAIL = 'webhook-teste-mp@methodgrowthhub.com.br';
 const ID_MAIN = 'dol37hflBB4LloFHpGab';
 const ID_SETUP = 'q7IxDLHWM6OI8EBmrreo';
+// O bump de personalizacao. Este id veio do PAINEL da Hubla e nao de um evento real, entao
+// o que este teste prova e so que o mapa esta ligado direito: com este id, a function grava
+// has_custom. Ele NAO prova que este e o id que a Hubla vai mandar na venda de verdade, e
+// nenhum teste daqui consegue provar isso. Quem prova e a primeira compra com o bump marcado.
+const ID_CUSTOM = 'vNYCSzkdxb4ehMKTYLTD';
 // Id inventado que nao esta em nenhum dos dois mapas. E o ensaio do bump de personalizacao,
 // que so vai ganhar id de verdade no primeiro evento real com o bump marcado.
 const ID_DESCONHECIDO = 'bumpFake' + randomBytes(6).toString('hex');
@@ -218,6 +223,58 @@ let idemMain = null;
     r.status === 200 && n[0]?.n === 1,
     `status ${r.status}, ${n[0]?.n} linha`,
   );
+}
+
+// 5b. O BUMP DE PERSONALIZACAO ---------------------------------------------
+{
+  const r = await bater(evento('customer.member_added', [ID_CUSTOM]));
+  const a = await sql(
+    `select has_main, has_custom, has_setup from myportifolio.member_access where email = '${EMAIL}'`,
+  );
+  conferir(
+    'o id do bump concede has_custom',
+    r.status === 200 && a[0]?.has_custom === true,
+    JSON.stringify(a[0] ?? null),
+  );
+  conferir(
+    'o bump nao derruba has_main',
+    a[0]?.has_main === true,
+    `has_main ${a[0]?.has_main}`,
+  );
+  conferir(
+    'a flag custom volta na resposta',
+    JSON.stringify(r.json?.appliedFlags) === JSON.stringify(['custom']),
+    JSON.stringify(r.json?.appliedFlags),
+  );
+}
+
+// 5c. ORDEM DE CHEGADA ------------------------------------------------------
+// A Hubla manda UM evento por produto e nao garante ordem. Se o bump chegar antes do
+// principal, a conta precisa nascer do mesmo jeito: quem pagou os dois nao pode depender
+// de qual pacote a rede entregou primeiro.
+{
+  const outro = 'webhook-teste-ordem@methodgrowthhub.com.br';
+  // public.hubla_events entra na limpeza porque a function audita TODO evento nas duas
+  // tabelas, inclusive os do MyPortifolio. Esquecer esta linha deixa lixo de teste na
+  // tabela de auditoria de um produto com cliente pagando, que e onde ele mais atrapalha:
+  // e la que se confere venda por venda quando alguem reclama que pagou e nao entrou.
+  const limparOutro = () => sql(`
+    delete from myportifolio.member_access where email = '${outro}';
+    delete from myportifolio.hubla_events where email = '${outro}';
+    delete from public.hubla_events where email = '${outro}';
+    delete from auth.users where email = '${outro}';`);
+  await limparOutro();
+  await bater(evento('customer.member_added', [ID_CUSTOM], outro));
+  const a = await sql(
+    `select has_main, has_custom from myportifolio.member_access where email = '${outro}'`,
+  );
+  const u = await sql(`select 1 from auth.users where email = '${outro}'`);
+  conferir(
+    'bump ANTES do principal ja cria a conta',
+    a[0]?.has_custom === true && a[0]?.has_main === false && u.length === 1,
+    `${JSON.stringify(a[0] ?? null)}, ${u.length} usuario`,
+  );
+  await limparOutro();
 }
 
 // 6. ID DESCONHECIDO (o ensaio do bump) -------------------------------------

@@ -80,9 +80,17 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       domínio `myportifolio.com.br`. As duas chaves em `.env.local`, e o secret foi testado
       contra o `siteverify` (recusou por token inválido, não por secret inválido)
 - [x] Preços lidos dos checkouts reais: principal **R$ 47,90**, facilitação **R$ 490,00**
-- [ ] Descobrir o id do bump de personalização. Ele não tem link próprio (vive dentro do
-      checkout do principal), então só aparece no corpo do primeiro evento real com o bump
-      marcado. Até lá, comprar o bump não libera nada
+- [~] Id do bump de personalização **no mapa, mas ainda não confirmado**. O dono passou
+      `vNYCSzkdxb4ehMKTYLTD`, que veio do painel da Hubla e não de um evento (a tabela
+      `myportifolio.hubla_events` estava zerada, conferido). Entrou porque o risco é
+      assimétrico: certo, a primeira venda com bump já libera; errado, ele nunca casa nada
+      (zero colisão com os 6 ids do AI Block) e o evento cai na fila de travados com o id
+      verdadeiro em destaque, que é exatamente a situação anterior
+- [ ] **Confirmar o id na primeira venda real com o bump marcado.** `select product_ids,
+      applied_flags, processed_result from myportifolio.hubla_events order by received_at
+      desc limit 5;` Se vier `custom` em `applied_flags`, está certo. Se o evento estiver
+      com `processed_at` nulo, o id certo é o que aparecer em `product_ids`: trocar em
+      `productFlags.ts` e redeployar, que a retentativa conclui a venda sozinha
 - [x] Estender o webhook `hubla-webhook` (que já está no ar servindo o AI Block) para
       conhecer os produtos do MyPortifolio. **Sem isso, a primeira venda entra em laço de
       500 e o comprador paga sem entrar.** Escrito, e provado: 20 de 20 testes passaram
