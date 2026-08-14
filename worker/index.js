@@ -79,9 +79,15 @@ export default {
     return servirApex({ request, url, cfg, ctx });
   },
 
-  // Keep-alive do projeto Supabase, a cada 6 horas (bloco `triggers` do wrangler.jsonc).
+  // Duas rotinas, dois horarios (bloco `triggers` do wrangler.jsonc). O `evento.cron` traz a
+  // expressao que disparou, e e por ela que se decide qual roda: sem essa distincao, o
+  // keep-alive de 6 em 6 horas passaria a bater no PostgREST a cada 15 minutos a toa, e o
+  // alerta da fila so sairia quatro vezes por dia.
+  //
+  // `env` inteiro vai junto porque o alerta precisa das credenciais do Resend, que nao sao
+  // configuracao de render e por isso nao entram no `cfg`.
   async scheduled(evento, env, ctx) {
     const cfg = lerEnv(env);
-    ctx.waitUntil(rodarCron(cfg));
+    ctx.waitUntil(rodarCron(cfg, evento.cron, env));
   },
 };

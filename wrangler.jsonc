@@ -57,7 +57,11 @@
   // Keep-alive por requisicao HTTP de verdade ao PostgREST, a cada 6 horas. O `cron.schedule`
   // do 0001 roda dentro do Postgres e nao conta como requisicao (suposicao S5), e projeto
   // pausado por inatividade e todo portfolio pago fora do ar de uma vez.
-  "triggers": { "crons": ["0 */6 * * *"] },
+  // Dois horarios, e worker/rotas/cron.js escolhe a rotina pela expressao que disparou.
+  //   0 */6 * * *    keep-alive do projeto Supabase (projeto pausado = todo mundo fora do ar)
+  //   */15 * * * *   alerta da fila de primeira publicacao. E frequente porque do outro lado
+  //                  tem alguem que pagou e cujo portfolio NAO EXISTE ate alguem aprovar
+  "triggers": { "crons": ["0 */6 * * *", "*/15 * * * *"] },
 
   "observability": { "enabled": true }
 }
