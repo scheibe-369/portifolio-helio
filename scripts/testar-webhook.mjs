@@ -31,24 +31,30 @@ const iAlvo = process.argv.indexOf('--alvo');
 const ALVO = iAlvo >= 0 ? process.argv[iAlvo + 1] : 'hubla-webhook-teste';
 const URL_FN = `https://${REF}.supabase.co/functions/v1/${ALVO}`;
 
-const TOKEN_MP = (
-  await readFile(
-    'C:/Users/HELINH~1/AppData/Local/Temp/claude/D--Projetos-vibeocding-eu-portifolio-helio/3070095b-f879-4daf-8a70-f1c66a7c3166/scratchpad/mp_token.txt',
-    'utf8',
-  )
-).trim();
+// O token da Hubla e por CONTA, nao por regra nem por produto (medido em 14/08/2026: com
+// apenas o HUBLA_WEBHOOK_TOKEN no ar, o token da conta foi aceito). Entao o teste usa o
+// mesmo token que a Hubla usa, lido de .env.local, que e gitignored.
+const TOKEN_MP = env.HUBLA_WEBHOOK_TOKEN;
+if (!TOKEN_MP) {
+  console.error('falta HUBLA_WEBHOOK_TOKEN em .env.local');
+  process.exit(2);
+}
 
 const EMAIL = 'webhook-teste-mp@methodgrowthhub.com.br';
-const ID_MAIN = 'dol37hflBB4LloFHpGab';
+// AS CHAVES SAO ID DE OFERTA, e nao de produto. Uma venda real (14/08/2026) mostrou que o
+// MyPortifolio e UM produto com varias ofertas, e que e a oferta que diz o que a pessoa
+// comprou. Este teste montava o corpo com o id do produto concedendo flag, ou seja, testava
+// uma Hubla que nao existe, e foi por isso que ele passou 24 de 24 enquanto o codigo ignorava
+// as ofertas e o comprador do bump ficava sem has_custom.
+const PRODUTO_MP = 'dol37hflBB4LloFHpGab';
+const ID_MAIN = 'U9cuWxeCOsTvt4urY5vS';
 const ID_SETUP = 'q7IxDLHWM6OI8EBmrreo';
-// O bump de personalizacao. Este id veio do PAINEL da Hubla e nao de um evento real, entao
-// o que este teste prova e so que o mapa esta ligado direito: com este id, a function grava
-// has_custom. Ele NAO prova que este e o id que a Hubla vai mandar na venda de verdade, e
-// nenhum teste daqui consegue provar isso. Quem prova e a primeira compra com o bump marcado.
+// O bump de personalizacao, CONFIRMADO numa venda real: ele chega como a oferta
+// "Personalizacao" do mesmo produto da principal.
 const ID_CUSTOM = 'vNYCSzkdxb4ehMKTYLTD';
 // Id inventado que nao esta em nenhum dos dois mapas. E o ensaio do bump de personalizacao,
 // que so vai ganhar id de verdade no primeiro evento real com o bump marcado.
-const ID_DESCONHECIDO = 'bumpFake' + randomBytes(6).toString('hex');
+const ID_DESCONHECIDO = 'ofertaFake' + randomBytes(6).toString('hex');
 // Um id REAL do AI Block, lido do mapa dele. Serve so para provar o desvio de caminho.
 const ID_AIBLOCK = Object.keys(
   JSON.parse(
@@ -93,12 +99,24 @@ async function limpar() {
   `);
 }
 
-// O corpo real da Hubla: type na raiz, e o resto pendurado em event.
-function evento(tipo, ids, email = EMAIL) {
+// O corpo real da Hubla, copiado da forma de um evento de verdade: UM produto, e as ofertas
+// aninhadas dentro dele. Montar `products: [{id}]` sem offers, como este arquivo fazia antes,
+// e inventar um formato que a Hubla nao usa, e teste sobre formato inventado nao reprova nada.
+function evento(tipo, ofertas, email = EMAIL) {
   return {
     type: tipo,
-    event: { products: ids.map((id) => ({ id })), user: { email } },
+    event: {
+      user: { email },
+      product: { id: PRODUTO_MP },
+      products: [{ id: PRODUTO_MP, offers: ofertas.map((id) => ({ id })) }],
+    },
   };
+}
+
+// O AI Block mapeia por PRODUTO, e os eventos dele nao dependem de oferta. Este helper existe
+// para o teste de desvio de caminho continuar exercitando o formato do vizinho, e nao o nosso.
+function eventoProduto(tipo, ids, email = EMAIL) {
+  return { type: tipo, event: { user: { email }, products: ids.map((id) => ({ id })) } };
 }
 
 async function bater(corpo, { token = TOKEN_MP, idem = randomUUID(), sandbox = false } = {}) {
@@ -170,7 +188,7 @@ await limpar();
 // 3. DESVIO DE CAMINHO ------------------------------------------------------
 // Evento do AI Block nao pode encostar em myportifolio.hubla_events.
 {
-  const r = await bater(evento('customer.member_added', [ID_AIBLOCK]), { sandbox: true });
+  const r = await bater(eventoProduto('customer.member_added', [ID_AIBLOCK]), { sandbox: true });
   const mp = await sql(`select 1 from myportifolio.hubla_events where id = '${r.idem}'`);
   const pub = await sql(`select 1 from public.hubla_events where id = '${r.idem}'`);
   conferir(

@@ -74,126 +74,30 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [ ] Pegar os `productId` reais no painel da Hubla para o `PRODUCT_FLAG_MAP`. **Não é o
       slug da URL de pagamento**, é o id que vem no corpo do evento. Confundir os dois faz
       todo evento chegar sem casar flag, ou seja, pagou e não entrou
+- [ ] **Criar a regra de webhook do MyPortifolio no painel da Hubla.** Descoberto em
+      14/08/2026, na marra: a primeira compra real foi feita e a Hubla **não chamou uma vez
+      sequer** (zero linha no log de acesso da função). A regra de webhook na Hubla é por
+      **produto**, e a única que existe é a do AI Block, com 2 produtos e 1 evento. Os
+      produtos do MyPortifolio não estão em regra nenhuma. Eu tinha assumido que o webhook
+      era por conta, porque o do AI Block já entregava naquela URL, e escrevi essa suposição
+      no código como se fosse fato
+- [x] **Token do webhook: é por CONTA, não por regra.** Medido, não suposto: com apenas o
+      `HUBLA_WEBHOOK_TOKEN` antigo no ar, o token que o dono passou foi aceito (400 na
+      validação seguinte em vez de 401). Ou seja, é o mesmo valor. `HUBLA_WEBHOOK_TOKEN_MP`
+      foi removido por ser redundante, e o comentário do código já dizia isso corretamente
 - [ ] Ler a taxa da Hubla (percentual e parcela fixa). No low ticket ela decide o ponto de
       equilíbrio, e a conta do plano usa 10% como estimativa (suposição S29)
 - [x] **Turnstile: criado pela API da Cloudflare.** Widget `myportifolio`, modo managed,
       domínio `myportifolio.com.br`. As duas chaves em `.env.local`, e o secret foi testado
       contra o `siteverify` (recusou por token inválido, não por secret inválido)
 - [x] Preços lidos dos checkouts reais: principal **R$ 47,90**, facilitação **R$ 490,00**
-- [~] Id do bump de personalização **no mapa, mas ainda não confirmado**. O dono passou
-      `vNYCSzkdxb4ehMKTYLTD`, que veio do painel da Hubla e não de um evento (a tabela
-      `myportifolio.hubla_events` estava zerada, conferido). Entrou porque o risco é
-      assimétrico: certo, a primeira venda com bump já libera; errado, ele nunca casa nada
-      (zero colisão com os 6 ids do AI Block) e o evento cai na fila de travados com o id
-      verdadeiro em destaque, que é exatamente a situação anterior
-- [ ] **Confirmar o id na primeira venda real com o bump marcado.** `select product_ids,
-      applied_flags, processed_result from myportifolio.hubla_events order by received_at
-      desc limit 5;` Se vier `custom` em `applied_flags`, está certo. Se o evento estiver
-      com `processed_at` nulo, o id certo é o que aparecer em `product_ids`: trocar em
-      `productFlags.ts` e redeployar, que a retentativa conclui a venda sozinha
-- [x] Estender o webhook `hubla-webhook` (que já está no ar servindo o AI Block) para
-      conhecer os produtos do MyPortifolio. **Sem isso, a primeira venda entra em laço de
-      500 e o comprador paga sem entrar.** Escrito, e provado: 20 de 20 testes passaram
-      contra uma cópia deployada com outro nome (`scripts/testar-webhook.mjs`)
-- [x] **Deployar o `hubla-webhook` por cima do que está no ar.** Feito e verificado: os
-      20 testes rodaram contra a função de PRODUÇÃO, e depois conferi que o AI Block segue
-      com 8 membros, 24 eventos e 8 usuários, sem nenhum resíduo do e-mail de teste
-
-### Fase 1: o produto vendável
-
-- [x] **1. Banco.** 22 tabelas, 73 funções e 34 policies no schema `myportifolio`,
-      migrations 0001 a 0008 aplicadas. Mais `supabase/operacao/0001_grants_webhook.sql`,
-      que destravou o `service_role` (sem ele **toda venda** dava `permission denied`)
-- [x] **2. Seed.** O portfólio do Helio no banco, mídia no Storage com hash de conteúdo no
-      nome, dentro de `<portfolio_id>/<tipo>/`
-- [x] **3. Worker.** Subdomínio por cliente com cache de duas camadas, chave por
-      `(portfolio_id, content_hash)` e não por slug. `helio.myportifolio.com.br` responde
-      200 com título, descrição, canonical e og:image vindos do banco
-- [x] **4. Login.** Código de 6 dígitos, gerado por `generateLink` e enviado pelo **nosso**
-      Resend. Isso resolveu o conflito de config de Auth com o AI Block (é uma config só
-      por projeto) e fechou o desvio pelo `/auth/v1/otp` com a anon key
-- [x] **5. Webhook.** No ar. 20 de 20 testes contra a função de produção
-- [x] **6. Editor mínimo.** Canvas vivo com gaveta, `fieldSchema.js` como fonte única. O
-      canvas usa a **mesma** `renderPortfolioPage()` e o **mesmo** `montarCtx()` da página
-      pública, com os pontos de edição injetados por JS depois do render, e não dentro dos
-      componentes `[iso]` (senão viraria markup de editor no HTML de todo visitante)
-- [x] **7. Experiência e certificado no editor.** Um formulário só para trabalho e estudo,
-      mudando rótulo e ordem. O consentimento de publicar o certificado nasce desligado e
-      fica desabilitado quando quem edita não é o titular, porque quem monta pelo bump de
-      facilitação não pode consentir pela pessoa
-- [x] **8. Cota de mídia.** O gatilho do banco recusa caminho e nome fora do padrão, e o
-      lado do cliente converte para WebP no navegador, com orçamento por destino e hash de
-      conteúdo no nome
-- [x] **9. Pacote jurídico.** Termos, privacidade, consentimento versionado, exportar
-      dados, arrependimento de 7 dias e exclusão de conta. As duas páginas legais agora
-      são servidas **já pintadas** pelo Worker, e não só pelo bundle
-- [x] **Virada do apex.** Feita por **rota** de Worker e não por `custom_domain`, que
-      exigiria remover o Pages antes e abriria uma janela com o site fora do ar. Rota tem
-      precedência sobre o Pages na mesma zona, então virou sem queda, e desfazer é apagar
-      uma linha. O projeto Pages ficou de pé, sem tráfego, como rede
-- [x] **10. `/comprar`.** Um botão só, o principal a R$ 47,90, com o preço do bump dito
-      antes do checkout. A facilitação de R$ 490 não aparece (9.2). `/entrar` redireciona
-      para `/app`. Links num arquivo só, `src/modules/checkout/config/checkoutLinks.js`
-- [x] **11. Fila do bump de facilitação** e a fila de primeira publicação, em
-      `/app/admin/fila`, mais o alerta por e-mail de 15 em 15 minutos (migration 0009)
-- [x] **12. Conciliação de vendas.** `supabase/operacao/conciliar.mjs` roda contra o banco
-      real e imprime as três telas. Zero divergência aberta hoje
-
-### Higiene do repo
-
-- [x] Diagnosticar os "175 arquivos pendentes" do `git status`
-- [x] `.gitignore`: excluir `SITE-GH/` (cópia velha de outro projeto) e os PNGs de fonte
-- [ ] Decidir se a cópia velha em `SITE-GH/` é apagada do disco (o projeto de verdade
-      está em `Growth Hub/Site-GH`, com git próprio e 2 meses à frente)
-- [ ] Corrigir o CLAUDE.md global: o token MASTER da Cloudflare **escreve** DNS, não é
-      read-only como está descrito lá
-
----
-
-## Review
-
-### Spike 1, TLS em subdomínio curinga: aprovado
-
-Era o único fato de plataforma capaz de derrubar a arquitetura escolhida, e a evidência
-inicial apontava contra (as outras zonas da conta servem certificado por hostname, sem SAN
-curinga). O spike rodou no domínio real:
-
-Criado `AAAA *.myportifolio.com.br -> 100::` proxiado, e medido o handshake em três
-subdomínios que nunca tiveram registro próprio. Os três fecharam com certificado válido:
-SANs `myportifolio.com.br` e `*.myportifolio.com.br`, emissor Google Trust Services, no
-plano Free.
-
-A leitura inicial estava certa sobre o que era servido e errada sobre a causa: aquelas
-zonas não têm registro curinga, então nunca houve motivo para a Cloudflare apresentar um
-SAN curinga nelas. Certificado por hostname era efeito da ausência de curinga, não prova
-de que curinga não funciona.
-
-Isso tira do caminho os três planos B (Total TLS, Cloudflare for SaaS, certificado
-avançado) e, o que mais importa sob pagamento único, garante **custo zero por hostname**.
-O cenário em que cada comprador acima do centésimo viraria custo mensal eterno contra uma
-receita única não vai acontecer.
-
-### Diagnóstico dos "175 commits"
-
-Não eram commits. Era `git status` mostrando 175 arquivos não rastreados: 167 de
-`SITE-GH/`, que é cópia parada em 20/mai de um projeto que vive em `Growth Hub/Site-GH`
-(com git próprio, 2 meses à frente), mais 6 PNGs de fonte de asset, mais `tasks/`. Depois
-do `.gitignore` corrigido, sobraram 7 arquivos, todos legítimos.
-
-### Como o plano foi produzido, e por que isso importa
-
-Três rodadas, e as duas últimas existem porque a primeira estava errada em pontos que
-custariam caro:
-
-1. **Desenho:** 3 arquiteturas independentes, 4 especialistas, júri e síntese.
-2. **Crítica adversarial:** 30 achados. As decisões do dono anularam 4 deles; os outros 26
-   eram defeitos reais, incluindo RLS que não protegia o que dizia proteger.
-3. **Dois verificadores:** 24 achados de dinheiro e isolamento, 20 de executabilidade. Os
-   três piores estavam **escritos como resolvidos**: chave de cache colidindo entre
-   clientes (serviria o portfólio de um cliente no subdomínio de outro, com cache
-   `immutable` de 1 ano e sem permissão de purge na conta), login contornável direto no
-   `/auth/v1/otp` com a anon key, e o `410` de banimento que o SQL não conseguia produzir.
-
-A lição que fica: agente que revisa o próprio trabalho declara resolvido o que só foi
-mencionado. Verificação adversarial separada, com instrução explícita de que "falou sobre"
-não é "corrigiu", foi o que pegou os três.
+- [x] **Id do bump: CONFIRMADO, e o modelo estava errado.** Ele é id de **oferta**, não de
+      produto. A Hubla modela o MyPortifolio como UM produto (`dol37hflBB4LloFHpGab`) com
+      duas ofertas: `U9cuWxeCOsTvt4urY5vS` (principal) e `vNYCSzkdxb4ehMKTYLTD`
+      (Personalização). O webhook lia só `products[].id` e por isso concedia `main` duas
+      vezes. Corrigido: o mapa passa a ser por oferta, o produto só roteia
+- [x] **Regra de webhook do MyPortifolio criada na Hubla** (pelo dono) e a primeira venda
+      real entrou: `has_main` e `has_custom`, origem `hubla`, os dois eventos fechados
+- [x] **Preço do bump corrigido de R$ 37,00 para R$ 37,90**, lido da nota da venda real
+      (`totalCents: 8580` menos os R$ 47,90 do principal). A página `/comprar` estava no ar
+      com o valor errado

@@ -27,7 +27,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { PRODUCT_TIER_MAP } from './productTiers.ts';
-import { PRODUCT_FLAG_MAP } from './productFlags.ts';
+import { PRODUCT_FLAG_MAP, PRODUTOS_MYPORTIFOLIO } from './productFlags.ts';
 
 const HUBLA_WEBHOOK_TOKEN = Deno.env.get('HUBLA_WEBHOOK_TOKEN') ?? '';
 
@@ -266,6 +266,24 @@ Deno.serve(async (req) => {
     ? [eventNode.product]
     : [];
   const productIds: string[] = rawProducts.map((p: any) => p?.id).filter(Boolean);
+
+  // AS OFERTAS. Este bloco existe porque o MyPortifolio vende DUAS ofertas do MESMO produto
+  // (a principal e o order bump de personalizacao), e ler so `products[].id` faz as duas
+  // chegarem como se fossem a mesma coisa. Foi o que aconteceu na primeira venda real: dois
+  // eventos, o mesmo id de produto nos dois, os dois concedendo 'main', e quem pagou o bump
+  // ficou sem has_custom. Sem erro em lugar nenhum, os dois fecharam como 'ok'.
+  //
+  // Para o AI Block isto e inerte: os tiers dele sao por produto, as chaves de
+  // PRODUCT_TIER_MAP sao ids de produto, e id de oferta nunca colide com id de produto
+  // (a Hubla os emite no mesmo espaco de ids, unicos por conta).
+  const offerIds: string[] = rawProducts
+    .flatMap((p: any) => (Array.isArray(p?.offers) ? p.offers : []))
+    .map((o: any) => o?.id)
+    .filter(Boolean);
+
+  // O que se procura nos mapas: produto E oferta. A ordem nao importa porque o casamento e
+  // por chave, e nenhum id aparece nos dois mapas.
+  const idsCasaveis: string[] = [...new Set([...productIds, ...offerIds])];
   const email = (eventNode.user?.email ?? '').toString().trim().toLowerCase() || null;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -276,10 +294,13 @@ Deno.serve(async (req) => {
   // Classificacao dos ids ANTES da auditoria. Precisa vir antes porque o achado 5 muda o
   // tratamento do 23505, e essa mudanca so pode valer para evento que carrega id do
   // MyPortifolio: para o AI Block, 23505 continua sendo 200 na hora, como sempre foi.
-  const idsAiBlock = productIds.filter((id) => !!PRODUCT_TIER_MAP[id]);
-  const idsMyPortifolio = productIds.filter((id) => !!PRODUCT_FLAG_MAP[id]);
-  const idsDesconhecidos = productIds.filter(
-    (id) => !PRODUCT_TIER_MAP[id] && !PRODUCT_FLAG_MAP[id],
+  const idsAiBlock = idsCasaveis.filter((id) => !!PRODUCT_TIER_MAP[id]);
+  const idsMyPortifolio = idsCasaveis.filter((id) => !!PRODUCT_FLAG_MAP[id]);
+  // O id do PRODUTO do MyPortifolio nao concede nada e tambem nao e desconhecido. Sem esta
+  // exclusao, toda venda que deu certo gravaria um processing_error dizendo que ele nao esta
+  // mapeado, e alarme que dispara em venda boa e alarme que ninguem le.
+  const idsDesconhecidos = idsCasaveis.filter(
+    (id) => !PRODUCT_TIER_MAP[id] && !PRODUCT_FLAG_MAP[id] && !PRODUTOS_MYPORTIFOLIO.has(id),
   );
 
   // Id desconhecido tambem entra no caminho do MyPortifolio, e isso e deliberado.
@@ -293,6 +314,7 @@ Deno.serve(async (req) => {
   // Evento COM id do AI Block nunca cai aqui, entao o produto vizinho nao muda de
   // comportamento. Evento sem nenhum produto no corpo tambem nao, para nao virar ruido.
   const ehMyPortifolio = idsMyPortifolio.length > 0
+    || idsCasaveis.some((id) => PRODUTOS_MYPORTIFOLIO.has(id))
     || (idsAiBlock.length === 0 && idsDesconhecidos.length > 0);
 
   const linhaAuditoria = {
@@ -385,7 +407,11 @@ Deno.serve(async (req) => {
   const appliedTiers: string[] = [];
   const appliedFlags: string[] = [];
 
-  for (const productId of productIds) {
+  for (const productId of idsCasaveis) {
+    // Produto nosso nao concede: quem concede e a oferta, que vem no mesmo laco. Sair aqui
+    // sem registrar nada e o que faz uma venda certa nao gerar alarme falso.
+    if (PRODUTOS_MYPORTIFOLIO.has(productId)) continue;
+
     const tier = PRODUCT_TIER_MAP[productId];
 
     if (!tier) {

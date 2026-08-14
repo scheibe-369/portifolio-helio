@@ -140,3 +140,48 @@ exatamente nesse vao: o `PER_PAGE` que matava modal, filtro e idioma depois do
 - Depois de deployar, **esperar antes de testar**. A primeira rodada do teste reprovou 8
   itens porque rodou colada no `wrangler deploy` e pegou a versao anterior no edge. Oito
   falsos negativos custam a mesma investigacao que oito defeitos.
+
+
+## O teste que eu escrevi provava a minha suposicao, nao a realidade (14/08/2026)
+
+**O que aconteceu:** o webhook da Hubla tinha 24 testes, todos passando, rodados contra a
+function de PRODUCAO, incluindo um chamado "o id do bump concede has_custom". Na primeira
+venda real, com o bump marcado, o comprador recebeu `has_main` e **nao** recebeu
+`has_custom`. Os dois eventos fecharam com `processed_result = 'ok'`. Nenhum alarme, nenhum
+500, nenhuma linha na fila de travados.
+
+**A causa:** a Hubla modela o produto assim:
+
+    product  dol37hflBB4LloFHpGab  "My portifolio"
+      +-- offer  U9cuWxeCOsTvt4urY5vS  "principal"
+      +-- offer  vNYCSzkdxb4ehMKTYLTD  "Personalizacao"
+
+O order bump nao e um produto, e outra **oferta do mesmo produto**. Comprar os dois gera
+dois eventos com o **mesmo** `products[].id`, e o que os distingue mora em
+`products[].offers[].id`. O codigo so lia `products[].id`, entao os dois eventos casaram
+`main` e o segundo nao acrescentou nada.
+
+**Por que os 24 testes nao pegaram:** porque eu escrevi o corpo do evento. O helper montava
+`products: [{ id }]`, sem `offers`, porque era assim que eu **achava** que a Hubla mandava.
+O teste do bump passava mandando o id da oferta no lugar do id do produto, ou seja, ele
+provava que o mapa estava ligado, num formato que a Hubla nunca usou. Teste sobre payload
+inventado mede a coerencia da minha suposicao com ela mesma.
+
+**O agravante:** eu tinha escrito no proprio arquivo, em caixa alta, "o unico id em que se
+pode confiar e o que chega no corpo de um evento real". E, faltando evento real, aceitei um
+id do painel e chamei de aposta informada. A aposta ate acertou o **valor**; errou o
+**nivel**: era id de oferta, e eu registrei como id de produto.
+
+**Regra pra proxima vez:**
+- Integracao com terceiro so tem teste de verdade depois que UM payload real foi capturado.
+  Antes disso, o que existe e ensaio, e ele deve dizer isso no nome e no comentario.
+- Guardar o payload cru desde o primeiro dia (`payload jsonb` na tabela de auditoria) foi o
+  que permitiu diagnosticar e **reprocessar** em minutos, sem pedir nada ao gateway. Isso se
+  paga sozinho.
+- Ter um `--reprocessar` que reabre o evento e reenvia com o MESMO idempotency transforma
+  "venda errada" em "roda de novo". O `processed_at` nulo de proposito, que parecia zelo
+  excessivo quando foi escrito, foi exatamente o que salvou a venda.
+- Quando um teste sintetico e um evento real discordam, o teste esta errado. Corrigir o
+  teste para falar a lingua do payload real, e nao o contrario.
+- Preco em pagina publica sai da NOTA, nao do painel nem da memoria. A fatura veio com
+  `totalCents: 8580`; 85,80 menos 47,90 da 37,90, e o `/comprar` anunciava 37,00.

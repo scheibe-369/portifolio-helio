@@ -1,57 +1,66 @@
-// Mapa productId (Hubla) -> flag interna do MyPortifolio.
+// Mapa id (Hubla) -> flag interna do MyPortifolio.
 //
-// POR QUE UM SEGUNDO MAPA, e nao um acrescimo no productTiers.ts do AI Block: a Hubla
-// aponta para UMA url de webhook, entao a mesma funcao recebe os eventos dos dois
-// produtos. Manter os mapas separados e o que garante que um id do MyPortifolio nunca
-// caia na RPC public.grant_or_revoke_member_access (a do AI Block) e vice-versa. Id que
-// casa aqui vai para myportifolio.grant_or_revoke_member_access, e so para ela.
+// LEIA ISTO ANTES DE MEXER: as chaves aqui sao ID DE **OFERTA**, nao de produto.
 //
-// POR QUE DOIS ALIASES POR PRODUTO: o mesmo padrao que ja roda em producao no AI Block. O
-// painel da Hubla mostra um id na listagem e outro na url de edicao, e o corpo do evento
-// pode trazer qualquer um dos dois. Id sobrando nao concede nada errado, porque id e unico
-// por produto. Id faltando e venda que nao libera, que e o defeito caro.
+// Foi assim que o payload de uma venda real, em 14/08/2026, mostrou que a Hubla modela:
 //
-// REGRA DE OURO: o unico id em que se pode confiar de verdade e o que chega no corpo de um
-// evento real. Depois da primeira compra de teste, conferir o product_ids gravado em
-// myportifolio.hubla_events contra este arquivo, em vez de confiar no painel.
+//   product  dol37hflBB4LloFHpGab   "My portifolio"
+//     +-- offer  U9cuWxeCOsTvt4urY5vS   "principal"
+//     +-- offer  vNYCSzkdxb4ehMKTYLTD   "Personalizacao"
+//
+// O order bump NAO e um produto. Ele e outra OFERTA do mesmo produto. Comprar o principal
+// com o bump marcado gera DOIS eventos, os dois com o mesmo `products[].id`, e o que os
+// distingue mora em `products[].offers[].id`.
+//
+// A CONSEQUENCIA, que custou uma venda de teste: a versao anterior deste arquivo tinha o id
+// do PRODUTO mapeado para 'main', e o codigo so lia `products[].id`. Os dois eventos casaram
+// 'main', o segundo nao acrescentou nada, e quem pagou o bump nao recebeu has_custom. Nao
+// deu erro em lugar nenhum: os dois eventos fecharam com resultado 'ok'.
+//
+// POR QUE O ID DO PRODUTO SAIU DAQUI: ele e o mesmo nas duas ofertas. Mantido no mapa, ele
+// concederia 'main' em QUALQUER evento do produto, inclusive no do bump comprado sozinho.
+// Quem decide a flag e a oferta; o produto so diz de quem e o evento (PRODUTOS_MYPORTIFOLIO,
+// abaixo).
+//
+// POR QUE OS ALIASES DE ANTES FUNCIONAVAM MEIO CERTO: os "segundos ids" que estavam aqui
+// eram os slugs das urls de checkout (pay.hub.la/<slug>), e o slug do checkout E o id da
+// oferta. Ou seja, a linha certa ja estava no arquivo por coincidencia, e a errada (a do
+// produto) e que mascarava o problema.
 
 export type Flag = 'main' | 'custom' | 'setup';
 
+// OFERTAS. E aqui que se decide o que a pessoa comprou.
 export const PRODUCT_FLAG_MAP: Record<string, Flag> = {
-  // "My portifolio" principal, R$ 47,90 (checkout pay.hub.la/U9cuWxeCOsTvt4urY5vS).
-  // Este checkout ja carrega o order bump de personalizacao dentro dele.
-  dol37hflBB4LloFHpGab: 'main',
+  // Oferta "principal", R$ 47,90. Confirmada num evento real (checkout
+  // pay.hub.la/U9cuWxeCOsTvt4urY5vS).
   U9cuWxeCOsTvt4urY5vS: 'main',
 
-  // Facilitacao, R$ 490 (checkout pay.hub.la/q7IxDLHWM6OI8EBmrreo). Upsell dentro do
-  // editor, nunca na pagina de oferta. Aplicar esta flag tambem abre a linha da fila em
-  // myportifolio.setup_requests, porque e trabalho humano e sem fila vende e nao entrega.
-  q7IxDLHWM6OI8EBmrreo: 'setup',
-
-  // Bump de personalizacao (R$ 37,00). Ele vive DENTRO do checkout do principal e nao tem
-  // link proprio, entao nao da para ler o id de uma url como nos dois de cima.
+  // Oferta "Personalizacao", R$ 37,90. Confirmada no mesmo evento real: ela chega como uma
+  // segunda entrada em products[].offers[], com o produto identico ao da principal.
   //
-  // ESTE ID VEIO DO PAINEL, E NAO DE UM EVENTO. Em 14/08/2026 nao havia um unico evento em
-  // myportifolio.hubla_events (a tabela estava zerada), entao ele NAO foi conferido contra a
-  // regra de ouro logo abaixo. Esta linha e uma aposta informada, nao um fato verificado.
-  //
-  // POR QUE ENTRAR MESMO ASSIM: o risco e assimetrico. Se o id estiver certo, a primeira
-  // venda com o bump ja libera has_custom. Se estiver errado, ele simplesmente nunca casa
-  // nada (nenhum dos 6 ids do AI Block e este, entao nao existe colisao possivel), e o
-  // evento do bump cai no mesmo caminho de antes: 500, retentativa, fila de eventos travados
-  // com o id de verdade em destaque. Ou seja, errar aqui devolve exatamente a situacao
-  // anterior, e acertar economiza uma venda travada.
+  // O PRECO SAIU DA NOTA, e nao do painel: a fatura veio com totalCents 8580 para a compra
+  // das duas ofertas juntas, e 85,80 menos 47,90 da 37,90.
   vNYCSzkdxb4ehMKTYLTD: 'custom',
 
-  // COMO CONFIRMAR, na primeira venda de verdade com o bump marcado:
-  //   select product_ids, applied_flags, processed_result
-  //   from myportifolio.hubla_events order by received_at desc limit 5;
-  // Se applied_flags trouxer 'custom', o id acima esta certo e este comentario pode virar
-  // uma frase so. Se o evento estiver com processed_at nulo e um id desconhecido em
-  // product_ids, o id certo e ESSE: troque a linha acima por ele e redeploye. A venda se
-  // conclui sozinha na retentativa, porque processed_at fica nulo de proposito.
-
-  // REGRA DE OURO, repetida aqui porque e o que separa "pagou e entrou" de "pagou e nao
-  // entrou": o unico id em que se pode confiar de verdade e o que chega no corpo de um
-  // evento real. Painel e chute educado.
+  // Facilitacao, R$ 490 (checkout pay.hub.la/q7IxDLHWM6OI8EBmrreo). AINDA NAO CONFIRMADA em
+  // evento: este id e o slug do checkout, e o slug do checkout provou ser o id da oferta nos
+  // outros dois casos. Se a primeira venda de facilitacao nao casar, o id verdadeiro aparece
+  // no processing_error do evento travado.
+  q7IxDLHWM6OI8EBmrreo: 'setup',
 };
+
+// PRODUTOS. Nao concedem nada: servem so para o Worker saber que o evento e nosso e para nao
+// acusar o id do produto como "desconhecido" a cada venda.
+//
+// Sem esta lista, todo evento do MyPortifolio gravaria um processing_error dizendo que
+// dol37hflBB4LloFHpGab nao esta mapeado, e alarme que dispara em venda que deu certo e
+// alarme que ninguem le.
+export const PRODUTOS_MYPORTIFOLIO = new Set<string>(['dol37hflBB4LloFHpGab']);
+
+// REGRA DE OURO, e agora ela tem cicatriz: o unico id em que se pode confiar e o que chega no
+// corpo de um evento real, e e preciso olhar o NIVEL certo do corpo. Painel da Hubla mostra
+// produto; quem paga a conta e a oferta.
+//
+// COMO CONFERIR, depois de qualquer venda:
+//   select jsonb_pretty(payload) from myportifolio.hubla_events order by received_at desc limit 2;
+// e olhar event.products[].offers[].id.

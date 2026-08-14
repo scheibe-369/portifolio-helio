@@ -68,7 +68,9 @@ const cb = (u) => `${u}${u.includes('?') ? '&' : '?'}cb=${Math.floor(Math.random
 
   const texto = await p.locator('body').innerText();
   conferir('o preco aparece na tela', texto.includes('R$ 47,90'), '');
-  conferir('o preco do bump aparece antes do checkout', texto.includes('R$ 37,00'), '');
+  // 37,90 e nao 37,00: o valor saiu da nota de uma venda real. Este teste guarda o numero
+  // certo justamente porque errar preco em pagina publica e o erro mais caro de todos.
+  conferir('o preco do bump aparece antes do checkout', texto.includes('R$ 37,90'), '');
   conferir('R$ 490 NAO aparece', !texto.includes('490'), '');
   conferir('sem travessao na copy', !/[—–]/.test(texto), '');
   conferir('credito Method Growth Hub no rodape', texto.includes('Method Growth Hub'), '');

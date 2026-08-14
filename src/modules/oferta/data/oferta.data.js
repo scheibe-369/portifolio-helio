@@ -43,7 +43,7 @@ export const oferta = {
   // a mais so na tela de pagamento e o tipo de surpresa que vira chargeback, e chargeback
   // reincidente bloqueia a conta (5.x). Uma linha honesta aqui sai mais barato.
   observacaoBump:
-    'Dentro do checkout você pode marcar, se quiser, a personalização de cores e detalhes por mais R$ 37,00. É opcional, e o portfólio funciona inteiro sem ela.',
+    'Dentro do checkout você pode marcar, se quiser, a personalização de cores e detalhes por mais R$ 37,90. É opcional, e o portfólio funciona inteiro sem ela.',
 
   // Perguntas que hoje chegariam por mensagem. Cada uma que a pagina responde e um ticket
   // que nao nasce, e uma duvida a menos entre o visitante e o botao.

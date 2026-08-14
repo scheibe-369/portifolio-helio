@@ -16,7 +16,7 @@
 export const CHECKOUT = {
   // O principal. E o UNICO link que a pagina /comprar mostra.
   //
-  // O order bump de personalizacao (R$ 37,00) mora DENTRO deste checkout e nao tem link
+  // O order bump de personalizacao (R$ 37,90) mora DENTRO deste checkout e nao tem link
   // proprio: quem quiser marca a caixinha na hora de pagar. Por isso a pagina de oferta tem
   // um botao e nao dois.
   principal: {
@@ -40,4 +40,8 @@ export const CHECKOUT = {
 
 // O bump nao tem url porque nao tem checkout proprio. O preco fica aqui so para a copia da
 // pagina de oferta nao ter numero solto no meio do texto.
-export const BUMP_PERSONALIZACAO = { preco: 'R$ 37,00', precoNumero: 37 };
+// O preco saiu da NOTA de uma venda real (totalCents 8580 para principal mais bump), e nao
+// do painel: 85,80 menos 47,90 da 37,90. A versao anterior dizia 37,00, e preco errado numa
+// pagina de oferta nao e detalhe, e o tipo de coisa que se perde numa discussao de
+// propaganda enganosa.
+export const BUMP_PERSONALIZACAO = { preco: 'R$ 37,90', precoNumero: 37.9 };
