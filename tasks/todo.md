@@ -34,8 +34,23 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] Registrar `myportifolio.com.br` e apontar para a Cloudflare
 - [x] Trocar NS no registro.br e esperar a zona ativar
 - [x] **Spike 1: TLS em subdomínio curinga.** APROVADO, ver abaixo
-- [ ] **Spike 2: cache de resposta de Worker pela Cache API**, medido por
-      `X-Portfolio-Cache` num deploy real. É o outro spike que precede código de produto
+- [x] **Spike 2: cache de Worker.** APROVADO e revelador: sem Cache API a borda NÃO
+      guarda resposta de Worker (nonce mudou nas 3 chamadas). Com ela, hit com o mesmo
+      nonce. `cache.delete` também funciona (suposição S15). Ver `_plano/medicoes.md`
+
+### Fase 0: fundação (concluída)
+
+- [x] Ferramentas de verificação, cada uma testada nos dois sentidos (passar e reprovar)
+- [x] As três baselines capturadas e commitadas antes de qualquer refatoração
+- [x] Refatoração para `ctx`: 9 componentes recebem dado por parâmetro, `t`/`tui`/`px`/`ex`
+      puros, estado de idioma isolado em `langState.js` (dívida D1)
+- [x] `sanitize.js` aplicado em todo `href`, `src`, `style` e texto livre
+- [x] Rodapé com o crédito Method Growth Hub (dívida D4)
+- [x] Hero: classe Tailwind com valor arbitrário virou `style` inline; avatar ganhou lazy
+- [x] `videoId` de 11 caracteres no lugar da URL do YouTube
+- [x] 4 imagens órfãs removidas (67 KB)
+- [x] `_headers` corrigido (dívida D3): immutable só onde há hash de conteúdo
+- [x] `medir-render.mjs`: mediana 0,073 ms, muito abaixo do teto de 6 ms
 - [x] **Resend: FEITO e provado.** Conta separada (`heliomonteiroprofissional@gmail.com`),
       domínio `mail.myportifolio.com.br` verificado em São Paulo, DKIM e SPF no subdomínio
       de envio, chave com permissão só de envio guardada em `.env.local`. Dois e-mails

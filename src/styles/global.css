@@ -241,7 +241,7 @@ body {
   .stacks-track { animation: none; }
 }
 
-/* ===== Metal Shine — texto prateado animado (só em títulos/labels) ===== */
+/* ===== Metal Shine: texto prateado animado (só em títulos/labels) ===== */
 .metallic-silver {
   /* prata claro + feixe MÉDIO (44/50/56) que percorre a frase inteira como UM feixe só */
   background: linear-gradient(120deg, #9ca3af 44%, #ffffff 50%, #9ca3af 56%);
@@ -315,7 +315,7 @@ body {
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(124, 92, 252, 0.75));
 }
 
-/* remove os botões de seta (▲▼) das pontas — ficavam "saindo pra fora" no Windows */
+/* remove os botões de seta (▲▼) das pontas, ficavam "saindo pra fora" no Windows */
 ::-webkit-scrollbar-button {
   display: none;
   width: 0;

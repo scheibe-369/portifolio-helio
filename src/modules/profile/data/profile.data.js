@@ -7,6 +7,12 @@ export const profile = {
   },
   avatar: '/avatar.webp',
   mainImage: '/hero.webp',
+  // Enquadramento do hero. Era a classe Tailwind object-[50%_36%], que o scanner do v4 nao
+  // gera quando o valor vem de dado. Virou campo, e o render poe em style inline.
+  heroObjectPosition: '50% 36%',
+  // CTA do painel de perfil. Estava hard-coded no componente; na versao vendida cada
+  // comprador poe o link dele, entao ja nasce como dado.
+  ctaUrl: 'https://cal.com/growth-hub/reuniao-gh',
   bio: {
     pt: 'Especialista em automação com IA e desenvolvedor full-stack com 3+ anos de experiência construindo agentes de IA, automações e plataformas SaaS de ponta a ponta. Lidero a frente técnica de uma agência de IA e automação, de SaaS multi-tenant a CRMs com IA, e formo uma comunidade de 30+ alunos na ION Academy. Autodidata e movido a resultado, estou aberto a novas oportunidades.',
     en: 'AI automation specialist and full-stack developer with 3+ years of experience building AI agents, automations and SaaS platforms end to end. I lead the technical side of an AI and automation agency, from multi-tenant SaaS to AI-powered CRMs, and I teach a community of 30+ students at ION Academy. Self-taught and results-driven, I am open to new opportunities.',

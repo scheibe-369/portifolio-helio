@@ -17,17 +17,25 @@ const pegar = (nome, padrao) => {
 };
 const destino = resolve(process.cwd(), pegar('--saida', 'snapshot'));
 
-// Import dinamico depois de montar o ambiente: os modulos leem localStorage no topo, e em
-// Node ele nao existe. O try/catch do i18n.js ja cai no padrao 'pt', entao nao e preciso
-// simular nada, mas a ordem importa e por isso o import nao e estatico.
+// O ctx e montado aqui, igual o main.js faz no navegador, mas sem tocar em DOM: e o
+// mesmo render, e e isso que prova que ele roda fora do browser (o pre requisito do SSR).
 const { renderPortfolioPage } = await import('../src/app/portfolioPage.js');
-const { setLang } = await import('../src/app/i18n.js');
+const { profile } = await import('../src/modules/profile/data/profile.data.js');
+const { projects, projectGroups, FILTER_GROUPS } = await import('../src/modules/projects/data/projects.data.js');
+const { stacks } = await import('../src/modules/stacks/data/stacks.data.js');
+const { experience } = await import('../src/modules/experience/data/experience.data.js');
 
 await mkdir(destino, { recursive: true });
 
 for (const lang of ['pt', 'en']) {
-  setLang(lang);
-  const html = renderPortfolioPage();
+  const ctx = {
+    lang,
+    portfolio: { profile, projects, stacks, experience, projectGroups, filterGroups: FILTER_GROUPS },
+    slug: 'helio',
+    flags: { hasCustom: false, englishEnabled: true },
+    isPreview: false,
+  };
+  const html = renderPortfolioPage(ctx);
   const arquivo = resolve(destino, `${lang}.html`);
   await writeFile(arquivo, html, 'utf8');
   console.log(`${lang}: ${html.length} bytes -> ${arquivo}`);

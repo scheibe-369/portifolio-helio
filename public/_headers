@@ -1,8 +1,27 @@
+# Cache. A regra e uma so: caminho COM hash de conteudo pode ser immutable de um ano,
+# caminho SEM hash nao pode.
+#
+# POR QUE ISSO MUDOU (divida D3): o curinga /*.webp aplicava immutable de UM ANO em todo
+# webp, inclusive nos de /projects/, que nao tem hash no nome. Isso ja custou caro aqui:
+# uma requisicao de verificacao logo apos o deploy pegou o HTML de fallback no lugar da
+# imagem e a Cloudflare guardou ESSA resposta por um ano, num caminho que nao dava para
+# purgar (nenhum dos dois tokens da conta tem permissao de Cache Purge). Ver tasks/lessons.md.
+#
+# Agora: so /assets/* (que o Vite gera COM hash) fica immutable. As imagens de projeto, que
+# o comprador troca pelo editor a partir da fase 1, ficam em um dia. Trocar uma imagem passa
+# a aparecer em 24 horas em vez de nunca.
+
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
-/*.webp
-  Cache-Control: public, max-age=31536000, immutable
+
+/hero.webp
+  Cache-Control: public, max-age=604800
+/avatar.webp
+  Cache-Control: public, max-age=604800
 /favicon.png
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=604800
+
 /projects/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=86400
+/experience/*
+  Cache-Control: public, max-age=86400

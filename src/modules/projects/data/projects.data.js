@@ -1,8 +1,7 @@
-// Projetos da Growth Hub. Campos opcionais: video (YouTube), link/linkNote (acesso externo),
+// Projetos da Growth Hub. Campos opcionais: videoId (11 caracteres do YouTube, NUNCA a URL
+// inteira: quem monta a URL e o render, ver src/modules/projects/lib/youtube.js),
+// link/linkNote (acesso externo),
 // fit ('cover' p/ screenshots | default 'contain' p/ logos).
-import { projectsEn } from './projects.en.js';
-import { getLang } from '../../../app/i18n.js';
-
 export const projects = [
   {
     slug: 'brasildtf',
@@ -13,7 +12,7 @@ export const projects = [
     accent: '#F2B705',
     plateBg: '#ffffff',
     image: '/projects/brasildtf.webp',
-    video: 'https://youtu.be/Rj3TplIKEho',
+    videoId: 'Rj3TplIKEho',
     tagline:
       'SaaS de edição de imagem para o mercado DTF: halftone, remoção de fundo e geração por IA, via assinatura.',
     summary:
@@ -43,7 +42,7 @@ export const projects = [
     accent: '#C96A41',
     plateBg: '#fdf4ef',
     image: '/projects/maternaforte.webp',
-    video: 'https://youtu.be/jwuYRA94UuU',
+    videoId: 'jwuYRA94UuU',
     tagline: 'Site e área de membros multiprofissional para o programa MaternaForte.',
     summary:
       'Plataforma de conteúdo e acompanhamento para o produto MaternaForte, com login segmentado por tipo de profissional, aulas em vídeo e pagamentos integrados.',
@@ -72,7 +71,7 @@ export const projects = [
     accent: '#D11F36',
     plateBg: '#ffffff',
     image: '/projects/previa.webp',
-    video: 'https://youtu.be/nE1K4U8VSBQ',
+    videoId: 'nE1K4U8VSBQ',
     tagline: 'Geração e disparo automático de boletos via WhatsApp e e-mail, sem intervenção manual.',
     summary:
       'Sistema de cobrança totalmente automatizado: consulta a API do cliente para puxar as contas pendentes, gera o boleto de cada devedor e dispara por WhatsApp Business API e e-mail, com tratamento de erro, retry e confirmação de entrega.',
@@ -99,7 +98,7 @@ export const projects = [
     accent: '#D11F36',
     plateBg: '#000000',
     image: '/projects/previa-leads.webp',
-    video: 'https://youtu.be/ENzsbL0YKnw',
+    videoId: 'ENzsbL0YKnw',
     tagline:
       'Motor de prospecção que garimpa a própria base do cliente e transforma quem já paga bem em lista de leads qualificados.',
     summary:
@@ -131,7 +130,7 @@ export const projects = [
     accent: '#8B5CF6',
     fit: 'cover',
     image: '/projects/growth-hub-cover.webp',
-    video: 'https://youtu.be/ZWsXiQ96Rlw',
+    videoId: 'ZWsXiQ96Rlw',
     link: 'https://methodgrowthhub.com.br',
     tagline: 'Site institucional de uma agência de tecnologia, do zero, com foco em impacto visual e credibilidade técnica.',
     summary:
@@ -159,7 +158,7 @@ export const projects = [
     accent: '#2F6BFF',
     fit: 'cover',
     image: '/projects/damascena-films.webp',
-    video: 'https://youtu.be/_LGj734-vew',
+    videoId: '_LGj734-vew',
     link: 'https://damascenafilms.com.br',
     linkNote: 'Em finalização (aguardando os ajustes finais do cliente)',
     tagline: 'Landing de um filmmaker da Região dos Lagos: vídeo com estética de cinema e cabeça de estratégia.',
@@ -188,7 +187,7 @@ export const projects = [
     accent: '#F2B705',
     plateBg: '#0B1220',
     image: '/projects/brasildtf-impressoras.webp',
-    video: 'https://youtu.be/iS_OtZVSeWE',
+    videoId: 'iS_OtZVSeWE',
     tagline:
       'Landing page de catálogo das impressoras DTF e UV-DTF da Brasil DTF: da iniciante A3 à industrial de 5 cabeças, com guia de escolha e contato direto no WhatsApp.',
     summary:
@@ -217,7 +216,7 @@ export const projects = [
     accent: '#7C5CFC',
     plateBg: '#000000',
     image: '/projects/deck-proposta-fidc.webp',
-    video: 'https://youtu.be/NZ5FrQ2-RTo',
+    videoId: 'NZ5FrQ2-RTo',
     tagline: 'Apresentação comercial navegável que substitui o PDF de proposta por um "site" que se adapta a cada cliente.',
     summary:
       'Deck web para vender um programa de formação em IA a FIDCs, securitizadoras e gestoras: motor único de 11 slides com dados isolados por proposta (nome, empresa, valor, prazo), resolvidos pela URL, sem tocar nas propostas já prontas.',
@@ -247,7 +246,7 @@ export const projects = [
     accent: '#2563FF',
     plateBg: '#0b0d12',
     image: '/projects/ai-block.webp',
-    video: 'https://youtu.be/kpDD93zu6f8',
+    videoId: 'kpDD93zu6f8',
     link: 'https://aiblock.methodcipher.com',
     linkNote: 'Área de membros, acesso restrito',
     tagline:
@@ -280,7 +279,7 @@ export const projects = [
     fit: 'cover',
     plateBg: '#ececec',
     image: '/projects/indicacao-marcos-logo.png',
-    video: 'https://youtu.be/rItFfYZCH_k',
+    videoId: 'rItFfYZCH_k',
     link: 'https://indicacaomarcos.methodgrowthhub.com.br',
     tagline: 'Landing de indicação só por convite, com captura de leads que converte mais que formulário comum.',
     summary:
@@ -309,7 +308,7 @@ export const projects = [
     accent: '#7C5CFC',
     fit: 'cover',
     image: '/projects/agents-logo.png',
-    video: 'https://youtu.be/lB_ZH0cKZf8',
+    videoId: 'lB_ZH0cKZf8',
     link: 'https://agentes.methodgrowthhub.com.br',
     tagline: 'Sandbox online para testar 6 agentes de IA de nível produção, cada um especializado em um nicho.',
     summary:
@@ -337,7 +336,7 @@ export const projects = [
     accent: '#7C5CFC',
     fit: 'cover',
     image: '/projects/token-logo.png',
-    video: 'https://youtu.be/hUPErH-prS0',
+    videoId: 'hUPErH-prS0',
     link: 'https://contagem-tokens.methodgrowthhub.com.br',
     tagline: 'Simule o custo de agentes de IA antes de colocar em produção, saiba o preço por conversa antes da fatura chegar.',
     summary:
@@ -365,7 +364,7 @@ export const projects = [
     accent: '#7C5CFC',
     fit: 'cover',
     image: '/projects/goat.webp',
-    video: 'https://youtu.be/kj62cah0MFU',
+    videoId: 'kj62cah0MFU',
     link: 'https://sistemagoat.methodgrowthhub.com.br',
     linkNote: 'Demo com dados fictícios',
     tagline: 'Plataforma all-in-one de gestão para agência: substitui várias ferramentas soltas por um sistema único.',
@@ -605,11 +604,4 @@ export const projectGroups = {
   'ai-block': ['sistemas', 'agentes-ia'],
 };
 
-// Resolve um campo traduzível do projeto (EN via projects.en.js quando o idioma é EN).
-export const px = (p, field) => {
-  if (getLang() === 'en') {
-    const v = projectsEn[p.slug] && projectsEn[p.slug][field];
-    if (v != null && v !== '') return v; // '' não conta como tradução: cai no PT
-  }
-  return p[field];
-};
+// px() saiu daqui na fase 0, pelo mesmo motivo: vive em ../lib/projectField.js.

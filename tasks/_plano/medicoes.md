@@ -79,3 +79,21 @@ fazer. Com S15 de pé, o `max-age` da cópia de socorro pode continuar em 24 hor
 "muitos tenants, poucas visitas cada". Cache é por colo, e um portfólio visitado uma vez por
 semana de um lugar diferente sempre vai dar miss. O cache protege o tenant com tráfego, não
 a cauda longa.
+
+### Render da página, medido em Node (2026-08-14)
+
+50 execuções de aquecimento e 300 de medição, por idioma, sobre o
+portfólio do Helio (20 projetos, 5 experiências).
+
+| Idioma | Mediana | p95 | Bytes de HTML |
+|---|---|---|---|
+| PT | 0.070 ms | 0.192 ms | 54500 |
+| EN | 0.071 ms | 0.204 ms | 54256 |
+
+Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
+Resultado: **dentro do orçamento**.
+
+Este número é de Node, não do isolate do Worker, então ele **não** prova que cabe no teto de
+CPU da plataforma. Ele serve para detectar regressão. A prova real é a segunda metade do
+critério 12: 500 requisições em miss forçado contra o Worker publicado, todas devolvendo o
+nosso corpo. Isso só existe a partir da fase 1.

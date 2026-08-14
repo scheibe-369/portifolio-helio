@@ -15,9 +15,6 @@
 //   highlights   o que foi feito ali, uma entrada por linha
 //   note         observação livre. É o campo que o comprador usa para contar a história
 //   certificate  opcional { url, label }. Certificado, diploma ou declaração
-import { experienceEn } from './experience.en.js';
-import { getLang } from '../../../app/i18n.js';
-
 export const experience = [
   {
     slug: 'growth-hub',
@@ -109,22 +106,5 @@ export const experience = [
   },
 ];
 
-// Resolve um campo traduzível da experiência (EN via experience.en.js quando o idioma é EN).
-// Mesma regra do px() dos projetos: string vazia não conta como tradução, cai no PT.
-export const ex = (e, field) => {
-  if (getLang() === 'en') {
-    const v = experienceEn[e.slug] && experienceEn[e.slug][field];
-    if (v != null && v !== '') return v;
-  }
-  return e[field];
-};
-
-// Monograma de fallback para experiência sem logo: até 2 iniciais do nome da organização.
-export const iniciais = (org) =>
-  org
-    .split(/\s+/)
-    .filter((p) => p.length > 2 || /^[A-Z]{2,}$/.test(p))
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase() || org.slice(0, 2).toUpperCase();
+// ex() e iniciais() sairam daqui na fase 0: dado nao importa idioma, e componente nao
+// importa dado. Agora vivem em ../lib/experienceField.js e ../lib/iniciais.js.

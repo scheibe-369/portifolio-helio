@@ -1,33 +1,15 @@
-// i18n simples: idioma global (persistido) + resolvers. A troca é IN-PLACE: o main.js
-// chama render() de novo (sem reload). Os listeners são delegados no document e ligados
-// uma vez, então o re-render não duplica nem perde handlers.
-const KEY = 'gh-portfolio-lang';
+// Resolucao de idioma, PURA. Zona [iso]: roda no browser e dentro do Worker.
+//
+// Nenhuma funcao aqui le estado de modulo. O idioma entra sempre por parametro, vindo de
+// ctx.lang, que o Worker resolve por requisicao. Quem guarda o idioma escolhido pelo
+// visitante e src/app/langState.js, que so existe no navegador. Ver o comentario de la para
+// o defeito que essa separacao evita.
+const PADRAO = 'pt';
+const normalizar = (l) => (l === 'en' ? 'en' : PADRAO);
 
-let lang = 'pt';
-try {
-  lang = localStorage.getItem(KEY) === 'en' ? 'en' : 'pt';
-} catch {
-  lang = 'pt';
-}
-
-export const getLang = () => lang;
-
-export function setLang(l) {
-  lang = l === 'en' ? 'en' : 'pt';
-  try {
-    localStorage.setItem(KEY, lang);
-  } catch {
-    /* ignore */
-  }
-}
-
-export function toggleLang() {
-  setLang(lang === 'pt' ? 'en' : 'pt');
-  return lang;
-}
-
-// Resolve um valor que pode ser string (igual nos 2 idiomas) ou { pt, en }.
-export const t = (v) => (v && typeof v === 'object' && 'pt' in v ? v[lang] ?? v.pt : v);
+// Resolve um valor que pode ser string (igual nos dois idiomas) ou { pt, en }.
+export const t = (v, lang) =>
+  v && typeof v === 'object' && 'pt' in v ? v[normalizar(lang)] ?? v.pt : v;
 
 // Strings de interface.
 const ui = {
@@ -49,6 +31,7 @@ const ui = {
   features: { pt: 'Recursos', en: 'Features' },
   stackLabel: { pt: 'Stack', en: 'Stack' },
   visit: { pt: 'Acessar', en: 'Visit' },
+  builtBy: { pt: 'Desenvolvida por', en: 'Built by' },
   // título da aba + aria-labels (controles só com ícone)
   title: { pt: 'Portfólio', en: 'Portfolio' },
   langAria: { pt: 'Trocar idioma (PT / EN)', en: 'Switch language (PT / EN)' },
@@ -58,4 +41,4 @@ const ui = {
   closeAria: { pt: 'Fechar', en: 'Close' },
 };
 
-export const tui = (key) => t(ui[key]);
+export const tui = (chave, lang) => t(ui[chave], lang);
