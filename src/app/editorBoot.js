@@ -15,6 +15,15 @@ import { precisaAceitarTermos } from '../modules/legal/state/legalState.js';
 import { montarEditor } from '../modules/editor/components/editorApp.js';
 import { fecharGaveta } from '../modules/editor/components/editorDrawer.js';
 import { renderFilaPanel, initFilaPanel } from '../modules/admin/components/filaPanel.js';
+import { renderAcessosPanel, initAcessosPanel } from '../modules/admin/components/acessosPanel.js';
+import {
+  estadoDoAdmin,
+  renderMfaNaoAutorizado,
+  renderMfaCadastro,
+  renderMfaDesafio,
+  initMfaCadastro,
+  initMfaDesafio,
+} from '../modules/admin/components/mfaGate.js';
 import { rotaInterna, BASE } from './rotaInterna.js';
 
 // Boot do editor. Zona [browser].
@@ -117,14 +126,44 @@ async function rodar() {
 
   if (caminho === '/conta') return abrirConta();
 
-  // A fila do dono. Ela nao aparece em menu nenhum: quem chega aqui digita o endereco, e
-  // quem nao e admin recebe a explicacao em vez de quatro listas vazias (o `is_admin()`
-  // devolve false enquanto o MFA nao for confirmado, e o sintoma disso parece defeito).
-  if (caminho === '/admin/fila') {
+  // AREA DE ADMIN. Nenhuma destas telas aparece em menu: quem chega digita o endereco.
+  //
+  // O portao de segundo fator vem ANTES de qualquer uma delas, e ele nao e decoracao: as
+  // funcoes admin_* do banco exigem sessao em aal2 e recusariam de qualquer jeito. O que este
+  // ramo acrescenta e DIZER POR QUE, em vez de deixar a tela abrir vazia, que foi o sintoma
+  // que fez a fila parecer quebrada.
+  const TELAS_ADMIN = {
+    '/admin/fila': { render: renderFilaPanel, init: initFilaPanel },
+    '/admin/acessos': { render: renderAcessosPanel, init: initAcessosPanel },
+  };
+  const tela = TELAS_ADMIN[caminho];
+  if (tela) {
     fecharGaveta();
     document.body.classList.remove('is-editing');
-    pintar(renderFilaPanel());
-    await initFilaPanel();
+
+    // `estadoAdmin` e nao `estado`: o de cima ja existe neste escopo e e o da SESSAO. Dois
+    // `estado` na mesma funcao, um sombreando o outro, e como se le a linha errada as duas da
+    // manha.
+    let estadoAdmin;
+    try {
+      estadoAdmin = await estadoDoAdmin();
+    } catch {
+      // Falha ao perguntar tambem e recusa: sem saber o nivel da sessao, o certo e nao abrir.
+      estadoAdmin = { tela: 'nao-autorizado' };
+    }
+
+    if (estadoAdmin.tela === 'nao-autorizado') return pintar(renderMfaNaoAutorizado(estadoAdmin.email));
+    if (estadoAdmin.tela === 'cadastro') {
+      pintar(renderMfaCadastro());
+      return initMfaCadastro({ aoConcluir: async () => { await rodar(); } });
+    }
+    if (estadoAdmin.tela === 'desafio') {
+      pintar(renderMfaDesafio());
+      return initMfaDesafio({ aoConcluir: async () => { await rodar(); } });
+    }
+
+    pintar(tela.render());
+    await tela.init();
     return;
   }
 

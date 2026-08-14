@@ -4,6 +4,8 @@ import { renderBotaoOlho, initPasswordToggles } from './passwordToggle.js';
 import {
   COOLDOWN_REENVIO_S,
   TAMANHO_CODIGO,
+  TAMANHO_CODIGO_MIN,
+  TAMANHO_CODIGO_MAX,
   VALIDADE_CODIGO_MIN,
   SUPORTE_EMAIL,
 } from '../config/access.config.js';
@@ -86,9 +88,9 @@ export function renderLoginGate() {
             required
             inputmode="numeric"
             autocomplete="one-time-code"
-            maxlength="${TAMANHO_CODIGO}"
-            pattern="[0-9]{${TAMANHO_CODIGO}}"
-            placeholder="000000"
+            maxlength="${TAMANHO_CODIGO_MAX}"
+            pattern="[0-9]{${TAMANHO_CODIGO_MIN},${TAMANHO_CODIGO_MAX}}"
+            placeholder="${'0'.repeat(TAMANHO_CODIGO)}"
             class="campo-acesso campo-codigo mb-3"
           />
           <button type="submit" id="acesso-confirmar" class="glass-button w-full rounded-xl px-4 py-2.5 text-sm font-medium">
