@@ -82,7 +82,10 @@ create table if not exists myportifolio.portfolio_projects (
   constraint projects_features_ok check (myportifolio.i18n_lista_valida(features_i18n, 12, 200)),
   constraint projects_stack_ok    check (myportifolio.i18n_lista_valida(stack_i18n, 16, 60)),
   constraint projects_link_ok     check (myportifolio.url_https_valida(link_url)),
-  constraint projects_note_ok     check (myportifolio.i18n_texto_valido(link_note_i18n, 40)),
+  -- 120 e nao 40: o limite de 40 foi escrito no plano por estimativa, e o dado real do
+  -- proprio Helio ja chega a 66 caracteres. Constraint apertada demais nao protege nada
+  -- e transforma conteudo legitimo em erro no meio do seed.
+  constraint projects_note_ok     check (myportifolio.i18n_texto_valido(link_note_i18n, 120)),
   constraint projects_groups_ok   check (
     coalesce(array_length(groups, 1), 0) <= 4
     and myportifolio.grupos_validos(groups)),
