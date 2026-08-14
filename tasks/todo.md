@@ -64,8 +64,9 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       `grant_or_revoke_member_access(text,text,boolean)`, `is_admin()` e `set_updated_at()`
       com assinatura **idêntica** às do plano, e `create or replace` substituiria em
       silêncio as de um produto com clientes pagantes
-- [ ] Reescrever o SQL das migrations 0001 a 0007 de `public.` para `myportifolio.`, com
-      as três exceções (`auth`, `storage`, `cron`) tratadas caso a caso
+- [x] Reescrever o SQL das migrations 0001 a 0007 de `public.` para `myportifolio.`, com
+      as três exceções (`auth`, `storage`, `cron`) tratadas caso a caso. Aplicadas de 0001
+      a 0008, validadas antes dentro de `begin; ... rollback;`
 - [ ] Migrar para projeto Supabase próprio antes de escalar. Enquanto dividir, um erro de
       migration derruba o AI Block junto
 - [x] Criar os SKUs na Hubla. Links prontos: principal (com o order bump dentro)
@@ -82,9 +83,41 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [ ] Descobrir o id do bump de personalização. Ele não tem link próprio (vive dentro do
       checkout do principal), então só aparece no corpo do primeiro evento real com o bump
       marcado. Até lá, comprar o bump não libera nada
-- [ ] Estender o webhook `hubla-webhook` (que já está no ar servindo o AI Block) para
+- [x] Estender o webhook `hubla-webhook` (que já está no ar servindo o AI Block) para
       conhecer os produtos do MyPortifolio. **Sem isso, a primeira venda entra em laço de
-      500 e o comprador paga sem entrar**
+      500 e o comprador paga sem entrar.** Escrito, e provado: 20 de 20 testes passaram
+      contra uma cópia deployada com outro nome (`scripts/testar-webhook.mjs`)
+- [ ] **Deployar o `hubla-webhook` por cima do que está no ar.** É o único passo que falta
+      para a primeira venda liberar acesso, e foi barrado pelo classificador de permissões
+      do ambiente. Precisa de autorização explícita do dono
+
+### Fase 1: o produto vendável
+
+- [x] **1. Banco.** 22 tabelas, 73 funções e 34 policies no schema `myportifolio`,
+      migrations 0001 a 0008 aplicadas. Mais `supabase/operacao/0001_grants_webhook.sql`,
+      que destravou o `service_role` (sem ele **toda venda** dava `permission denied`)
+- [x] **2. Seed.** O portfólio do Helio no banco, mídia no Storage com hash de conteúdo no
+      nome, dentro de `<portfolio_id>/<tipo>/`
+- [x] **3. Worker.** Subdomínio por cliente com cache de duas camadas, chave por
+      `(portfolio_id, content_hash)` e não por slug. `helio.myportifolio.com.br` responde
+      200 com título, descrição, canonical e og:image vindos do banco
+- [x] **4. Login.** Código de 6 dígitos, gerado por `generateLink` e enviado pelo **nosso**
+      Resend. Isso resolveu o conflito de config de Auth com o AI Block (é uma config só
+      por projeto) e fechou o desvio pelo `/auth/v1/otp` com a anon key
+- [x] **5. Webhook.** Escrito e testado, deploy pendente (acima)
+- [ ] **6. Editor mínimo.** Canvas vivo com gaveta, `fieldSchema.js` como fonte única
+- [ ] **7. Experiência e certificado no editor**
+- [ ] **8. Cota de mídia.** O gatilho do banco já recusa caminho e nome fora do padrão;
+      falta o lado do cliente
+- [x] **9. Pacote jurídico.** Termos, privacidade, consentimento versionado, exportar
+      dados, arrependimento de 7 dias e exclusão de conta. As duas páginas legais agora
+      são servidas **já pintadas** pelo Worker, e não só pelo bundle
+- [x] **10. `/comprar`.** Um botão só, o principal a R$ 47,90, com o preço do bump dito
+      antes do checkout. A facilitação de R$ 490 não aparece (9.2). `/entrar` redireciona
+      para `/app`. Links num arquivo só, `src/modules/checkout/config/checkoutLinks.js`
+- [ ] **11. Fila do bump de facilitação** e a fila de primeira publicação
+- [x] **12. Conciliação de vendas.** `supabase/operacao/conciliar.mjs` roda contra o banco
+      real e imprime as três telas. Zero divergência aberta hoje
 
 ### Higiene do repo
 

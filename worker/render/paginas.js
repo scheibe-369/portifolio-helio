@@ -22,6 +22,29 @@ function pagina({ titulo, robots, corpo }) {
   return html;
 }
 
+// As paginas do apex que EXISTEM para serem achadas: a oferta e os dois documentos
+// juridicos. Elas nao levam robots noindex, e por isso precisam do que a de erro nao precisa:
+// description, que e o texto que aparece no resultado da busca, e canonical, porque o mesmo
+// conteudo responde tambem em www e no dominio antigo, e sem canonical o buscador escolhe
+// sozinho qual dos tres indexar.
+export function paginaIndexavel({ head, corpo }) {
+  const tags = [
+    `<title>${esc(head.title)}</title>`,
+    `<meta name="description" content="${esc(head.description)}" />`,
+    `<link rel="canonical" href="${esc(head.canonical)}" />`,
+    // Sem imagem propria: og:image de um produto e a pagina do produto, e a vitrine ja tem a
+    // dela. Cartao de link sem imagem e melhor do que cartao com a imagem errada.
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:title" content="${esc(head.title)}" />`,
+    `<meta property="og:description" content="${esc(head.description)}" />`,
+    `<meta property="og:url" content="${esc(head.canonical)}" />`,
+  ].join('\n    ');
+  return SHELL_PUBLICO.replace(MARCADOR_HEAD, tags).replace(
+    '<div id="app"></div>',
+    `<div id="app" class="ready">${corpo}</div>`,
+  );
+}
+
 const moldura = (conteudo) => `
 <section class="min-h-screen flex items-center justify-center px-6 py-16">
   <div class="glass-card rounded-3xl p-8 sm:p-10 max-w-lg w-full flex flex-col gap-4 text-center">

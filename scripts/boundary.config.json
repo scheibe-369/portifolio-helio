@@ -44,6 +44,17 @@
       "proibirTexto": ["import.meta.env", "document.", "window.", "localStorage"]
     },
     {
+      "_comentario": [
+        "A pagina de oferta obedece a mesma regra de pureza pelo mesmo motivo das juridicas:",
+        "quem a renderiza e o Worker, no apex. Pagina que decide venda nao pode depender de o",
+        "JavaScript carregar, entao ela precisa existir ja pintada no primeiro byte."
+      ],
+      "nome": "iso: pagina de oferta que o Worker renderiza",
+      "entradas": ["src/modules/oferta/components/ofertaPage.js"],
+      "proibirImports": ["*.css", "lucide", "@supabase/supabase-js", "langState.js"],
+      "proibirTexto": ["import.meta.env", "document.", "window.", "localStorage"]
+    },
+    {
       "nome": "browser: boot publico",
       "entradas": ["src/main.js"],
       "proibirImports": ["@supabase/supabase-js"]
