@@ -42,15 +42,27 @@
   // A service role key e usada em exatamente uma rota de tenant, /certificado/<slug>, que
   // assina URL de vida curta no bucket privado. O caminho quente nunca a toca.
 
-  // A VIRADA DO APEX E PASSO SEPARADO, de proposito. Hoje o apex e o www sao custom domain
-  // do projeto Pages "helioportifolio", que serve o portfolio do Helio. Declarar os dois
-  // aqui como custom_domain do Worker tira o site do ar no instante do deploy, antes de
-  // qualquer teste. Primeiro o curinga sobe e um subdominio real e testado; so depois o
-  // apex troca de dono, e ai estas duas linhas voltam.
+  // A VIRADA DO APEX, feita por ROTA e nao por custom_domain.
+  //
+  // O plano previa custom_domain e avisava que ele tira o site do ar no instante do deploy:
+  // o hostname so pode pertencer a um dono, entao o custom domain do Pages precisa ser
+  // removido ANTES, e entre remover e o Worker assumir existe uma janela de queda no site
+  // que ja esta no ar. A pre condicao do plano (curinga no ar, subdominio real testado) foi
+  // cumprida, mas a janela continuava sendo um preco sem necessidade.
+  //
+  // Rota resolve os dois: dentro da zona, a rota de Worker e avaliada ANTES do Pages, entao
+  // o apex troca de dono sem passar por nenhum instante sem dono. E voltar atras e apagar
+  // uma linha e deployar, em vez de recriar custom domain no painel do Pages e esperar
+  // certificado. O projeto Pages "helioportifolio" fica de pe, sem trafego, como rede.
+  //
+  // O www nao precisa de linha: ele ja casa o curinga abaixo, e o Worker o redireciona para
+  // o apex com 301.
+  //
   //  { "pattern": "myportifolio.com.br", "custom_domain": true },
   //  { "pattern": "www.myportifolio.com.br", "custom_domain": true },
   "routes": [
-    { "pattern": "*.myportifolio.com.br/*", "zone_name": "myportifolio.com.br" }
+    { "pattern": "*.myportifolio.com.br/*", "zone_name": "myportifolio.com.br" },
+    { "pattern": "myportifolio.com.br/*", "zone_name": "myportifolio.com.br" }
   ],
   "account_id": "dbcff9abde3df964100df4b1d3a41798",
 
