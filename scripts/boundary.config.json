@@ -15,6 +15,35 @@
       "proibirTexto": ["import.meta.env", "document.", "window.", "localStorage"]
     },
     {
+      "_comentario": [
+        "worker: tudo que e alcancavel a partir do handler fetch da borda. Ele arrasta a zona",
+        "iso inteira junto, e por isso a lista de proibidos e a mesma mais uma: import.meta.env",
+        "e do Vite e devolve undefined dentro do Worker, sem erro de build e sem erro em runtime.",
+        "Quem copiar uma linha do front recebe SUPABASE_URL undefined em producao."
+      ],
+      "nome": "worker: render na borda",
+      "entradas": ["worker/index.js"],
+      "proibirImports": ["*.css", "lucide", "@supabase/supabase-js", "langState.js"],
+      "proibirTexto": ["import.meta.env"]
+    },
+    {
+      "_comentario": [
+        "As duas paginas juridicas sao servidas pelo Worker no apex, ja renderizadas no HTML.",
+        "Termos que so aparecem depois que o JavaScript roda nao servem: eles precisam existir",
+        "para leitor sem script, para o robo do buscador e para quem imprimir a pagina como",
+        "prova do que estava escrito no dia da compra. Por isso o renderizador e o dado deles",
+        "obedecem a mesma regra de pureza do render do portfolio."
+      ],
+      "nome": "iso: paginas juridicas que o Worker tambem renderiza",
+      "entradas": [
+        "src/modules/legal/components/legalPage.js",
+        "src/modules/legal/data/termos.data.js",
+        "src/modules/legal/data/privacidade.data.js"
+      ],
+      "proibirImports": ["*.css", "lucide", "@supabase/supabase-js", "langState.js"],
+      "proibirTexto": ["import.meta.env", "document.", "window.", "localStorage"]
+    },
+    {
       "nome": "browser: boot publico",
       "entradas": ["src/main.js"],
       "proibirImports": ["@supabase/supabase-js"]

@@ -33,3 +33,6 @@ SITE-GH/
 # Gerado a cada build por scripts/preparar-shell.mjs. O nome dos assets tem hash, entao
 # este arquivo muda em todo build e commitar so gera conflito.
 /worker/shell.gen.js
+
+# Segredos do wrangler dev. Nunca commitar.
+/.dev.vars

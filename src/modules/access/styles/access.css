@@ -1,0 +1,65 @@
+/* Regras de formulario do modulo de acesso.
+ *
+ * Elas moram AQUI e nao em src/styles/global.css de proposito: global.css e carregado pelo
+ * bundle publico, que e servido no subdominio de todo comprador, e nenhuma dessas regras
+ * tem uso naquela pagina. A divida D2 do plano ("global.css nao tem uma unica regra de
+ * formulario") se paga por modulo, nao por arquivo global.
+ */
+
+.campo-acesso {
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: #fff;
+  background-color: rgba(15, 15, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease;
+}
+
+.campo-acesso::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.campo-acesso:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* O campo de codigo e o unico do produto onde o comprador digita algo em movimento, no
+ * celular, lendo a notificacao. Fonte grande, espacada e tabular para ele conferir digito a
+ * digito sem abrir o e-mail. */
+.campo-codigo {
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  padding-left: 0.5rem;
+}
+
+.campo-senha {
+  position: relative;
+}
+
+.campo-senha .campo-acesso {
+  padding-right: 2.75rem;
+}
+
+.botao-olho {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.2s ease;
+}
+
+.botao-olho:hover {
+  color: rgba(255, 255, 255, 0.8);
+}

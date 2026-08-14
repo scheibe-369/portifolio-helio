@@ -1,0 +1,63 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portfolio-render",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-01",
+
+  // account_id sai de `npx wrangler whoami` com o token MASTER exportado em
+  // CLOUDFLARE_API_TOKEN, e e gravado aqui no primeiro deploy. Os dois tokens da conta nao
+  // fazem o que o nome sugere e isso ja custou tempo uma vez: o MASTER e quem le `whoami` e
+  // quem escreve DNS, o DEPLOY e quem publica Worker e nao enxerga DNS.
+  // "account_id": "",
+
+  // Static Assets no MESMO deploy do Worker. Shell e assets com hash sobem juntos, atomico,
+  // sem a janela em que o HTML aponta para um /assets/<hash>.js que ja nao existe.
+  //
+  // `dist/` NUNCA contem .html, e quem garante isso e scripts/preparar-shell.mjs. Com
+  // `run_worker_first: false` um arquivo estatico que case com o caminho e servido ANTES de o
+  // Worker rodar: um dist/index.html sobrevivente faria fulano.myportifolio.com.br/ servir o
+  // shell cru do Helio, sem SSR, em silencio, que e exatamente o defeito que o SSR existe
+  // para evitar.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "run_worker_first": false
+  },
+
+  "vars": {
+    "APEX_HOST": "myportifolio.com.br",
+    // Versao da chave de cache. Trocar aqui invalida tudo de uma vez, e e a unica forma de
+    // invalidacao global que a conta tem: os tokens nao tem permissao de purge.
+    "CACHE_NS": "v1",
+    // O apex serve o portfolio do Helio pelo mesmo caminho de tenant (secao 9.8).
+    "APEX_SLUG": "helio",
+    // O projeto Supabase e compartilhado com o AI Block: tudo deste produto vive em schema
+    // proprio, e o PostgREST precisa dele em header a cada chamada.
+    "SUPABASE_SCHEMA": "myportifolio"
+  },
+
+  // Secrets por `wrangler secret put`, NUNCA neste arquivo (ele e versionado):
+  //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+  // A service role key e usada em exatamente uma rota de tenant, /certificado/<slug>, que
+  // assina URL de vida curta no bucket privado. O caminho quente nunca a toca.
+
+  // A VIRADA DO APEX E PASSO SEPARADO, de proposito. Hoje o apex e o www sao custom domain
+  // do projeto Pages "helioportifolio", que serve o portfolio do Helio. Declarar os dois
+  // aqui como custom_domain do Worker tira o site do ar no instante do deploy, antes de
+  // qualquer teste. Primeiro o curinga sobe e um subdominio real e testado; so depois o
+  // apex troca de dono, e ai estas duas linhas voltam.
+  //  { "pattern": "myportifolio.com.br", "custom_domain": true },
+  //  { "pattern": "www.myportifolio.com.br", "custom_domain": true },
+  "routes": [
+    { "pattern": "*.myportifolio.com.br/*", "zone_name": "myportifolio.com.br" }
+  ],
+  "account_id": "dbcff9abde3df964100df4b1d3a41798",
+
+  // Keep-alive por requisicao HTTP de verdade ao PostgREST, a cada 6 horas. O `cron.schedule`
+  // do 0001 roda dentro do Postgres e nao conta como requisicao (suposicao S5), e projeto
+  // pausado por inatividade e todo portfolio pago fora do ar de uma vez.
+  "triggers": { "crons": ["0 */6 * * *"] },
+
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,37 @@
+# Config do Supabase CLI para este repo. Existe por UM motivo: declarar
+# verify_jwt = false na hubla-webhook.
+#
+# POR QUE verify_jwt = false: quem chama e a Hubla, que nao tem JWT do Supabase. A
+# autenticacao dessa porta e o header x-hubla-token, comparado em tempo constante dentro da
+# function. Com verify_jwt = true o gateway recusa antes de o codigo rodar e toda venda vira
+# 401.
+#
+# ATENCAO, PROJETO COMPARTILHADO: o ref fxchcqlbjszichhbllzm serve tambem o AI Block, que
+# tem clientes pagantes. Deste repo so se deploya FUNCTION, nunca `supabase db push` nem
+# `supabase db reset`. As migrations deste produto sao aplicadas por
+# scripts/validar-migrations.mjs, que roda dentro de transacao e sabe dar rollback.
+project_id = "myportifolio"
+
+[functions.hubla-webhook]
+verify_jwt = false
+
+# Quem pede codigo de acesso ainda NAO tem sessao: exigir JWT aqui recusaria todo login
+# antes de a function rodar. A porta e defendida por dentro, e em quatro camadas: Turnstile
+# validado no servidor, rate limit por IP e por e-mail em access_throttle, teto global que
+# alarma e enfileira em vez de recusar, e resposta uniforme, que e o que impede o endpoint de
+# virar lista de clientes.
+[functions.request-access-code]
+verify_jwt = false
+
+# Estas duas SO fazem sentido com sessao: elas agem em nome de quem esta logado, e a
+# identidade sai de current_purchase_email() lido com o JWT do proprio titular. verify_jwt
+# ligado e a primeira camada disso.
+[functions.accept-terms]
+verify_jwt = true
+
+[functions.request-refund]
+verify_jwt = true
+
+# O bloco [api] de proposito NAO esta aqui. `schemas` em config.toml so vale para o Supabase
+# local; no projeto hospedado quem manda e o db_schema do PostgREST, alterado pela Management
+# API. Ver supabase/operacao/0001_grants_webhook.sql, que documenta o passo.
