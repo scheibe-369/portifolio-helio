@@ -1,26 +1,22 @@
-import {
-  adminStatus,
-  nivelDaSessao,
-  iniciarCadastroMfa,
-  confirmarCadastroMfa,
-  desafiarMfa,
-} from '../state/adminState.js';
+import { adminStatus, iniciarCadastroMfa, confirmarCadastroMfa } from '../state/adminState.js';
 
-// O portao da area de admin. Zona [browser].
+// O portao da area de admin, e a tela OPCIONAL de cadastro do app autenticador. Zona
+// [browser].
 //
-// POR QUE SEGUNDO FATOR AQUI E NAO NO PRODUTO INTEIRO: o comprador entra com codigo no
-// e-mail, e para o que ele pode fazer (editar o proprio portfolio) isso basta. O admin pode
-// tirar do ar o portfolio de um cliente pagante, conceder acesso vitalicio e ler o e-mail de
-// todo mundo. Essa conta atras de "quem tiver a caixa de entrada dele" e barata demais.
+// O SEGUNDO FATOR NAO E EXIGIDO (migration 0012, decisao do dono, tomada depois de o custo
+// ser dito): o codigo por e-mail e a protecao do produto inteiro, admin incluido. A unica
+// pergunta que este portao faz e se o e-mail esta em admin_users, e quem responde de verdade
+// e o banco, porque toda funcao admin_* comeca com `if not is_admin() then raise`. Este
+// arquivo so decide QUAL TELA pintar.
 //
-// AAL2 E NAO "TEM FATOR CADASTRADO", e a diferenca e o produto inteiro: cadastrar o app uma
-// vez e depois entrar so com o codigo do e-mail seria segundo fator de enfeite. O banco exige
-// que a SESSAO tenha subido para aal2, ou seja, que o TOTP tenha sido digitado nesta entrada.
+// POR QUE A TELA DE CADASTRO CONTINUA AQUI, sem ninguem ser mandado para ela: porque a porta
+// de volta custa quase nada enquanto existir, e custaria caro para reescrever no dia em que
+// houver um segundo administrador (ou uma conta que nao seja a do dono). Ela vive em
+// /app/admin/mfa, e quem cadastrar tem o fator carimbado em mfa_confirmado_em. Voltar a
+// EXIGIR e trocar is_admin() pela versao da migration 0011, sem mexer em mais nada.
 //
-// TRES ESTADOS, e a tela precisa distinguir os tres, porque o remedio de cada um e outro:
-//   1. o e-mail nao esta em admin_users        -> nao ha o que fazer sozinho
-//   2. esta, mas nao ha app cadastrado         -> cadastrar (QR)
-//   3. esta e ha app, mas a sessao esta em aal1 -> digitar o codigo do app
+// O que saiu junto com a exigencia foi a tela de desafio: cobrar o codigo do app de quem
+// cadastrou por conta propria seria transformar a escolha dele em punicao.
 
 function moldura(conteudo) {
   return `
@@ -65,20 +61,6 @@ export function renderMfaCadastro() {
       maxlength="6" pattern="[0-9]{6}" placeholder="000000" class="campo-acesso campo-codigo" />
     <button type="button" id="mfa-confirmar"
       class="glass-button w-full rounded-xl px-4 py-2.5 text-sm font-medium">Confirmar</button>
-    <p id="mfa-erro" class="hidden text-xs text-red-400"></p>`);
-}
-
-export function renderMfaDesafio() {
-  return moldura(`
-    <h1 class="text-xl font-bold text-white">Código do aplicativo</h1>
-    <p class="text-sm text-white/50 leading-relaxed">
-      Abra o seu app autenticador e digite o número de 6 dígitos que ele mostra agora.
-    </p>
-    <label class="block text-xs text-white/50" for="mfa-codigo">Código</label>
-    <input type="text" id="mfa-codigo" inputmode="numeric" autocomplete="one-time-code"
-      maxlength="6" pattern="[0-9]{6}" placeholder="000000" class="campo-acesso campo-codigo" />
-    <button type="button" id="mfa-confirmar"
-      class="glass-button w-full rounded-xl px-4 py-2.5 text-sm font-medium">Entrar</button>
     <p id="mfa-erro" class="hidden text-xs text-red-400"></p>`);
 }
 
@@ -138,24 +120,6 @@ export async function initMfaCadastro({ aoConcluir }) {
       // O erro do Supabase aqui e quase sempre relogio do celular fora de hora, e dizer isso
       // economiza a hora que a pessoa passaria achando que digitou errado.
       erro(`${e.message ?? 'codigo recusado'}. Se persistir, confira se a hora do celular está automática.`);
-      botao.disabled = false;
-    }
-  });
-}
-
-export async function initMfaDesafio({ aoConcluir }) {
-  const erro = ligarErro();
-  document.getElementById('mfa-confirmar')?.addEventListener('click', async (ev) => {
-    const botao = ev.currentTarget;
-    const codigo = (document.getElementById('mfa-codigo')?.value ?? '').replace(/\D/g, '');
-    if (codigo.length < 6) return erro('Digite os 6 dígitos do app.');
-    botao.disabled = true;
-    erro('');
-    try {
-      await desafiarMfa(codigo);
-      await aoConcluir();
-    } catch (e) {
-      erro(e.message ?? 'codigo recusado');
       botao.disabled = false;
     }
   });

@@ -3,9 +3,13 @@ import { supabase } from '../../../shared/supabase/client.js';
 // Estado da area de admin. Zona [browser].
 //
 // NADA AQUI E SEGURANCA. Toda funcao `admin_*` do banco comeca com `if not is_admin() then
-// raise`, e o is_admin() olha DUAS coisas que o navegador nao consegue forjar: o e-mail estar
-// em admin_users e existir um segundo fator verificado nesta conta. Reescrever este arquivo
-// no console nao abre nada.
+// raise`, e is_admin() pergunta se o e-mail da sessao esta em admin_users, o que o navegador
+// nao tem como forjar (o e-mail sai do JWT emitido pelo Supabase Auth). Reescrever este
+// arquivo no console nao abre nada.
+//
+// O segundo fator NAO entra nessa conta desde a migration 0012: o codigo por e-mail e a
+// protecao do produto inteiro, admin incluido. As funcoes de cadastro do app continuam aqui
+// porque a tela opcional /app/admin/mfa continua viva.
 //
 // O QUE ESTE ARQUIVO RESOLVE E OUTRA COISA: dizer POR QUE foi recusado. Antes de 0010, o
 // dono abria a fila e via quatro listas vazias, porque is_admin() era falso e as consultas
@@ -16,15 +20,6 @@ export async function adminStatus() {
   const { data, error } = await supabase.rpc('admin_status');
   if (error) throw error;
   return data;
-}
-
-// NIVEL DA SESSAO (AAL). Ter um fator cadastrado nao e a mesma coisa que ter usado o fator
-// AGORA: quem entra so com o codigo do e-mail fica em aal1, e so vira aal2 depois de digitar
-// o TOTP. O banco exige aal2, entao esta funcao e o que diz a tela se falta o desafio.
-export async function nivelDaSessao() {
-  const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (error) throw error;
-  return { atual: data.currentLevel, necessario: data.nextLevel };
 }
 
 export async function listarFatores() {
@@ -64,21 +59,6 @@ export async function confirmarCadastroMfa(fatorId, codigo) {
   // entao ela nao aceita ser convencida por esta chamada.
   const { error: e3 } = await supabase.rpc('admin_confirmar_mfa');
   if (e3) throw e3;
-}
-
-// O desafio de quem JA tem fator e acabou de entrar pelo codigo do e-mail (aal1 -> aal2).
-export async function desafiarMfa(codigo) {
-  const fatores = await listarFatores();
-  const totp = fatores.find((f) => f.status === 'verified' && f.factor_type === 'totp');
-  if (!totp) throw new Error('nenhum app autenticador cadastrado nesta conta');
-  const { data: desafio, error: e1 } = await supabase.auth.mfa.challenge({ factorId: totp.id });
-  if (e1) throw e1;
-  const { error: e2 } = await supabase.auth.mfa.verify({
-    factorId: totp.id,
-    challengeId: desafio.id,
-    code: codigo,
-  });
-  if (e2) throw e2;
 }
 
 // ACESSOS --------------------------------------------------------------------
