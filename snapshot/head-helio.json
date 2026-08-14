@@ -1,0 +1,14 @@
+{
+  "url": "https://myportifolio.com.br/",
+  "title": "Portfólio",
+  "description": "Portfólio de Helio Monteiro: especialista em automação com IA e desenvolvedor full-stack. Agentes de IA, plataformas SaaS, CRMs e automações de ponta a ponta.",
+  "canonical": "https://myportifolio.com.br/",
+  "og:title": "Helio Monteiro · Portfólio",
+  "og:description": "Automação com IA, SaaS e sistemas. Projetos e cases de ponta a ponta.",
+  "og:image": "https://myportifolio.com.br/hero.webp",
+  "og:url": "https://myportifolio.com.br/",
+  "twitter:card": "summary_large_image",
+  "lang": "pt-br",
+  "og:image__status": 206,
+  "og:image__tipo": "image/webp"
+}

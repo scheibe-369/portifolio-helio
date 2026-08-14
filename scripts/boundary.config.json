@@ -1,0 +1,23 @@
+{
+  "_comentario": [
+    "Fronteiras de execucao do MyPortifolio, checadas por scripts/import-graph.mjs.",
+    "A zona 'iso' e a que importa: e o codigo que roda TANTO no browser QUANTO dentro do",
+    "Worker. Nada dela pode depender de coisa que so existe no navegador (document, CSS,",
+    "lucide) nem de import.meta.env, que e do Vite e nao existe em Worker.",
+    "langState.js e proibido em iso porque ele guarda o idioma em variavel de modulo: num",
+    "isolate de Worker isso vaza entre requests de pessoas diferentes."
+  ],
+  "zonas": [
+    {
+      "nome": "iso: render que o Worker tambem executa",
+      "entradas": ["src/app/portfolioPage.js"],
+      "proibirImports": ["*.css", "lucide", "@supabase/supabase-js", "langState.js"],
+      "proibirTexto": ["import.meta.env", "document.", "window.", "localStorage"]
+    },
+    {
+      "nome": "browser: boot publico",
+      "entradas": ["src/main.js"],
+      "proibirImports": ["@supabase/supabase-js"]
+    }
+  ]
+}

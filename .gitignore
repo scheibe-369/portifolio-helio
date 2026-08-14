@@ -21,3 +21,11 @@ SITE-GH/
 # em lugar nenhum do site. As experiencias que saem dele ja vivem em
 # src/modules/experience/data/, sem dado de contato.
 /Curriculo_*.docx
+
+# Saida das ferramentas de verificacao da fase 0. O baseline (snapshot/) ENTRA no git, e o
+# "depois" (out/) nunca: ele e regerado a cada checagem e commitar os dois faria o diff do
+# repo virar ruido de imagem.
+/out/
+
+# Logs de sessao do navegador do MCP. Sao artefato de ferramenta, nao do projeto.
+/.playwright-mcp/

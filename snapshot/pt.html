@@ -1,0 +1,603 @@
+
+<section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+    
+  <div class="relative rounded-3xl bg-black border border-white/10 overflow-hidden shadow-2xl min-h-[380px] lg:min-h-0">
+    <img src="/hero.webp" alt="Helio Monteiro - Principal" fetchpriority="high" decoding="async" width="1000" height="1250" class="absolute inset-0 w-full h-full object-cover object-[50%_36%] grayscale-[10%] hover:grayscale-0 transition duration-700">
+  </div>
+    <div class="flex flex-col gap-5">
+      
+    <!-- Card de Perfil -->
+    <div class="flex flex-col sm:flex-row sm:items-stretch sm:justify-between glass-card rounded-3xl p-6 gap-5">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <img src="/avatar.webp" alt="Helio Monteiro Avatar" class="w-14 h-14 object-cover ring-white/10 ring-2 rounded-full">
+          <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full shadow-lg"></span>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">Helio Monteiro</h1>
+          <p class="text-xs font-medium text-white/40 metallic-silver">Automação com IA · Dev SaaS · Sistemas · Rio das Ostras, RJ</p>
+        </div>
+      </div>
+      <div class="flex flex-col sm:items-end sm:justify-between gap-3">
+        <div class="flex gap-5 text-xs text-white/80">
+            <div class="flex flex-col text-center">
+              <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">Projetos</span>
+              <span class="mt-1 font-bold text-base">30+</span>
+            </div>
+            <div class="flex flex-col text-center">
+              <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">Experiência</span>
+              <span class="mt-1 font-bold text-base">3+ anos</span>
+            </div>
+            <button id="lang-toggle" type="button" class="flex flex-col text-center cursor-pointer" title="Trocar idioma (PT / EN)">
+              <span class="text-[10px] uppercase tracking-widest text-white/30 metallic-silver">Idiomas</span>
+              <span class="mt-1 font-bold text-base">
+                <span class="text-white">PT</span><span class="text-white/20">/</span><span class="text-white/35">EN</span>
+              </span>
+            </button>
+        </div>
+        <!-- BOTÃO VIBECODER -->
+        <button class="inline-flex vibecoder-btn text-[11px] font-bold text-white rounded-full py-1.5 px-5 gap-2 items-center justify-center">
+          <i data-lucide="code" class="h-3.5 w-3.5 text-white"></i>
+          VibeCoder
+        </button>
+      </div>
+    </div>
+
+    <!-- Bio + Sociais -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
+        <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">Sobre</h2>
+        <p class="text-sm text-white/80 leading-relaxed font-medium">Especialista em automação com IA e desenvolvedor full-stack com 3+ anos de experiência construindo agentes de IA, automações e plataformas SaaS de ponta a ponta. Lidero a frente técnica de uma agência de IA e automação, de SaaS multi-tenant a CRMs com IA, e formo uma comunidade de 30+ alunos na ION Academy. Autodidata e movido a resultado, estou aberto a novas oportunidades.</p>
+      </div>
+
+      <div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">
+        <div class="flex-1 flex flex-col gap-2 text-[11px] font-semibold text-white">
+            <a href="https://www.instagram.com/heliomonteir0.ia/" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-between rounded-xl glass-button px-4 py-2.5">
+              <span>Instagram</span>
+              <span class="text-white/40 font-normal">1000+</span>
+            </a>
+            <a href="https://www.tiktok.com/@heliomonteir0" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-between rounded-xl glass-button px-4 py-2.5">
+              <span>TikTok</span>
+              <span class="text-white/40 font-normal">2800+</span>
+            </a>
+            <a href="https://www.linkedin.com/in/helio-monteiro-a4278b399/" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-between rounded-xl glass-button px-4 py-2.5">
+              <span>LinkedIn</span>
+              <span class="text-white/40 font-normal">Perfil</span>
+            </a>
+            <a href="https://www.youtube.com/@heliomonteiro_ia" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-between rounded-xl glass-button px-4 py-2.5">
+              <span>YouTube</span>
+              <span class="text-white/40 font-normal">Canal</span>
+            </a>
+        </div>
+
+        <!-- BOTÃO AGENDAR CALL (abre o Cal.com) -->
+        <a href="https://cal.com/growth-hub/reuniao-gh" target="_blank" rel="noopener noreferrer" class="bookmarkBtn mt-2">
+          <span class="IconContainer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </span>
+          <p class="btn-text">Agendar Call</p>
+        </a>
+      </div>
+    </div>
+    </div>
+  </div>
+  
+    <div class="flex flex-col glass-card rounded-3xl p-5 gap-4"
+      style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent); --border-radius-before: 24px">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">Stacks Dominadas</span>
+      <div class="stacks-marquee">
+        <div class="stacks-track"><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Next.js</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Astro</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">React</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">TypeScript</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Tailwind CSS</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Node.js</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">PostgreSQL</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Drizzle ORM</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Supabase</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">n8n</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">OpenAI</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Claude</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Gemini</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Cloudflare Workers</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">WhatsApp API</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Evolution API</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Stripe</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Asaas</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Docker</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Vite</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Next.js</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Astro</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">React</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">TypeScript</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Tailwind CSS</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Node.js</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">PostgreSQL</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Drizzle ORM</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Supabase</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">n8n</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">OpenAI</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Claude</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Gemini</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Cloudflare Workers</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">WhatsApp API</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Evolution API</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Stripe</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Asaas</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Docker</span><span class="stack-chip shrink-0 rounded-full px-5 py-2 text-[11px] font-semibold text-white/90 whitespace-nowrap">Vite</span></div>
+      </div>
+    </div>
+  
+    <div class="flex flex-col glass-card rounded-3xl p-5 gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">Meus Projetos</span>
+          <i data-lucide="arrow-right" class="h-3 w-3 text-white/20"></i>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="project-count" class="text-[10px] font-medium text-white/30">20 cases</span>
+          <div class="relative" id="project-filter-wrap">
+            <button type="button" id="project-filter-toggle" class="filter-icon-btn" aria-label="Filtrar projetos">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+              <span id="filter-badge" class="filter-badge hidden">0</span>
+            </button>
+            <div id="project-filter-menu" class="filter-menu">
+              <span class="px-2.5 pb-1 pt-0.5 text-[9px] font-bold uppercase tracking-widest text-white/30">Filtrar por</span>
+          <button type="button" class="filter-option" data-filter="agentes-ia">
+            <span class="filter-dot"></span>Agentes IA
+          </button>
+          <button type="button" class="filter-option" data-filter="sistemas">
+            <span class="filter-dot"></span>Sistemas
+          </button>
+          <button type="button" class="filter-option" data-filter="websites">
+            <span class="filter-dot"></span>Websites
+          </button>
+          <button type="button" class="filter-option" data-filter="automacao">
+            <span class="filter-dot"></span>Automação
+          </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div data-slug="brasildtf" data-groups="sistemas" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #ffffff;">
+            <img src="/projects/brasildtf.webp" alt="BrasilDTF" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              SaaS
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              BrasilDTF
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="maternaforte" data-groups="websites,sistemas" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #fdf4ef;">
+            <img src="/projects/maternaforte.webp" alt="MaternaForte" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              SaaS / Plataforma Web
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              MaternaForte
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="previa" data-groups="automacao" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #ffffff;">
+            <img src="/projects/previa.webp" alt="Previa" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Automação / Cobrança
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Previa
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="geracao-leads-previa" data-groups="sistemas,automacao" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #000000;">
+            <img src="/projects/previa-leads.webp" alt="Geração de Leads" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Sistema / Prospecção
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Geração de Leads
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="growth-hub-site" data-groups="websites" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/growth-hub-cover.webp" alt="Site Growth Hub" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Website
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Site Growth Hub
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="damascena-films" data-groups="websites" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/damascena-films.webp" alt="Damascena Films" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Landing Page
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Damascena Films
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="brasil-dtf-impressoras" data-groups="websites" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0B1220;">
+            <img src="/projects/brasildtf-impressoras.webp" alt="Brasil DTF Impressoras" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Landing Page
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Brasil DTF Impressoras
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="deck-proposta-fidc" data-groups="websites" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #000000;">
+            <img src="/projects/deck-proposta-fidc.webp" alt="Deck de Proposta · IA para FIDCs" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Apresentação Comercial
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Deck de Proposta · IA para FIDCs
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="ai-block" data-groups="sistemas,agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0d12;">
+            <img src="/projects/ai-block.webp" alt="AI Block" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Plataforma / Infoproduto
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              AI Block
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="indicacao-marcos" data-groups="websites" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #ececec;">
+            <img src="/projects/indicacao-marcos-logo.png" alt="Landing de Indicação" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Landing Page
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Landing de Indicação
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="ai-agents-playground" data-groups="agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/agents-logo.png" alt="AI Agents Playground" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Agentes de IA
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              AI Agents Playground
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="token-cost-calculator" data-groups="sistemas" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/token-logo.png" alt="AI Token Cost Calculator" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Ferramenta IA
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              AI Token Cost Calculator
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="sistema-goat" data-groups="sistemas,agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/goat.webp" alt="Sistema GOAT" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Plataforma / CRM
+            </span>
+            <span class="absolute right-3 bottom-3 w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Sistema GOAT
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="porceli" data-groups="sistemas,agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0d0d0d;">
+            <img src="/projects/porceli.webp" alt="Porceli Co." loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              CRM
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Porceli Co.
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="manhattan-hotel" data-groups="sistemas,agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #020028;">
+            <img src="/projects/hotel.webp" alt="Manhattan Hotel" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              CRM
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Manhattan Hotel
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="newcar" data-groups="agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #00192a;">
+            <img src="/projects/newcar.webp" alt="NewCar" loading="lazy" decoding="async" class="w-full h-full object-contain p-5 transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Agente de IA
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              NewCar
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="pipeline-video-ia" data-groups="automacao,agentes-ia" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/pipeline-video-ia.webp" alt="Pipeline de Vídeo com IA" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Automação / IA
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Pipeline de Vídeo com IA
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="chatbot-clinicas" data-groups="agentes-ia,automacao" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/chatbot-clinicas.webp" alt="Chatbot para Clínicas" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Chatbot / Automação
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Chatbot para Clínicas
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="automacao-financeira-asaas" data-groups="automacao" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/automacao-financeira-asaas.webp" alt="Automação Financeira (Asaas)" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Automação / Cobrança
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Automação Financeira (Asaas)
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+        <div data-slug="infra-agentes-ia" data-groups="agentes-ia,sistemas" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
+          <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: #0b0b12;">
+            <img src="/projects/infra-agentes-ia.webp" alt="Infraestrutura de Agentes de IA" loading="lazy" decoding="async" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
+              Infraestrutura / IA
+            </span>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+              Infraestrutura de Agentes de IA
+            </p>
+            <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
+          </div>
+        </div>
+      </div>
+
+      <div id="project-pager" class="hidden items-center justify-center gap-4 pt-1">
+        <button type="button" id="pager-prev" class="pager-btn" aria-label="Página anterior"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+        <span id="pager-info" class="text-[10px] font-medium tracking-widest text-white/40">1 / 1</span>
+        <button type="button" id="pager-next" class="pager-btn" aria-label="Próxima página"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </div>
+    </div>
+  
+    <div id="experiencia" class="flex flex-col glass-card rounded-3xl p-5 gap-1">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">Experiência</span>
+        <span class="text-[10px] font-medium text-white/30">5 passagens</span>
+      </div>
+      <ul class="flex flex-col">
+          <li class="flex gap-3.5 py-4 border-t border-white/5 first:border-t-0 first:pt-1">
+            
+            <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: #161616;">
+              <img src="/experience/growth-hub.webp" alt="Growth Hub" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p class="text-[12.5px] font-bold text-white leading-tight">Co-fundador</p>
+                <span class="text-white/20 text-[11px]">·</span>
+                <p class="text-[12px] font-medium text-white/70 leading-tight">Growth Hub</p>
+                
+              </div>
+              <div class="flex flex-wrap items-center gap-x-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                <span>Desde 2025</span><span class="text-white/15">·</span><span>Rio das Ostras, RJ</span>
+              </div>
+              <ul class="flex flex-col gap-1 mt-0.5">
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Lidera a arquitetura e a entrega de sistemas de automação, agentes de IA e plataformas SaaS multi-tenant para clientes de hotelaria, serviços financeiros, saúde e varejo.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Definiu o stack técnico padrão da agência (Next.js 15, TypeScript, PostgreSQL, Cloudflare Workers, n8n) e a metodologia de documentação técnica PRD-first aplicada a todos os projetos.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Conduz o ciclo completo de cada projeto: discovery, escopo técnico, desenvolvimento, deploy e onboarding do cliente.
+                </li></ul>
+              
+              
+            </div>
+          </li>
+          <li class="flex gap-3.5 py-4 border-t border-white/5 first:border-t-0 first:pt-1">
+            
+            <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: #000000;">
+              <img src="/experience/ion-academy.webp" alt="ION Academy" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p class="text-[12.5px] font-bold text-white leading-tight">Co-fundador e Educador</p>
+                <span class="text-white/20 text-[11px]">·</span>
+                <p class="text-[12px] font-medium text-white/70 leading-tight">ION Academy</p>
+                
+              </div>
+              <div class="flex flex-wrap items-center gap-x-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                <span>Desde 2025</span>
+              </div>
+              <ul class="flex flex-col gap-1 mt-0.5">
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Co-fundou plataforma educacional de IA, automação e desenvolvimento de software voltada ao público de língua portuguesa.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Lidera o desenho de currículo e as mentorias ao vivo sobre agentes de IA, workflows em n8n, vibe coding e desenvolvimento de SaaS.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Já formou mais de 30 alunos em aplicações práticas e baseadas em projetos das principais ferramentas de IA.
+                </li></ul>
+              
+              
+            </div>
+          </li>
+          <li class="flex gap-3.5 py-4 border-t border-white/5 first:border-t-0 first:pt-1">
+            
+            <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: #f7f7f7;">
+              <img src="/experience/treemkt.webp" alt="TreeMKT" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p class="text-[12.5px] font-bold text-white leading-tight">Consultor de Automação</p>
+                <span class="text-white/20 text-[11px]">·</span>
+                <p class="text-[12px] font-medium text-white/70 leading-tight">TreeMKT</p>
+                
+              </div>
+              <div class="flex flex-wrap items-center gap-x-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                <span>2025 a 2026</span>
+              </div>
+              <ul class="flex flex-col gap-1 mt-0.5">
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Implementou sistemas de automação que escalaram as operações internas e a entrega para clientes da agência.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Desenhou workflows conectando ferramentas de marketing, CRMs e canais de mensageria, reduzindo trabalho manual.
+                </li></ul>
+              
+              
+            </div>
+          </li>
+          <li class="flex gap-3.5 py-4 border-t border-white/5 first:border-t-0 first:pt-1">
+            
+            <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: #131313;">
+              <img src="/experience/horizon.webp" alt="Horizon" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p class="text-[12.5px] font-bold text-white leading-tight">Fundador</p>
+                <span class="text-white/20 text-[11px]">·</span>
+                <p class="text-[12px] font-medium text-white/70 leading-tight">Horizon</p>
+                
+              </div>
+              <div class="flex flex-wrap items-center gap-x-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                <span>2024 a 2025</span>
+              </div>
+              <ul class="flex flex-col gap-1 mt-0.5">
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Fundou e liderou agência de IA e automação focada em workflows sob medida, chatbots e agentes de IA para pequenas e médias empresas.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Arquitetou e entregou sistemas de automação ponta a ponta integrando WhatsApp, CRMs, ferramentas de agendamento e LLMs.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Construiu a base técnica reaproveitada posteriormente em diversos projetos SaaS de clientes.
+                </li></ul>
+              
+              
+            </div>
+          </li>
+          <li class="flex gap-3.5 py-4 border-t border-white/5 first:border-t-0 first:pt-1">
+            
+            <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: #ffffff;">
+              <img src="/experience/dg-comunicacao.webp" alt="DG Comunicação" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <p class="text-[12.5px] font-bold text-white leading-tight">Desenvolvedor de Automação</p>
+                <span class="text-white/20 text-[11px]">·</span>
+                <p class="text-[12px] font-medium text-white/70 leading-tight">DG Comunicação</p>
+                
+              </div>
+              <div class="flex flex-wrap items-center gap-x-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                <span>2024 a 2025</span>
+              </div>
+              <ul class="flex flex-col gap-1 mt-0.5">
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Desenhou e implementou soluções de automação para as operações internas e o portfólio de clientes da agência.
+                </li>
+                <li class="relative pl-3.5 text-[11.5px] leading-relaxed text-white/55">
+                  <span class="absolute left-0 top-[0.55em] w-1 h-1 rounded-full bg-white/25"></span>Construiu workflows de marketing e operação integrando CRMs, plataformas de mensageria e ferramentas de conteúdo.
+                </li></ul>
+              
+              
+            </div>
+          </li>
+      </ul>
+    </div>
+</section>
+<div id="project-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/70 backdrop-blur-sm"></div>
