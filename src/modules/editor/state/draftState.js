@@ -130,8 +130,13 @@ export function montarPayloadDoRascunho() {
       mainImagePath: pf.hero_path || undefined,
       heroObjectPosition: pf.hero_object_position,
       showOnlineDot: Boolean(pf.show_online_dot),
-      badgeLabel: custom ? pf.badge_label : 'VibeCoder',
-      badgeIcon: custom ? pf.badge_icon : 'code',
+      // O selo saiu do bump e passou a ser da base (migration 0014): dizer "Chef" ou
+      // "Tatuadora" ao lado do proprio nome e identidade, nao estetica, e nao podia custar
+      // R$ 37,90 ainda mais tendo como valor de fabrica o nome de outra profissao. Estas
+      // duas linhas espelhavam a normalizacao do banco, e a normalizacao tambem deixou de
+      // forcar: o previa tem que mostrar exatamente o que a pagina publicada vai mostrar.
+      badgeLabel: pf.badge_label || undefined,
+      badgeIcon: pf.badge_icon || undefined,
       ctaUrl: pf.cta_url || undefined,
       ctaLabel: custom ? pf.cta_label_i18n || undefined : undefined,
       bio: { pt: perfilAtual().bio },

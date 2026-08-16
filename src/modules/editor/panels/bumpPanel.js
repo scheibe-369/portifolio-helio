@@ -13,11 +13,14 @@ import { LINK_BUMP_CUSTOM } from '../config/editor.config.js';
 // por coluna, o trigger portfolios_guarda_colunas e a normalizacao na saida de
 // montar_payload_portfolio). Aqui e so a explicacao de por que o cadeado esta ali.
 
+// O SELO SAIU DESTA LISTA em 16/08/2026 (migration 0014), e a razao vale ficar escrita: o
+// valor de fabrica de badge_label era 'VibeCoder'. Vender a troca do selo significava cobrar
+// R$ 37,90 de um chef para ele parar de anunciar que e programador. Isso nao e personalizar,
+// e consertar. O selo virou campo da base, no passo 1 do perfil, junto com nome e profissao.
 const INCLUI = [
   'A cor de destaque da página inteira',
   'O fundo das placas dos cards',
   'A cor de cada projeto, um por um',
-  'O texto do selo do perfil',
   'O texto do botão principal',
   'Renomear os grupos do filtro',
 ];

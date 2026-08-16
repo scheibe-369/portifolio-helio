@@ -67,6 +67,7 @@ export function perfilDaLinha(pf) {
     hero_object_position: pf.hero_object_position ?? '50% 36%',
     show_online_dot: Boolean(pf.show_online_dot),
     badge_label: pf.badge_label ?? '',
+    badge_icon: pf.badge_icon ?? '',
     cta_url: pf.cta_url ?? '',
     cta_label: doI18n(pf.cta_label_i18n),
     theme_accent: pf.theme_accent ?? '#7C5CFC',
@@ -112,6 +113,12 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     projects_per_page: Number(v.projects_per_page) || 6,
     seo_title_i18n: v.seo_title ? paraI18n(v.seo_title, pf.seo_title_i18n) : null,
     seo_description_i18n: v.seo_description ? paraI18n(v.seo_description, pf.seo_description_i18n) : null,
+    // O selo e da BASE desde a migration 0014, e por isso mora aqui e nao no bloco do bump.
+    // Ele saiu de la porque e identidade, nao estetica: o valor de fabrica era 'VibeCoder',
+    // entao cobrar para troca-lo significava cobrar de um chef para ele parar de dizer que e
+    // programador. O grant update das duas colunas foi aberto na mesma migration.
+    badge_label: ouNulo(v.badge_label),
+    badge_icon: ouNulo(v.badge_icon),
   };
 
   // AS SEIS COLUNAS DO BUMP SO ENTRAM NO PATCH QUANDO A CONTA COMPROU, e omiti-las nao e
@@ -123,7 +130,6 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
   if (!temCustom) return base;
   return {
     ...base,
-    badge_label: ouNulo(v.badge_label),
     cta_label_i18n: v.cta_label ? paraI18n(v.cta_label, pf.cta_label_i18n) : null,
     theme_accent: ouNulo(v.theme_accent),
     theme_plate_bg: ouNulo(v.theme_plate_bg),

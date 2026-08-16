@@ -57,6 +57,29 @@ const BLOCO_EXPERIENCIA_VAZIA = `
     <span class="ed-btn e-primario">Adicionar experiência</span>
   </div>`;
 
+// Os irmaos do bloco acima, pelo mesmo motivo e pela mesma regra.
+//
+// Em 16/08/2026 a pagina publica ganhou guarda de lista vazia tambem em projetos e stacks:
+// antes ela desenhava um card "Meus Projetos / 0 cases" com um funil que nao filtra nada, e
+// um carrossel de stacks girando vazio. Consertar a pagina publica abriu um buraco no canvas
+// do editor, porque a ancora de "Adicionar ou reordenar projetos" e pendurada na secao
+// renderizada: sem secao, sem alvo de clique, e o comprador recem chegado ficava sem caminho
+// visivel para o que mais importa. Estes dois blocos existem so no editor e nunca no HTML
+// publicado.
+const BLOCO_PROJETOS_VAZIO = `
+  <div class="ed-bloco-vazio" data-edit="projetos">
+    <p class="ed-bloco-vazio-titulo">Trabalhos</p>
+    <p class="ed-bloco-vazio-texto">É o coração do portfólio: comece por um. Enquanto estiver vazia, esta seção não aparece na sua página.</p>
+    <span class="ed-btn e-primario">Adicionar trabalho</span>
+  </div>`;
+
+const BLOCO_STACKS_VAZIO = `
+  <div class="ed-bloco-vazio" data-edit="perfil-stacks">
+    <p class="ed-bloco-vazio-titulo">O que você usa no trabalho</p>
+    <p class="ed-bloco-vazio-texto">Ferramentas, técnicas ou especialidades suas. Enquanto estiver vazia, esta seção não aparece na sua página.</p>
+    <span class="ed-btn e-primario">Adicionar</span>
+  </div>`;
+
 /**
  * Pinta o canvas e injeta os pontos de edicao. Devolve o elemento do canvas.
  *
@@ -79,7 +102,11 @@ export function pintarCanvas(ctx, { temExperiencia }) {
   });
 
   const secaoProjetos = canvas.querySelector('#project-count')?.closest('.glass-card');
-  secaoProjetos?.insertAdjacentHTML('beforeend', alvo('projetos', 'Adicionar ou reordenar projetos', 'e-rodape'));
+  if (secaoProjetos) {
+    secaoProjetos.insertAdjacentHTML('beforeend', alvo('projetos', 'Adicionar ou reordenar projetos', 'e-rodape'));
+  } else {
+    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_PROJETOS_VAZIO);
+  }
 
   const experiencia = canvas.querySelector('#experiencia');
   if (experiencia) {
@@ -97,7 +124,11 @@ export function pintarCanvas(ctx, { temExperiencia }) {
   }
 
   const stacks = canvas.querySelector('.stacks-marquee')?.closest('div');
-  stacks?.insertAdjacentHTML('beforeend', alvo('perfil-stacks', 'Editar stacks', 'e-canto'));
+  if (stacks) {
+    stacks.insertAdjacentHTML('beforeend', alvo('perfil-stacks', 'Editar', 'e-canto'));
+  } else {
+    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_STACKS_VAZIO);
+  }
 
   return canvas;
 }

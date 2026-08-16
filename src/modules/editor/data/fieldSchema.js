@@ -1,4 +1,20 @@
 import { ANOS } from '../config/editor.config.js';
+import { ICONES_SELO } from '../../profile/lib/iconesSelo.js';
+
+// As opcoes do icone do selo, em pares [valor gravado, rotulo mostrado].
+//
+// A lista de valores NAO e escrita aqui: ela sai de ICONES_SELO, que e a mesma fonte que o
+// render consulta e que o bundle registra no lucide. Duas listas divergem com o tempo, e a
+// divergencia aqui seria um icone oferecido no editor que simplesmente nao desenha na
+// pagina, sem erro nenhum (ver scripts/testar-icones.mjs).
+const ROTULO_ICONE = {
+  'code': 'Código', 'chef-hat': 'Chapéu de chef', 'scale': 'Balança', 'camera': 'Câmera',
+  'dumbbell': 'Halter', 'ruler': 'Régua', 'brain': 'Cérebro', 'music': 'Música',
+  'cake': 'Bolo', 'graduation-cap': 'Capelo', 'pen-tool': 'Caneta', 'briefcase': 'Maleta',
+  'sparkles': 'Brilhos', 'heart': 'Coração', 'star': 'Estrela', 'palette': 'Paleta',
+  'mic': 'Microfone', 'scissors': 'Tesoura', 'wrench': 'Chave inglesa', 'leaf': 'Folha',
+};
+const OPCOES_ICONE_SELO = [['', 'Sem ícone'], ...Object.keys(ICONES_SELO).map((k) => [k, ROTULO_ICONE[k] || k])];
 
 // FONTE UNICA de campo, tipo, rotulo e limite do editor. Zona [browser].
 //
@@ -73,7 +89,12 @@ export const CAMPOS_PERFIL = [
 
   { key: 'seo_title', tipo: 'texto', i18n: true, label: 'Título no Google e no WhatsApp', maxLength: 70, passo: 'fino' },
   { key: 'seo_description', tipo: 'texto', i18n: true, label: 'Descrição no Google e no WhatsApp', maxLength: 180, passo: 'fino' },
-  { key: 'badge_label', tipo: 'texto', label: 'Texto do selo', maxLength: 24, passo: 'fino', feature: 'custom' },
+  // O selo saiu do bump e subiu para o passo 1, junto com nome e profissao (migration 0014).
+  // Ele e a segunda coisa que se le no card, e enquanto morava nos "ajustes finos" atras de
+  // um cadeado o comprador so descobria que existia depois de publicar uma pagina que dizia
+  // que ele e vibecoder.
+  { key: 'badge_label', tipo: 'texto', label: 'Selo do seu perfil', help: 'Duas palavras que dizem o que você é. Ex: "Chef", "Advogada trabalhista", "Fotógrafo". Em branco, o selo não aparece.', maxLength: 24, passo: 1 },
+  { key: 'badge_icon', tipo: 'select', label: 'Ícone do selo', opcoes: OPCOES_ICONE_SELO, passo: 1 },
   { key: 'theme_accent', tipo: 'cor', label: 'Cor de destaque', padrao: '#7C5CFC', passo: 'fino', feature: 'custom' },
   { key: 'theme_plate_bg', tipo: 'cor', label: 'Fundo das placas', padrao: '#0b0b12', passo: 'fino', feature: 'custom' },
 ];
