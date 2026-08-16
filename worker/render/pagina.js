@@ -7,6 +7,13 @@ import { montarCtx, urlMidia } from '../../src/modules/portfolio/lib/ctx.js';
 
 export { montarCtx };
 
+// Prefixo dos portfolios de demonstracao. O slug e a unica marca que atravessa o Worker, o
+// banco e a URL sem precisar de coluna nova, e a checagem e de PREFIXO e nao de igualdade:
+// `demo` sozinho ja e rotulo reservado (worker/lib/reservados.js), entao nenhum cliente
+// consegue registrar `demo-<qualquer coisa>` por engano e cair nesta regra sem querer.
+const PREFIXO_DEMO = 'demo-';
+export const ehDemo = (slug) => typeof slug === 'string' && slug.startsWith(PREFIXO_DEMO);
+
 // Monta o HTML de um tenant: shell buildado + <head> proprio + payload injetado + o mesmo
 // render que roda no navegador.
 //
@@ -48,7 +55,13 @@ function montarHead(ctx) {
   if (heroi) linhas.push(`<link rel="preload" as="image" href="${esc(heroi)}" fetchpriority="high" />`);
   // Previa e rascunho de cliente: fora do indice, e o header X-Robots-Tag e cinto, este meta
   // e suspensorio.
-  if (ctx.isPreview) linhas.push(`<meta name="robots" content="noindex, nofollow" />`);
+  //
+  // As paginas de DEMONSTRACAO entram na mesma regra. Elas sao portfolios inventados, de
+  // personas que nao existem, criados para testar o produto com dez profissoes diferentes, e
+  // moram em producao porque nao existe ambiente de teste com subdominio curinga. Sao paginas
+  // reais no dominio comercial: indexa-las significaria o Google mostrando "Marina Salgueiro,
+  // chef" como se fosse gente, no dominio onde clientes de verdade publicam.
+  if (ctx.isPreview || ehDemo(ctx.slug)) linhas.push(`<meta name="robots" content="noindex, nofollow" />`);
 
   return linhas.join('\n    ');
 }

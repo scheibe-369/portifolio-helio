@@ -9,7 +9,7 @@ import {
   apagarTenant,
   carimbar,
 } from '../lib/cache.js';
-import { montarCtx, montarHtml } from '../render/pagina.js';
+import { montarCtx, montarHtml, ehDemo } from '../render/pagina.js';
 import { PAYLOAD_V_CORRENTE } from '../lib/env.js';
 import { naoExiste, bloqueado, indisponivel } from '../render/paginas.js';
 
@@ -34,6 +34,11 @@ function html(corpo, status, extras = {}) {
   return new Response(corpo, { status, headers: h });
 }
 
+// O cinto do noindex das paginas de demonstracao. O suspensorio e a meta tag, escrita em
+// worker/render/pagina.js; o header existe porque ele vale mesmo para quem le a resposta sem
+// interpretar o HTML, e porque uma pagina servida do CACHE nao passa pelo render de novo.
+const cabecalhoDemo = (slug) => (ehDemo(slug) ? { 'x-robots-tag': 'noindex, nofollow' } : {});
+
 // ROTA PRINCIPAL -------------------------------------------------------------
 export async function servirTenant({ request, url, slug, cfg, ctx }) {
   const previa = url.searchParams.get('previa');
@@ -55,7 +60,7 @@ export async function servirTenant({ request, url, slug, cfg, ctx }) {
   const ponteiro = await lerPonteiro(cfg, slug);
   if (ponteiro && ponteiro.fresco && ponteiro.portfolioId && ponteiro.contentHash) {
     const doc = await lerDocumento(cfg, ponteiro.portfolioId, ponteiro.contentHash);
-    if (doc) return carimbar(doc, { 'X-Portfolio-Cache': 'hit', 'cache-control': CACHE_VISITANTE });
+    if (doc) return carimbar(doc, { 'X-Portfolio-Cache': 'hit', 'cache-control': CACHE_VISITANTE, ...cabecalhoDemo(slug) });
   }
 
   // 2) Miss, que e o caso mediano deste produto (muitos tenants, poucas visitas cada, e o
@@ -114,7 +119,7 @@ export async function servirTenant({ request, url, slug, cfg, ctx }) {
   const pagina = montarCtx(cfg, { payload: r.payload, payloadV: r.payloadV, slug, url, payloadVCorrente: PAYLOAD_V_CORRENTE, vitrine: slug === cfg.apexSlug });
   if (!pagina) {
     const doc = await lerDocumento(cfg, r.portfolioId, r.contentHash);
-    if (doc) return carimbar(doc, { 'X-Portfolio-Cache': 'hit', 'cache-control': CACHE_VISITANTE });
+    if (doc) return carimbar(doc, { 'X-Portfolio-Cache': 'hit', 'cache-control': CACHE_VISITANTE, ...cabecalhoDemo(slug) });
     return await socorroOu503(cfg, { portfolioId: r.portfolioId });
   }
 
@@ -129,7 +134,7 @@ export async function servirTenant({ request, url, slug, cfg, ctx }) {
     payloadV: r.payloadV,
   });
 
-  return html(corpo, 200, { 'X-Portfolio-Cache': 'miss', 'cache-control': CACHE_VISITANTE });
+  return html(corpo, 200, { 'X-Portfolio-Cache': 'miss', 'cache-control': CACHE_VISITANTE, ...cabecalhoDemo(slug) });
 }
 
 // SOCORRO --------------------------------------------------------------------
