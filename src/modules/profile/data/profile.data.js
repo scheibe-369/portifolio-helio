@@ -13,6 +13,14 @@ export const profile = {
   // CTA do painel de perfil. Estava hard-coded no componente; na versao vendida cada
   // comprador poe o link dele, entao ja nasce como dado.
   ctaUrl: 'https://cal.com/growth-hub/reuniao-gh',
+  // O selo do card de perfil. Estes tres campos existem no banco desde a 0002 e viajavam no
+  // payload sem consumidor: o componente imprimia "VibeCoder" e o icone de codigo literais,
+  // entao TODO comprador publicava uma pagina dizendo que e vibecoder. Aqui eles aparecem
+  // como dado pelo mesmo motivo de heroObjectPosition e ctaUrl: esta fixture e o espelho da
+  // linha real do Helio no banco, e e ela que o snapshot usa como baseline.
+  badgeLabel: 'VibeCoder',
+  badgeIcon: 'code',
+  showOnlineDot: true,
   bio: {
     pt: 'Especialista em automação com IA e desenvolvedor full-stack com 3+ anos de experiência construindo agentes de IA, automações e plataformas SaaS de ponta a ponta. Lidero a frente técnica de uma agência de IA e automação, de SaaS multi-tenant a CRMs com IA, e formo uma comunidade de 30+ alunos na ION Academy. Autodidata e movido a resultado, estou aberto a novas oportunidades.',
     en: 'AI automation specialist and full-stack developer with 3+ years of experience building AI agents, automations and SaaS platforms end to end. I lead the technical side of an AI and automation agency, from multi-tenant SaaS to AI-powered CRMs, and I teach a community of 30+ students at ION Academy. Self-taught and results-driven, I am open to new opportunities.',

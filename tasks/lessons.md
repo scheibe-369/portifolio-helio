@@ -219,3 +219,39 @@ pedido nao existiria em lugar nenhum.
 - Caminho que so roda em situacao rara (reembolso, chargeback, exclusao de conta) precisa de
   teste de fumaca no dia em que e escrito. Ele nao tem usuario para descobrir o defeito, e
   quando tiver, a pessoa ja vai estar irritada e com razao.
+
+## A suite inteira passou verde enquanto o campo de video estava 100% quebrado (16/08/2026)
+
+**O que aconteceu:** `parseYoutubeId` devolvia string ou `null`, e os tres chamadores
+(`primitivos.js:221`, `formulario.js:89`, `projectsApi.js:58`) liam `.id` e `.orientation`,
+porque foram escritos contra a secao 6.6 do plano. O modulo ficou para tras da spec e ninguem
+percebeu.
+
+**O efeito, que era duplo e silencioso:** link VALIDO caia em `!r.id` (undefined) e o editor
+respondia "nao reconheci este link do YouTube", **bloqueando o salvar**; link invalido devolvia
+`null` e `r.id` lancava TypeError, derrubando o formulario. Ou seja: **nenhum comprador
+conseguia salvar um projeto com video**. Como `has_video` e coluna gerada de `youtube_id`, a
+invariante editorial "video primeiro" (`projects_video_first`) nunca disparava e a badge de
+play nunca aparecia. O campo existe no editor, no passo "Provas", e vende conversao.
+
+**Por que nada pegou:** o `npm run verificar` tem quatro ferramentas e nenhuma olha para
+ali. O build compila (JS nao tem tipo), o `import-graph` confere fronteira de execucao, o
+`dom-diff` compara a pagina publica (e o defeito e do editor) e o `medir-render` mede tempo.
+**Quatro luzes verdes sobre um caminho que nenhuma delas percorre.** E a mesma familia da
+licao de 14/08: o teste provava a minha suposicao, nao a realidade.
+
+**Regra pra proxima vez:**
+- **Quando um modulo e escrito contra uma spec e os chamadores tambem, alguem tem que checar
+  que os dois falam a mesma lingua.** Em JS isso nao aparece em build: `undefined` propaga
+  calado e so vira sintoma na mao do cliente. Ao mudar a FORMA de um retorno, grep nos
+  chamadores no mesmo commit, sempre.
+- **Todo campo de formulario que o comprador preenche precisa de um teste que o exercite de
+  ponta a ponta.** Nao basta o render estar certo: entre o que ele digita e o que o banco
+  guarda tem parser, validador e patch, e nenhum dos tres esta na pagina publica que o
+  dom-diff vigia.
+- **O teste tem que ser capaz de falhar, e isso se demonstra, nao se afirma.** Aqui o defeito
+  foi reintroduzido de proposito e o `testar-youtube.mjs` reprovou com 31 falhas antes de
+  entrar na suite. Sem essa demonstracao, um teste novo e so mais uma luz verde.
+- Ao achar um defeito assim, **procurar os irmaos dele**: o mesmo commit achou um parser
+  ad-hoc (`split('/').pop()`) no `draftState.js`, que fazia o previa do editor mentir sobre a
+  propria pagina.

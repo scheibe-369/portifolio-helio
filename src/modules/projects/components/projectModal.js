@@ -47,9 +47,20 @@ export function renderProjectModal(p, lang) {
 
   // O dado guarda o id de 11 caracteres; quem monta a URL do embed e este render, no
   // instante da pintura. Ver src/modules/projects/lib/youtube.js.
+  //
+  // A PROPORCAO VEM DO DADO. Shorts e vertical, e ate 16/08/2026 este bloco cravava
+  // `aspect-video` para todo mundo: um Short entrava numa moldura 16:9 e o YouTube o
+  // devolvia com duas tarjas pretas ocupando a maior parte da largura. A coluna
+  // youtube_orientation existe desde a 0007 e o payload ja a publicava (0007:515); faltava
+  // consumidor. As duas classes sao LITERAIS no fonte de proposito: o Tailwind v4 varre o
+  // codigo e nao gera classe montada a partir de dado (risco R11 do plano).
+  const vertical = p.videoOrientation === 'portrait';
+  const molduraVideo = vertical
+    ? 'aspect-[9/16] max-w-[320px] mx-auto'
+    : 'aspect-video w-full';
   const videoHtml = p.videoId
     ? `
-          <div class="mt-5 aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black">
+          <div class="mt-5 ${molduraVideo} rounded-2xl overflow-hidden border border-white/10 bg-black">
             <iframe class="w-full h-full" src="https://www.youtube.com/embed/${esc(p.videoId)}?rel=0" title="${nome}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
           </div>`
     : '';

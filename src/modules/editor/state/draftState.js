@@ -4,6 +4,7 @@ import { APEX_HOST } from '../config/editor.config.js';
 import { carregarPortfolio, ehTitular as consultarTitular, perfilDaLinha } from '../api/portfolioApi.js';
 import { carregarProjetos, projetoDaLinha } from '../api/projectsApi.js';
 import { carregarExperiencias, experienciaDaLinha } from '../api/experiencesApi.js';
+import { parseYoutubeId } from '../../projects/lib/youtube.js';
 
 // Rascunho do editor: as linhas do banco, em memoria, e o `ctx` que o canvas consome.
 // Zona [browser].
@@ -150,7 +151,16 @@ export function montarPayloadDoRascunho() {
       plateBg: cor(p.plate_bg, '#0b0b12'),
       fit: p.image_fit === 'cover' ? 'cover' : undefined,
       imagePath: p.image_path || undefined,
-      videoId: p.video ? p.video.split('/').pop() : undefined,
+      // O previa usa o MESMO parser do salvar, e nao um split de barra. Com o split, um link
+      // no formato `watch?v=ID` virava o id "watch?v=ID" e o iframe do previa nascia morto,
+      // enquanto o que ia para o banco estava certo: o editor mentia sobre a propria pagina.
+      // E sem a orientacao o previa mostrava todo Short deitado.
+      ...(() => {
+        const yt = p.video ? parseYoutubeId(p.video) : null;
+        return yt && yt.id
+          ? { videoId: yt.id, videoOrientation: yt.orientation || 'horizontal' }
+          : { videoId: undefined, videoOrientation: undefined };
+      })(),
       tagline: p.tagline,
       problem: p.problem || undefined,
       solution: p.solution || undefined,

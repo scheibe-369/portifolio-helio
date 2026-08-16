@@ -1,6 +1,6 @@
 import { px } from '../lib/projectField.js';
 import { t, tui } from '../../../app/i18n.js';
-import { esc, safeColor } from '../../portfolio/lib/sanitize.js';
+import { esc, safeColor, safeUrl } from '../../portfolio/lib/sanitize.js';
 
 // Badge de "play" pra cards que têm vídeo.
 const PLAY_BADGE = `
@@ -19,7 +19,16 @@ const card = (p, lang, grupos) => {
   return `
         <div data-slug="${esc(p.slug)}" data-groups="${esc(grupos)}" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
           <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: ${safeColor(p.plateBg)};">
-            <img src="${esc(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105">
+            ${
+              // SEM IMAGEM, NAO SAI <img>. Nem todo trabalho tem print: um caso de uma
+              // advogada, uma consultoria, uma aula. O card continua de pe com a placa e a
+              // categoria, e o titulo passa a ocupar o espaco da imagem. Antes saia
+              // `src=""`, que faz o navegador rebuscar o proprio documento como imagem e
+              // desenha o icone de figura quebrada em cima da placa colorida.
+              p.image
+                ? `<img src="${safeUrl(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105">`
+                : `<span class="px-5 text-center text-[13px] font-semibold leading-snug text-white/70">${nome}</span>`
+            }
             <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
               ${esc(px(p, 'category', lang))}
             </span>${p.videoId ? PLAY_BADGE : ''}
@@ -44,6 +53,10 @@ const filterOption = (g, lang) => `
 // precisa desse texto para recontar. Antes ela chamava tui() direto, o que a obrigava a
 // conhecer o idioma, que e estado. Lendo do DOM, ela vira pura em relacao a idioma.
 export function renderProjectsSection(projects, lang, { projectGroups, filterGroups }) {
+  // Grade vazia nao desenha secao, mesma regra das stacks e da experiencia. Sem isto, quem
+  // acabou de comprar publicava um card escrito "Meus Projetos / 0 cases" com um funil de
+  // filtro que nao filtra nada, e essa e a primeira coisa que ele mostraria para alguem.
+  if (!Array.isArray(projects) || !projects.length) return '';
   const rotuloCases = esc(tui('cases', lang));
   return `
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4">

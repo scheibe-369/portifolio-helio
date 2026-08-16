@@ -7,6 +7,11 @@ const chip = (s) =>
 // Carrossel infinito de stacks. O track é renderizado 2x para o loop ser contínuo
 // (a animação desloca translateX(-50%) = exatamente uma cópia).
 export function renderStacksMarquee(stacks, lang) {
+  // Lista vazia nao desenha secao. E a mesma regra que experienceSection.js:63 ja seguia, e
+  // faltava aqui: o comprador que ainda nao preencheu via um card com o titulo e um vazio
+  // dentro, animando para os lados. No editor existe um bloco de estado vazio proprio para
+  // dar alvo de clique; na pagina publica, seccao sem conteudo e so ruido.
+  if (!Array.isArray(stacks) || !stacks.length) return '';
   const row = stacks.map(chip).join('');
   return `
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4"
