@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "contem": "class=\"relative shrink-0\"",
+    "porque": "16/08/2026: sem shrink-0 o flex do card de perfil espremia a foto quando o nome quebrava em duas linhas, e o avatar de 512x512 virava uma tira de ~25px. O nome do Helio cabe numa linha so, entao a baseline nunca mostrou o defeito; quem achou foi a persona de teste 'Marina Salgueiro'. Duas entradas porque a classe entra no container e no proprio <img>."
+  },
+  {
+    "contem": "rounded-full shrink-0 w-14",
+    "porque": "16/08/2026: par da entrada acima, no <img> do avatar. Ver src/modules/profile/components/profilePanel.js."
+  }
+]

@@ -114,8 +114,16 @@ export function pintarCanvas(ctx, { temExperiencia }) {
     // Uma ancora por entrada, casada por indice com a lista do ctx: a secao publica nao imprime
     // o slug em atributo nenhum, e acrescentar um so para o editor seria markup de editor no
     // HTML de todo visitante.
+    // `:scope > ul > li` e nao `ul > li`, e a diferenca nao e estilo.
+    //
+    // A secao tem DUAS profundidades de lista: o <ul> das entradas e, dentro de cada entrada,
+    // um <ul> com os marcadores dos destaques. `ul > li` casava os dois e a numeracao saia
+    // embaralhada: o lapis do primeiro marcador da primeira entrada abria o formulario da
+    // SEGUNDA experiencia, e as entradas do fim ficavam sem ponto de edicao nenhum. So
+    // aparece quando a primeira entrada tem destaques, que e o caso normal de quem preencheu
+    // direito, e por isso passou despercebido.
     const lista = ctx.portfolio.experience;
-    experiencia.querySelectorAll('ul > li').forEach((li, i) => {
+    experiencia.querySelectorAll(':scope > ul > li').forEach((li, i) => {
       if (!lista[i]) return;
       li.insertAdjacentHTML('beforeend', alvo(`experiencia:${lista[i].slug}`, 'Editar', 'e-canto'));
     });

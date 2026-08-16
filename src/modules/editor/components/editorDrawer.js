@@ -58,13 +58,35 @@ export function abrirGaveta({ titulo, subtitulo = '', html, rodape = '', aoLigar
 
 // Troca so o corpo, mantendo o cabecalho e a rolagem. E o que permite repintar o formulario a
 // cada clique em switch sem a gaveta piscar inteira.
+//
+// O NO E SUBSTITUIDO, e nao so o innerHTML dele. Esta e a correcao de um defeito que atingia
+// todo comprador e nao aparecia em log nenhum.
+//
+// ligarFormulario() registra os ouvintes NO PROPRIO no do corpo, por delegacao. Trocar
+// `corpo.innerHTML` destroi os filhos e os ouvintes DELES, mas o corpo continua sendo o mesmo
+// elemento, com os ouvintes antigos intactos, e ligarFormulario e chamado de novo logo em
+// seguida. Cada repintura somava mais um jogo completo de ouvintes ao mesmo no.
+//
+// O efeito era proporcional ao numero de repinturas, e devastador:
+//   . switch com N ouvintes executa `valores[k] = !valores[k]` N vezes, entao depois do
+//     primeiro clique ele nunca mais desliga. Foi assim que uma formacao concluida em 2014
+//     foi publicada como "DESDE 2010": o campo de fim so nasce quando o switch "estou aqui
+//     ate hoje" desliga, e ele nao desligava.
+//   . remover um chip filtra a lista N vezes e leva N itens junto: um clique apagou dez
+//     especialidades de uma vez.
+//
+// `cloneNode(false)` copia o elemento e os atributos e NAO copia ouvinte nenhum, entao o no
+// novo nasce limpo. E a forma mais barata de garantir que ligarFormulario seja sempre o
+// primeiro e unico a registrar.
 export function repintarCorpo(html, aoLigar) {
   const corpo = raiz?.querySelector('[data-gaveta-corpo]');
   if (!corpo) return;
   const rolagem = corpo.scrollTop;
-  corpo.innerHTML = html;
-  corpo.scrollTop = rolagem;
-  aoLigar?.(corpo, raiz);
+  const novo = corpo.cloneNode(false);
+  novo.innerHTML = html;
+  corpo.replaceWith(novo);
+  novo.scrollTop = rolagem;
+  aoLigar?.(novo, raiz);
 }
 
 export function fecharGaveta() {

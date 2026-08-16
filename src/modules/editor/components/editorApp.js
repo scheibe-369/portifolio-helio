@@ -1,4 +1,5 @@
-import { createIcons, Code, ArrowRight, ArrowUpRight } from 'lucide';
+import { createIcons } from 'lucide';
+import { ICONES_LUCIDE } from '../../profile/lib/iconesLucide.js';
 import { renderCasca, pintarCanvas } from './editorShell.js';
 import { renderWizardSlug, initWizardSlug } from './wizardSlug.js';
 import { carregarRascunho, getRascunho, montarCtxDoRascunho } from '../state/draftState.js';
@@ -37,7 +38,10 @@ export async function montarEditor({ raiz, temCustom, aoAbrirConta }) {
       statusPublicacao: portfolio.first_published_at ? 'no_ar' : 'rascunho',
     });
     pintarCanvas(montarCtxDoRascunho(), { temExperiencia: experiencias.length > 0 });
-    createIcons({ icons: { Code, ArrowRight, ArrowUpRight } });
+    // O MESMO mapa do bundle publico. Com tres icones fixos aqui, o selo que o comprador
+    // acabou de escolher desenhava na pagina publicada e NAO desenhava no previa do editor,
+    // que e onde ele decide se gostou. Duas listas de icone e uma delas sempre fica para tras.
+    createIcons({ icons: ICONES_LUCIDE });
     requestAnimationFrame(() => raiz.classList.add('ready'));
   };
 

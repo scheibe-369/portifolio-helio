@@ -255,3 +255,38 @@ licao de 14/08: o teste provava a minha suposicao, nao a realidade.
 - Ao achar um defeito assim, **procurar os irmaos dele**: o mesmo commit achou um parser
   ad-hoc (`split('/').pop()`) no `draftState.js`, que fazia o previa do editor mentir sobre a
   propria pagina.
+
+## Trocar innerHTML nao remove ouvinte do proprio no, e isso publicou dado errado (16/08/2026)
+
+**O que aconteceu:** `repintarCorpo` (`editorDrawer.js`) trocava `corpo.innerHTML` e chamava
+`ligarFormulario` de novo. Os ouvintes do formulario sao registrados POR DELEGACAO no proprio
+no do corpo, e trocar o innerHTML destroi os filhos, nao o pai. Cada repintura somava mais um
+jogo completo de ouvintes ao mesmo elemento.
+
+**O efeito, proporcional ao numero de repinturas:**
+- Switch executa `valores[k] = !valores[k]` N vezes. Com N par, o clique nao faz nada: depois
+  do primeiro clique o interruptor nunca mais desliga.
+- Remover um chip filtra a lista N vezes e leva N itens: **um clique apagou dez
+  especialidades**.
+- E o pior, porque chegou na pagina publicada: o campo "ate quando" so nasce quando o switch
+  "ainda estou aqui" desliga. Como ele nao desligava, **duas personas publicaram formacao
+  concluida como "DESDE 2012"**, uma delas dizendo que uma psicologa formada ha dez anos ainda
+  esta cursando.
+
+**Por que nada pegou:** zero erro de console, zero resposta HTTP 4xx/5xx, zero diff de DOM na
+pagina publica (o defeito e do editor). O `npm run verificar` inteiro passava verde. Foram
+tres personas de teste diferentes esbarrando no mesmo comportamento que fizeram o padrao
+aparecer.
+
+**Regra pra proxima vez:**
+- **Ao repintar por innerHTML, substitua o NO, nao o conteudo dele.** `no.cloneNode(false)` +
+  `replaceWith` devolve um elemento identico e sem ouvinte nenhum, e custa uma linha. Se o
+  codigo re-registra ouvinte depois de repintar, essa e a unica forma barata de garantir que
+  ele seja o primeiro e unico.
+- **Defeito de estado acumulado nao aparece na primeira interacao.** Todo teste de formulario
+  que repinta precisa clicar no MESMO controle pelo menos tres vezes e conferir que o valor
+  alterna todas as vezes. Clicar uma vez e ver funcionar e o teste que este defeito passava.
+- **Uma pessoa de teste acha um bug; dez acham um padrao.** O que tornou este achado possivel
+  foi rodar dez perfis diferentes contra o mesmo produto: o mesmo defeito apareceu com sintomas
+  completamente diferentes (chip sumindo, switch travado, data errada publicada), e nenhum dos
+  tres sozinho apontaria para a causa.

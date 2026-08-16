@@ -50,9 +50,13 @@ const renderAvatar = (profile) => {
   const nome = String(profile.name || '').trim();
   if (!profile.avatar) {
     const iniciais = nome.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
-    return `<div class="w-14 h-14 ring-white/10 ring-2 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-white/70" aria-label="${esc(nome)}">${esc(iniciais || '?')}</div>`;
+    return `<div class="w-14 h-14 shrink-0 ring-white/10 ring-2 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-white/70" aria-label="${esc(nome)}">${esc(iniciais || '?')}</div>`;
   }
-  return `<img src="${safeUrl(profile.avatar)}" alt="${esc(nome)} Avatar" loading="lazy" decoding="async" class="w-14 h-14 object-cover ring-white/10 ring-2 rounded-full">`;
+  // `shrink-0` NAO E ENFEITE. Sem ele o flex do card espreme a foto quando o nome quebra em
+  // duas linhas, e o avatar de 512x512 vira uma tira vertical de ~25px de largura. O gatilho
+  // e nome comprido, ou seja quase todo nome brasileiro com sobrenome: o do Helio cabe numa
+  // linha so e por isso a baseline nunca mostrou o defeito.
+  return `<img src="${safeUrl(profile.avatar)}" alt="${esc(nome)} Avatar" loading="lazy" decoding="async" class="w-14 h-14 shrink-0 object-cover ring-white/10 ring-2 rounded-full">`;
 };
 
 // O botao principal. Duas coisas mudaram aqui.
@@ -89,7 +93,7 @@ export function renderProfilePanel(profile, lang) {
     <!-- Card de Perfil -->
     <div class="flex flex-col sm:flex-row sm:items-stretch sm:justify-between glass-card rounded-3xl p-6 gap-5">
       <div class="flex items-center gap-4">
-        <div class="relative">
+        <div class="relative shrink-0">
           ${renderAvatar(profile)}
           ${profile.showOnlineDot === false ? '' : `<span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full shadow-lg"></span>`}
         </div>

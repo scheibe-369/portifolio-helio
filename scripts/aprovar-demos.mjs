@@ -54,23 +54,51 @@ if (!APLICAR) {
   process.exit(0);
 }
 
-// A aprovacao vai pela funcao interna e nao pela RPC de admin porque a RPC exige uma SESSAO
-// de administrador, e este e um script de operacao rodando com a Management API. O efeito no
-// banco e o mesmo, e o filtro de slug e o que mantem o alcance restrito as demos.
+// O QUE ESTE BLOCO FAZ e exatamente o que admin_approve_first_publish faz (0004:324): marca
+// a aprovacao no portfolio, decide a linha da fila e chama publicar_interno, que e quem
+// monta o snapshot e liga o is_live.
+//
+// POR QUE REPLICADO E NAO CHAMADO: a RPC comeca com `if not is_admin() then raise`, e
+// is_admin() le o e-mail da SESSAO. Este script roda pela Management API, sem JWT nenhum,
+// entao nao existe sessao para ler e a RPC recusaria. O filtro `slug like 'demo-%'` e o que
+// mantem o alcance: a fila continua sendo conferida na mao para comprador de verdade, que e
+// a unica razao de ela existir.
+//
+// `app.escrita_confiavel` precisa estar ligado porque first_publish_approved_at e coluna
+// protegida por trigger de guarda, e ela e desligada no mesmo comando (regra do projeto:
+// marca de escrita confiavel nunca atravessa transacao).
 for (const d of DEMOS) {
   try {
     const r = await q(`
-      update myportifolio.portfolio_publications pp
-         set is_live = true
+      do $$
+      declare v_id uuid;
+      begin
+        select id into v_id from myportifolio.portfolios where slug = '${d.slug}';
+        if v_id is null then return; end if;
+        if not exists (select 1 from myportifolio.publish_reviews where portfolio_id = v_id) then return; end if;
+
+        perform set_config('app.escrita_confiavel', 'on', true);
+        update myportifolio.portfolios
+           set first_publish_approved_at = now(),
+               first_publish_approved_by = 'script aprovar-demos'
+         where id = v_id and first_publish_approved_at is null;
+        perform set_config('app.escrita_confiavel', 'off', true);
+
+        update myportifolio.publish_reviews
+           set decided_at = now(), decided_by = 'script aprovar-demos', decision = 'aprovado'
+         where portfolio_id = v_id and decided_at is null;
+
+        perform myportifolio.publicar_interno(v_id);
+      end $$;
+      select p.slug, coalesce(pp.is_live,false) as no_ar
         from myportifolio.portfolios p
-       where pp.portfolio_id = p.id
-         and p.slug = '${d.slug}'
-         and pp.id = (select id from myportifolio.portfolio_publications
-                       where portfolio_id = p.id order by created_at desc limit 1)
-      returning p.slug;`);
-    console.log(r.length ? `no ar  ${d.slug}` : `nada   ${d.slug} (ainda nao publicou)`);
+        left join lateral (select is_live from myportifolio.portfolio_publications
+           where portfolio_id = p.id order by created_at desc limit 1) pp on true
+       where p.slug = '${d.slug}';`);
+    const linha = r[r.length - 1];
+    console.log(linha && linha.no_ar ? `no ar  ${d.slug}` : `nada   ${d.slug} (sem pedido na fila)`);
   } catch (e) {
-    console.log(`erro   ${d.slug}: ${e.message.slice(0, 120)}`);
+    console.log(`erro   ${d.slug}: ${e.message.slice(0, 160)}`);
   }
 }
 

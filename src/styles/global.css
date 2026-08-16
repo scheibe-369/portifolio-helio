@@ -148,11 +148,17 @@ body {
 
 .btn-text {
   height: 100%;
-  width: auto;
+  /* O rotulo vem do comprador (cta_label), e "Chamar no WhatsApp" nao cabe nos 160px do
+     botao. Com display:flex o texto anonimo nao recebe text-overflow, entao ele era cortado
+     no meio da palavra: a pagina publicava "CHAMAR NO WHATSA". Em bloco, com line-height
+     igual a altura do botao, a centralizacao optica e a mesma e o texto que nao cabe ganha
+     reticencia em vez de amputacao. */
+  display: block;
+  line-height: 44px;
+  max-width: calc(100% - 60px);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: white;
   z-index: 1;
   transition-duration: 0.3s;
