@@ -53,6 +53,9 @@ function montarPortfolio(cfg, payload, { origem }) {
     ...p,
     image: urlMidia(cfg, p.imagePath),
     plateBg: placa(p.plateBg),
+    // A galeria guarda caminho relativo, como toda midia (achado 12): a URL absoluta nasce
+    // aqui, no instante do request.
+    gallery: (p.gallery || []).map((caminho) => urlMidia(cfg, caminho)),
     // A cor de destaque de um projeto sem cor propria passa a ser a do tema. Antes ela era o
     // roxo de fabrica, entao a borda do modal e o check dos itens saiam roxos numa pagina
     // inteira em ambar.

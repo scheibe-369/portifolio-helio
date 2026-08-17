@@ -46,6 +46,20 @@ export function projetoDaLinha(p) {
     image_mime: p.image_mime ?? '',
     image_fit: p.image_fit || 'cover',
     image_position: p.image_position ?? '50% 50%',
+    // A galeria vira uma linha por caminho no formulario, que e como o primitivo de linhas
+    // ja funciona. O upload de cada foto continua sendo o mesmo pipeline do resto.
+    // A galeria e um ARRAY no banco e OITO CAMPOS no formulario, porque o motor de formulario
+    // e uma lista plana de chaves e o upload e por chave. A ponte e feita aqui e no patch, e as
+    // duas sao gemeas: mexer numa sem a outra faz a pessoa subir foto que nunca e gravada.
+    ...Object.fromEntries(
+      Array.from({ length: 8 }, (_, i) => {
+        const caminho = (p.gallery || [])[i] || '';
+        return [
+          [`gallery_${i + 1}_path`, caminho],
+          [`gallery_${i + 1}_url`, caminho ? `${base}/${caminho}` : ''],
+        ];
+      }).flat(),
+    ),
     accent: p.accent || '#7C5CFC',
     plate_bg: p.plate_bg || '#0b0b12',
     position: p.position ?? 0,
@@ -81,6 +95,13 @@ export function patchDoProjeto(v, linha = {}) {
     image_mime: ouNulo(v.image_mime),
     image_fit: v.image_fit === 'contain' ? 'contain' : 'cover',
     image_position: ouNulo(v.image_position),
+    // Os slots viram array na ordem, e buraco no meio e fechado: se a pessoa remover a foto 2
+    // de quatro, o banco recebe tres caminhos seguidos e nao um vazio no meio, que viraria um
+    // quadrado preto na galeria publicada.
+    gallery: Array.from({ length: 8 }, (_, i) => v[`gallery_${i + 1}_path`])
+      .map((c) => String(c || '').trim())
+      .filter(Boolean)
+      .slice(0, 8),
     accent: v.accent || '#7C5CFC',
     plate_bg: v.plate_bg || '#0b0b12',
   };

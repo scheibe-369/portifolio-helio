@@ -164,6 +164,26 @@ export const CAMPOS_PROJETO = [
   // nasceu, onde todo trabalho e uma logo de cliente ou um screenshot de sistema. Um fotografo,
   // uma confeiteira e um tatuador sobem FOTO, e nenhuma das duas palavras dizia nada para eles.
   // A ordem tambem inverteu: preencher passou a ser o primeiro porque virou o padrao.
+
+  // A GALERIA: ate oito fotos por trabalho, que aparecem dentro da janela do card.
+  //
+  // Os slots NASCEM UM DE CADA VEZ, e isso nao e economia de tela: oito areas de arrastar
+  // vazias empilhadas comunicam "voce precisa preencher oito", que e o oposto do que o
+  // produto quer dizer. Cada slot novo so existe quando o anterior tem foto, entao quem quer
+  // uma foto ve um campo e quem quer oito ve oito.
+  //
+  // Eles reusam o primitivo de imagem inteiro (upload, corte, conversao para WebP, cota) em
+  // vez de ganharem um campo proprio. Um primitivo novo aqui seria uma segunda implementacao
+  // do pipeline de midia, e a primeira ja e o lugar onde EXIF e payload escondido morrem.
+  ...Array.from({ length: 8 }, (_, i) => ({
+    key: `gallery_${i + 1}`,
+    tipo: 'imagem',
+    destino: 'project',
+    label: i === 0 ? 'Mais fotos deste trabalho' : `Foto ${i + 1}`,
+    help: i === 0 ? 'Aparecem dentro da janela quando alguém clica no card. Até oito.' : '',
+    passo: 3,
+    dependeDe: (v) => (i === 0 ? true : Boolean(v[`gallery_${i}_path`])),
+  })),
   { key: 'image_fit', tipo: 'select', label: 'Como a imagem se encaixa', opcoes: [['cover', 'Preencher o card'], ['contain', 'Caber inteira, com respiro']], passo: 'fino' },
   // Enquadramento, o mesmo controle que a foto do topo ja tinha. Ele so faz sentido quando a
   // imagem preenche o card: com "caber inteira" nao ha corte para reposicionar.

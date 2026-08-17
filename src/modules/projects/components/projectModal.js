@@ -66,6 +66,28 @@ export function renderProjectModal(p, lang, ui = {}) {
           </div>`
     : '';
 
+  // A GALERIA, quando o trabalho tem mais de uma foto.
+  //
+  // Ela mora dentro da janela e nao no card da grade de proposito: o card e uma miniatura numa
+  // grade de tres colunas, e enfiar oito fotos ali transformaria a pagina inteira num mosaico
+  // sem hierarquia. Aqui, depois da descricao, ela e o que a pessoa veio ver.
+  //
+  // Duas colunas em tela larga e uma no celular, cada foto na proporcao da placa. Todas
+  // `lazy`: elas estao dentro de um elemento que so entra no DOM quando o visitante clica.
+  const galeria = Array.isArray(p.gallery) && p.gallery.length
+    ? `
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${p.gallery
+              .map(
+                (src, i) => `
+            <div class="rounded-xl overflow-hidden border border-white/10 aspect-[3/2]" style="background-color: ${safeColor(p.plateBg)};">
+              <img src="${safeUrl(src)}" alt="${nome} ${i + 1}" loading="lazy" decoding="async" class="w-full h-full object-cover">
+            </div>`,
+              )
+              .join('')}
+          </div>`
+    : '';
+
   // Painel externo arredondado que RECORTA (overflow-hidden) + wrapper interno que rola.
   // Assim a scrollbar fica dentro do card e não vaza os cantos arredondados.
   return `
@@ -88,13 +110,23 @@ export function renderProjectModal(p, lang, ui = {}) {
             </div>
             <div>
               <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${nome}</h2>
-              <p class="text-[11px] uppercase tracking-widest text-white/40 mt-1">${esc(px(p, 'category', lang))} · ${esc(p.year)} · ${esc(p.client)}</p>
+              <!-- Categoria, ano e cliente, juntados so quando existem. Com os tres cravados
+                   numa string, um trabalho sem cliente publicava "RETRATO · 2025 ·", com o
+                   separador solto no fim, e um sem ano e sem cliente publicava dois. Nem toda
+                   profissao tem cliente: prato de menu autoral, tatuagem de fluxo e ensaio
+                   pessoal nao tem. -->
+              <p class="text-[11px] uppercase tracking-widest text-white/40 mt-1">${[px(p, 'category', lang), p.year, p.client]
+                .map((v) => String(v ?? '').trim())
+                .filter(Boolean)
+                .map(esc)
+                .join(' · ')}</p>
             </div>
           </div>
 
           <p class="text-sm text-white/80 leading-relaxed font-medium mt-5">${esc(px(p, 'tagline', lang))}</p>
           ${linkHtml}
           ${videoHtml}
+          ${galeria}
 
           <div class="mt-6 flex flex-col gap-5">
             ${block(rotulo(ui, 'challenge', lang), px(p, 'problem', lang))}
