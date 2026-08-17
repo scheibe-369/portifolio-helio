@@ -1,6 +1,6 @@
 import { esc } from '../../portfolio/lib/sanitize.js';
 import { abrirGaveta, repintarCorpo, fecharGaveta } from '../components/editorDrawer.js';
-import { renderFormulario, ligarFormulario, passosAbertos, validarTudo } from '../components/formulario.js';
+import { renderFormulario, ligarFormulario, passosAbertos, classificarValidacao } from '../components/formulario.js';
 import { processarImagem } from '../../media/lib/imageUpload.js';
 import { subirCertificado } from '../../media/lib/docUpload.js';
 import { apagarArquivo, urlAssinadaDoc, BUCKET_DOCS } from '../../media/lib/storage.js';
@@ -135,14 +135,23 @@ export function abrirFormulario({
       ligar(corpo);
 
       raiz.querySelector('#ed-form-salvar').addEventListener('click', async (e) => {
-        const erros = validarTudo(campos, valores);
-        const chaves = Object.keys(erros);
-        if (chaves.length) {
-          chaves.forEach((k) => {
-            const el = corpo.querySelector(`[data-campo="${CSS.escape(k)}"] [data-erro]`);
-            if (el) el.textContent = erros[k];
-          });
+        const { bloqueios, avisos } = classificarValidacao(campos, valores);
+        const mostrar = (mapa) => Object.keys(mapa).forEach((k) => {
+          const el = corpo.querySelector(`[data-campo="${CSS.escape(k)}"] [data-erro]`);
+          if (el) el.textContent = mapa[k];
+        });
+
+        if (Object.keys(bloqueios).length) {
+          mostrar(bloqueios);
           return mensagem('Confira os campos marcados.');
+        }
+
+        // Campo opcional que a gente nao entendeu sai do patch e o resto grava. Sem isto, um
+        // link de Spotify colado no campo de video segurava o trabalho inteiro.
+        const chavesAviso = Object.keys(avisos);
+        if (chavesAviso.length) {
+          mostrar(avisos);
+          chavesAviso.forEach((k) => { valores[k] = ''; });
         }
         e.target.disabled = true;
         mensagem('salvando...', 'neutro');

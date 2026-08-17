@@ -206,12 +206,34 @@ export function ligarFormulario(raiz, { campos, valores, aoMudar, aoArquivo, aoC
 
 // Erros de campo obrigatorio, antes de mandar para o banco. Nao substitui o CHECK: evita a
 // viagem de rede que voltaria com uma mensagem de constraint que ninguem entende.
-export function validarTudo(campos, valores) {
-  const erros = {};
+// UM CAMPO OPCIONAL MAL PREENCHIDO NAO PODE SEGURAR O RESTO DO FORMULARIO.
+//
+// Ate 16/08/2026 todo erro de validacao era bloqueio: quem colava um link do Spotify no campo
+// de video (opcional, no passo 3) recebia "Confira os campos marcados" e o trabalho INTEIRO
+// nao gravava. A pessoa tinha escrito nome, descricao, categoria e subido foto, e perdia tudo
+// por causa de um campo que ela nem precisava preencher.
+//
+// A separacao e por consequencia, e nao por tipo de campo:
+//
+//   BLOQUEIO  o que o banco tambem recusaria e que nao da para contornar sozinho: campo
+//             obrigatorio vazio, e periodo que termina antes de comecar. Deixar passar aqui
+//             seria trocar uma mensagem clara por um erro de constraint depois de salvar.
+//   AVISO     formato que a gente nao reconhece num campo opcional. O resto grava, o campo
+//             fica de fora, e a mensagem continua na tela dizendo por que.
+//
+// O campo com aviso e LIMPO antes do patch, e isso e deliberado: gravar um link invalido
+// bateria no CHECK do banco e viraria bloqueio de novo, so que mais tarde e com mensagem pior.
+const BLOQUEIA_SEMPRE = new Set(['period_end']);
+
+export function classificarValidacao(campos, valores) {
+  const bloqueios = {};
+  const avisos = {};
   for (const campo of campos) {
     if (campo.dependeDe && !campo.dependeDe(valores)) continue;
     const msg = validarCampo(campo, valores[campo.key], valores);
-    if (msg) erros[campo.key] = msg;
+    if (!msg) continue;
+    if (campo.obrigatorio || BLOQUEIA_SEMPRE.has(campo.key)) bloqueios[campo.key] = msg;
+    else avisos[campo.key] = msg;
   }
-  return erros;
+  return { bloqueios, avisos };
 }

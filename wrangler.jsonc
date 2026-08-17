@@ -35,7 +35,7 @@
     // md5 do PAYLOAD: mudanca que so mexe no render nao muda o hash, entao sem trocar isto
     // a borda continuaria servindo o HTML antigo por ate um ano, e nenhum token da conta tem
     // permissao de purge.
-    "CACHE_NS": "v16",
+    "CACHE_NS": "v17",
     // O apex serve o portfolio do Helio pelo mesmo caminho de tenant (secao 9.8).
     "APEX_SLUG": "helio",
     // O projeto Supabase e compartilhado com o AI Block: tudo deste produto vive em schema
