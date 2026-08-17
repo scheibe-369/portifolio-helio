@@ -57,6 +57,9 @@ function montarPortfolio(cfg, payload, { origem }) {
       stats: perfil.stats || [],
       socials: perfil.socials || [],
     },
+    // Os titulos que o dono da pagina reescreveu. Objeto vazio significa "usa os de hoje", e
+    // e o estado de todo tenant publicado antes da migration 0015.
+    uiLabels: payload.uiLabels || {},
     projects: projetos,
     stacks: payload.stacks || [],
     // `experiences` ausente e lista vazia, e nao erro: um tenant publicado ANTES da migration

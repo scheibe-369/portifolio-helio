@@ -1,4 +1,5 @@
 import { tui, tuin } from '../../../app/i18n.js';
+import { rotulo } from '../../../app/rotulos.js';
 import { ex } from '../lib/experienceField.js';
 import { iniciais } from '../lib/iniciais.js';
 import { esc, safeUrl, safeColor } from '../../portfolio/lib/sanitize.js';
@@ -59,12 +60,12 @@ const item = (e, lang) => {
 };
 
 // Seção "Experiência": lista vertical, uma entrada por passagem (trabalho ou estudo).
-export function renderExperienceSection(experience, lang) {
+export function renderExperienceSection(experience, lang, ui = {}) {
   if (!experience.length) return '';
   return `
     <div id="experiencia" class="flex flex-col glass-card rounded-3xl p-5 gap-1">
       <div class="flex items-center justify-between mb-1">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">${esc(tui('experience', lang))}</span>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">${esc(rotulo(ui, 'experience', lang))}</span>
         <span class="text-[10px] font-medium text-white/30">${experience.length} ${esc(tuin('experienceCount', experience.length, lang))}</span>
       </div>
       <ul class="flex flex-col">${experience.map((e) => item(e, lang)).join('')}

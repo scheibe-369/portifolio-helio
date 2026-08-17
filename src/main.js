@@ -94,6 +94,7 @@ render();
 initProjectModal(
   (slug) => (ctxCorrente?.portfolio?.projects || []).find((p) => p.slug === slug),
   () => getLang(),
+  () => ctxCorrente?.portfolio?.uiLabels || {},
 );
 initProjects();
 

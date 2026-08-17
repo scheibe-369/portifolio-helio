@@ -1,5 +1,6 @@
 import { px } from '../lib/projectField.js';
 import { tui } from '../../../app/i18n.js';
+import { rotulo } from '../../../app/rotulos.js';
 import { esc, safeUrl, safeColor } from '../../portfolio/lib/sanitize.js';
 
 // SVGs inline (evita uma 2ª chamada de createIcons que re-escaneia o DOM inteiro).
@@ -30,7 +31,7 @@ const block = (title, text) => {
 };
 
 // Conteudo do modal de um projeto. Puro: recebe projeto e idioma.
-export function renderProjectModal(p, lang) {
+export function renderProjectModal(p, lang, ui = {}) {
   const chipImgClass = p.fit === 'cover' ? 'object-cover' : 'object-contain p-2';
   const accent = safeColor(p.accent, '#ffffff');
   const nome = esc(px(p, 'name', lang));
@@ -39,7 +40,7 @@ export function renderProjectModal(p, lang) {
     ? `
           <div class="mt-5 flex items-center gap-3 flex-wrap">
             <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 glass-button rounded-full px-4 py-2 text-[11px] font-semibold text-white hover:border-white/30 transition">
-              ${esc(tui('visit', lang))} ${EXTERNAL_SVG}
+              ${esc(rotulo(ui, 'visit', lang))} ${EXTERNAL_SVG}
             </a>
             ${p.linkNote ? `<span class="text-[10px] text-white/40">${esc(px(p, 'linkNote', lang))}</span>` : ''}
           </div>`
@@ -76,7 +77,14 @@ export function renderProjectModal(p, lang) {
         <div class="max-h-[85vh] overflow-y-auto p-7 sm:p-8">
           <div class="flex items-center gap-4 pr-10">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 border border-white/10" style="background-color: ${safeColor(p.plateBg)};">
-              <img src="${esc(p.image)}" alt="${nome}" class="w-full h-full ${chipImgClass}">
+              ${
+                // Mesma regra do card da grade: sem imagem nao sai <img>, e a URL passa por
+                // safeUrl e nao por esc. Este era o ultimo `src` da arvore montado so com
+                // escape de HTML.
+                p.image
+                  ? `<img src="${safeUrl(p.image)}" alt="${nome}" class="w-full h-full ${chipImgClass}">`
+                  : `<span class="text-[11px] font-bold text-white/50">${esc((px(p, 'name', lang) || '?').slice(0, 2).toUpperCase())}</span>`
+              }
             </div>
             <div>
               <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${nome}</h2>
@@ -89,15 +97,15 @@ export function renderProjectModal(p, lang) {
           ${videoHtml}
 
           <div class="mt-6 flex flex-col gap-5">
-            ${block(tui('challenge', lang), px(p, 'problem', lang))}
-            ${block(tui('solution', lang), px(p, 'solution', lang))}
+            ${block(rotulo(ui, 'challenge', lang), px(p, 'problem', lang))}
+            ${block(rotulo(ui, 'solution', lang), px(p, 'solution', lang))}
             <div>
-              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(tui('features', lang))}</h3>
+              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(rotulo(ui, 'features', lang))}</h3>
               <ul class="flex flex-col gap-2">${(px(p, 'features', lang) || []).map((f) => feature(f, accent)).join('')}
               </ul>
             </div>
             <div>
-              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(tui('stackLabel', lang))}</h3>
+              <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(rotulo(ui, 'stackLabel', lang))}</h3>
               <div class="flex flex-wrap gap-2">${(px(p, 'stack', lang) || []).map(chip).join('')}
               </div>
             </div>

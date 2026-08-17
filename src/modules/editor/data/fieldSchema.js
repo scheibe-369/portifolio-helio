@@ -81,11 +81,35 @@ export const CAMPOS_PERFIL = [
   { key: 'socials', tipo: 'pares', label: 'Suas redes', help: 'Uma por linha, no formato: rótulo | texto ao lado | https://link', maxLength: 8, passo: 2 },
   { key: 'stats', tipo: 'pares', label: 'Números da capa', help: 'Um por linha, no formato: rótulo | valor', maxLength: 6, passo: 2 },
 
-  { key: 'stacks', tipo: 'chips', label: 'Stacks que você domina', help: 'Enter para adicionar.', maxLength: 40, passo: 3 },
+  // "Stacks" so faz sentido para quem escreve codigo. O campo continua sendo a mesma lista, e
+  // o nome dela na pagina agora e escolha da pessoa (rotulo_stacks, logo abaixo).
+  { key: 'stacks', tipo: 'chips', label: 'O que você usa no trabalho', help: 'Ferramentas, técnicas, materiais ou especialidades. Enter para adicionar.', maxLength: 40, passo: 3 },
   { key: 'show_online_dot', tipo: 'switch', label: 'Mostrar a bolinha de "disponível"', passo: 3 },
   { key: 'projects_video_first', tipo: 'switch', label: 'Projetos com vídeo primeiro', help: 'Case com vídeo converte mais. Ligado, eles sobem para o topo da grade.', passo: 3 },
   { key: 'projects_per_page', tipo: 'select', label: 'Projetos por página', opcoes: ['3', '4', '6', '8', '9', '12'], passo: 3 },
   { key: 'english_enabled', tipo: 'switch', label: 'Página em inglês', help: 'Na fase atual o conteúdo em inglês ainda não é editável: ligar isto serve para reservar o botão.', passo: 3 },
+
+  // OS TITULOS DAS SECOES, escritos pela pessoa. Vazio = o texto padrao, que e o de hoje.
+  //
+  // Eles moram no passo 3 ("A página") e nao nos ajustes finos porque, para quem nao e
+  // programador, trocar "Stacks Dominadas" por "Minhas especialidades" nao e ajuste fino: e a
+  // diferenca entre a pagina falar a lingua dela ou a de outra profissao. O placeholder de
+  // cada um mostra o padrao, entao ninguem precisa adivinhar o que acontece deixando vazio.
+  { key: 'rotulo_stacks', tipo: 'texto', i18n: true, label: 'Título da seção de especialidades', help: 'Ex: "Minhas especialidades", "Técnicas da casa", "Áreas de atuação". Vazio, fica "Stacks Dominadas".', maxLength: 40, passo: 3 },
+  { key: 'rotulo_projects', tipo: 'texto', i18n: true, label: 'Título da seção de trabalhos', help: 'Ex: "Meus pratos", "Ensaios", "Casos". Vazio, fica "Meus Projetos".', maxLength: 40, passo: 3 },
+  { key: 'rotulo_cases', tipo: 'texto', i18n: true, label: 'Como você chama cada trabalho', help: 'Aparece no contador, no plural. Ex: "receitas", "ensaios", "tatuagens". Vazio, fica "cases".', maxLength: 40, passo: 3 },
+  { key: 'rotulo_experience', tipo: 'texto', i18n: true, label: 'Título da seção de experiência', help: 'Ex: "Onde eu cozinhei", "Formação". Vazio, fica "Experiência".', maxLength: 40, passo: 3 },
+  { key: 'rotulo_about', tipo: 'texto', i18n: true, label: 'Título do texto sobre você', help: 'Vazio, fica "Sobre".', maxLength: 40, passo: 3 },
+
+  // Os quatro de dentro da janela de um trabalho. Ficam nos ajustes finos porque so aparecem
+  // depois que o visitante clica num card.
+  { key: 'rotulo_challenge', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: primeiro bloco', help: 'Vazio, fica "O Desafio".', maxLength: 40, passo: 'fino' },
+  { key: 'rotulo_solution', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: segundo bloco', help: 'Vazio, fica "A Solução".', maxLength: 40, passo: 'fino' },
+  { key: 'rotulo_features', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: lista de itens', help: 'Ex: "O que está incluído", "O que fizemos". Vazio, fica "Recursos".', maxLength: 40, passo: 'fino' },
+  { key: 'rotulo_stackLabel', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: lista de ferramentas', help: 'Ex: "Ingredientes", "Equipamento". Vazio, fica "Stack".', maxLength: 40, passo: 'fino' },
+  { key: 'rotulo_visit', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: texto do link', help: 'Vazio, fica "Acessar".', maxLength: 40, passo: 'fino' },
+
+  { key: 'avatar_shape', tipo: 'select', label: 'Formato da foto pequena', opcoes: [['circulo', 'Redonda'], ['oval', 'Oval']], passo: 'fino' },
 
   { key: 'seo_title', tipo: 'texto', i18n: true, label: 'Título no Google e no WhatsApp', maxLength: 70, passo: 'fino' },
   { key: 'seo_description', tipo: 'texto', i18n: true, label: 'Descrição no Google e no WhatsApp', maxLength: 180, passo: 'fino' },

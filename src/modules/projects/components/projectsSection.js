@@ -1,5 +1,6 @@
 import { px } from '../lib/projectField.js';
 import { t, tui } from '../../../app/i18n.js';
+import { rotulo } from '../../../app/rotulos.js';
 import { esc, safeColor, safeUrl } from '../../portfolio/lib/sanitize.js';
 
 // Badge de "play" pra cards que têm vídeo.
@@ -52,17 +53,17 @@ const filterOption = (g, lang) => `
 // O rótulo de "cases" vai para data-cases-label: applyProjects() roda DEPOIS do render e
 // precisa desse texto para recontar. Antes ela chamava tui() direto, o que a obrigava a
 // conhecer o idioma, que e estado. Lendo do DOM, ela vira pura em relacao a idioma.
-export function renderProjectsSection(projects, lang, { projectGroups, filterGroups }) {
+export function renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui = {} }) {
   // Grade vazia nao desenha secao, mesma regra das stacks e da experiencia. Sem isto, quem
   // acabou de comprar publicava um card escrito "Meus Projetos / 0 cases" com um funil de
   // filtro que nao filtra nada, e essa e a primeira coisa que ele mostraria para alguem.
   if (!Array.isArray(projects) || !projects.length) return '';
-  const rotuloCases = esc(tui('cases', lang));
+  const rotuloCases = esc(rotulo(ui, 'cases', lang));
   return `
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">${esc(tui('projects', lang))}</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver">${esc(rotulo(ui, 'projects', lang))}</span>
           <i data-lucide="arrow-right" class="h-3 w-3 text-white/20"></i>
         </div>
         <div class="flex items-center gap-3">

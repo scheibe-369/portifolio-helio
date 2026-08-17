@@ -1,4 +1,4 @@
-import { tui } from '../../../app/i18n.js';
+import { rotulo } from '../../../app/rotulos.js';
 import { esc } from '../../portfolio/lib/sanitize.js';
 
 const chip = (s) =>
@@ -6,7 +6,7 @@ const chip = (s) =>
 
 // Carrossel infinito de stacks. O track é renderizado 2x para o loop ser contínuo
 // (a animação desloca translateX(-50%) = exatamente uma cópia).
-export function renderStacksMarquee(stacks, lang) {
+export function renderStacksMarquee(stacks, lang, ui = {}) {
   // Lista vazia nao desenha secao. E a mesma regra que experienceSection.js:63 ja seguia, e
   // faltava aqui: o comprador que ainda nao preencheu via um card com o titulo e um vazio
   // dentro, animando para os lados. No editor existe um bloco de estado vazio proprio para
@@ -16,7 +16,7 @@ export function renderStacksMarquee(stacks, lang) {
   return `
     <div class="flex flex-col glass-card rounded-3xl p-5 gap-4"
       style="position: relative; --border-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent); --border-radius-before: 24px">
-      <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(tui('stacks', lang))}</span>
+      <span class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotulo(ui, 'stacks', lang))}</span>
       <div class="stacks-marquee">
         <div class="stacks-track">${row}${row}</div>
       </div>

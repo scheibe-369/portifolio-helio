@@ -1,6 +1,7 @@
 import { supabase } from '../../../shared/supabase/client.js';
 import { baseMidiaPublica } from '../../media/lib/storage.js';
 import { doI18n, paraI18n, ouNulo } from './mapear.js';
+import { CHAVES_ROTULO } from '../../../app/rotulos.js';
 
 // Acesso ao portfolio do comprador. Zona [browser].
 //
@@ -68,6 +69,12 @@ export function perfilDaLinha(pf) {
     show_online_dot: Boolean(pf.show_online_dot),
     badge_label: pf.badge_label ?? '',
     badge_icon: pf.badge_icon ?? '',
+    avatar_shape: pf.avatar_shape ?? 'circulo',
+    // ui_labels e UM objeto no banco e VARIOS campos no formulario, porque o motor de
+    // formulario e uma lista plana de chaves. A ponte e feita aqui e no patch, e em nenhum
+    // outro lugar: as duas funcoes sao gemeas e mexer numa sem a outra perde o texto que a
+    // pessoa escreveu.
+    ...Object.fromEntries(CHAVES_ROTULO.map((k) => [`rotulo_${k}`, doI18n((pf.ui_labels || {})[k])])),
     cta_url: pf.cta_url ?? '',
     cta_label: doI18n(pf.cta_label_i18n),
     theme_accent: pf.theme_accent ?? '#7C5CFC',
@@ -119,6 +126,16 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     // programador. O grant update das duas colunas foi aberto na mesma migration.
     badge_label: ouNulo(v.badge_label),
     badge_icon: ouNulo(v.badge_icon),
+    avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
+    // Chave so entra no objeto se tiver texto. Guardar `{"stacks": {"pt": ""}}` faria o
+    // render achar que existe rotulo proprio, e a regra de volta ao padrao (rotulos.js) teria
+    // que reproduzir aqui a mesma limpeza. Um lugar so decide, e e este.
+    ui_labels: Object.fromEntries(
+      CHAVES_ROTULO
+        .map((k) => [k, String(v[`rotulo_${k}`] ?? '').trim()])
+        .filter(([, texto]) => texto)
+        .map(([k, texto]) => [k, paraI18n(texto, (pf.ui_labels || {})[k])]),
+    ),
   };
 
   // AS SEIS COLUNAS DO BUMP SO ENTRAM NO PATCH QUANDO A CONTA COMPROU, e omiti-las nao e

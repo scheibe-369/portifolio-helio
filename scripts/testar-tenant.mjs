@@ -149,6 +149,51 @@ const checar = (nome, condicao, detalhe) => {
     'o banco guarda caminho relativo; quem monta URL absoluta e o render (achado 12)');
 }
 
+// ---------------------------------------------------------------- rotulos das secoes
+{
+  const base = { stacks: ['Brigadeiro', 'Bolo'], projects: [{ slug: 'b', name: 'Bolo', category: 'Doce', groups: [] }] };
+  const padrao = render(base);
+  checar('sem uiLabels, o titulo e o de hoje', padrao.includes('Stacks Dominadas') && padrao.includes('Meus Projetos'),
+    'e isso que mantem identico o portfolio do Helio e o de todo tenant publicado antes da 0015');
+
+  const proprio = render({ ...base, uiLabels: {
+    stacks: { pt: 'Minhas especialidades' },
+    projects: { pt: 'Meus doces' },
+    cases: { pt: 'receitas' },
+  } });
+  checar('o titulo das especialidades vem do dono', proprio.includes('Minhas especialidades'));
+  checar('e a palavra de programador some', !proprio.includes('Stacks Dominadas'),
+    'uma confeiteira publicava STACKS DOMINADAS em cima de "Brigadeiro gourmet"');
+  checar('o titulo dos trabalhos vem do dono', proprio.includes('Meus doces') && !proprio.includes('Meus Projetos'));
+  // A palavra "cases" sobrevive no NOME do atributo `data-cases-label`, que e interno e nao e
+  // lido por ninguem. O que importa e o texto visivel do contador, entao a assercao mira nele.
+  checar('o contador usa a palavra do dono', /1 receitas/.test(proprio) && !/\d+ cases/.test(proprio));
+
+  // Rotulo em branco nao apaga o titulo: cai no padrao. Sem esta regra, um campo limpo por
+  // engano publicaria uma secao sem nome nenhum.
+  const vazio = render({ ...base, uiLabels: { stacks: { pt: '   ' } } });
+  checar('rotulo em branco cai no padrao', vazio.includes('Stacks Dominadas'));
+}
+
+// ---------------------------------------------------------------- forma do avatar
+{
+  const perfil = { ...RECEM_COMPRADO.profile, avatarPath: 'abc/avatar/x-1234abcd.webp' };
+  const circulo = render({ profile: { ...perfil, avatarShape: 'circulo' } });
+  const oval = render({ profile: { ...perfil, avatarShape: 'oval' } });
+  const semNada = render({ profile: perfil });
+  checar('circulo e o padrao', semNada.includes('rounded-full'));
+  checar('oval sai quando escolhido', oval.includes('rounded-[50%]'));
+  checar('e o oval nao e redondo tambem', !oval.includes('w-14 h-14 rounded-full'));
+  checar('circulo explicito continua redondo', circulo.includes('rounded-full'));
+}
+
+// ---------------------------------------------------------------- credito de producao
+{
+  const html = render({});
+  checar('a pagina do comprador nao leva o credito da agencia', !html.includes('Method Growth Hub'),
+    'quem pagou por um portfolio no proprio nome nao comprou um outdoor nosso');
+}
+
 // ---------------------------------------------------------------- nada do Helio vaza
 {
   const html = render({ projects: [{ slug: 'bolo', name: 'Bolo de festa', category: 'Encomenda', groups: [] }] });

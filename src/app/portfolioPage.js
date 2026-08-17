@@ -26,18 +26,22 @@ export function renderPortfolioPage(ctx) {
   // documento e cacheado por (portfolio_id, content_hash), identico para o apex e para o
   // subdominio da vitrine, entao conteudo que dependesse do host colidiria em cache.
   const cta = ctx.vitrine ? renderVitrineCta(lang, ctx.apexHost) : '';
-  const { profile, projects, stacks, experience, projectGroups, filterGroups } = portfolio;
+  const { profile, projects, stacks, experience, projectGroups, filterGroups, uiLabels } = portfolio;
+  // Os titulos das secoes descem por parametro, e nao sao lidos de um modulo dentro de cada
+  // componente, pelo mesmo motivo que o idioma ja desce assim: nada abaixo daqui le estado,
+  // e e isso que deixa dois visitantes do mesmo isolate de Worker verem paginas diferentes.
+  const ui = uiLabels || {};
   return `
 <section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
     ${renderHeroImage(profile, lang)}
     <div class="flex flex-col gap-5">
-      ${renderProfilePanel(profile, lang)}
+      ${renderProfilePanel(profile, lang, ui)}
     </div>
   </div>
-  ${renderStacksMarquee(stacks, lang)}
-  ${renderProjectsSection(projects, lang, { projectGroups, filterGroups })}
-  ${renderExperienceSection(experience, lang)}
+  ${renderStacksMarquee(stacks, lang, ui)}
+  ${renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui })}
+  ${renderExperienceSection(experience, lang, ui)}
 </section>
 ${cta}
 ${ctx.vitrine ? renderSiteFooter(lang) : ''}

@@ -137,6 +137,7 @@ export function montarPayloadDoRascunho() {
       // forcar: o previa tem que mostrar exatamente o que a pagina publicada vai mostrar.
       badgeLabel: pf.badge_label || undefined,
       badgeIcon: pf.badge_icon || undefined,
+      avatarShape: pf.avatar_shape || undefined,
       ctaUrl: pf.cta_url || undefined,
       ctaLabel: custom ? pf.cta_label_i18n || undefined : undefined,
       bio: { pt: perfilAtual().bio },
@@ -145,6 +146,10 @@ export function montarPayloadDoRascunho() {
       stats: pf.stats || [],
     },
     stacks: pf.stacks || [],
+    // O previa tem que mostrar os titulos que a pessoa escreveu. Sem esta linha ela trocaria
+    // "Stacks Dominadas" por "Minhas especialidades", salvaria, e continuaria vendo o texto
+    // antigo no proprio editor, o que parece defeito de salvamento.
+    uiLabels: pf.ui_labels || {},
     filterGroups: vistos.map((k) => ({ key: k, label: { pt: k, en: k } })),
     projects: ordenados.map((p) => ({
       slug: p.slug,

@@ -1,6 +1,7 @@
 import { t, tui } from '../../../app/i18n.js';
 import { esc, safeUrl } from '../../portfolio/lib/sanitize.js';
 import { iconeSeloValido } from '../lib/iconesSelo.js';
+import { rotulo as rotuloSecao } from '../../../app/rotulos.js';
 
 // UM NUMERO DA CAPA.
 //
@@ -134,7 +135,7 @@ const socialItem = ({ label, value, href }, lang) => `
 // saiu impresso na vertical em producao, uma letra embaixo da outra. A largura minima da
 // identidade, mais o flex-wrap no pai, sao o que garante que quem desce para a linha de baixo
 // e a fileira de numeros, nunca o nome da pessoa.
-export function renderProfilePanel(profile, lang) {
+export function renderProfilePanel(profile, lang, ui = {}) {
   return `
     <!-- Card de Perfil -->
     <!-- Card de Perfil -->
@@ -159,7 +160,7 @@ export function renderProfilePanel(profile, lang) {
     <!-- Bio + Sociais -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
-        <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(tui('about', lang))}</h2>
+        <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotuloSecao(ui, 'about', lang))}</h2>
         <p class="text-sm text-white/80 leading-relaxed font-medium">${esc(t(profile.bio, lang))}</p>
       </div>
 

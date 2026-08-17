@@ -6,7 +6,9 @@ import { renderProjectModal } from './projectModal.js';
 // initProjectModal recebe um RESOLVEDOR em vez de importar a lista de projetos. Assim o
 // mesmo codigo serve o portfolio do Helio hoje e o de qualquer comprador na fase 1, onde a
 // lista vem do payload publicado e nao de um arquivo.
-export function initProjectModal(resolverProjeto, obterLang = () => 'pt') {
+// obterUi devolve os rotulos que o dono da pagina escreveu. Vem por funcao, e nao por
+// valor, porque o modal e ligado UMA vez no boot e o ctx e remontado a cada troca de idioma.
+export function initProjectModal(resolverProjeto, obterLang = () => 'pt', obterUi = () => ({})) {
   const getModal = () => document.getElementById('project-modal');
   let lastTrigger = null;
 
@@ -16,7 +18,7 @@ export function initProjectModal(resolverProjeto, obterLang = () => 'pt') {
     const p = resolverProjeto(slug);
     if (!p) return;
     lastTrigger = trigger || null;
-    modal.innerHTML = renderProjectModal(p, obterLang());
+    modal.innerHTML = renderProjectModal(p, obterLang(), obterUi());
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
