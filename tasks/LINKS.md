@@ -17,6 +17,7 @@ meta tag e no header, e estão marcadas como cortesia para não entrarem na conc
 | 8 | Sônia Prazeres | Confeiteira | https://demo-confeitaria.myportifolio.com.br |
 | 9 | Adriano Peçanha | Professor de concursos | https://demo-professor.myportifolio.com.br |
 | 10 | Rafa Ximenes | Tatuador | https://demo-tattoo.myportifolio.com.br |
+| 11 | Teresa Bogado | Confeiteira (nasceu com starter kit) | https://demo-kit.myportifolio.com.br |
 
 ## O que cada uma existe para quebrar
 
@@ -81,3 +82,27 @@ node scripts/limpar-demos.mjs --aplicar  # apaga as dez
 
 As dez moram em produção porque não existe ambiente de teste com subdomínio curinga. Enquanto
 estiverem lá, ocupam dez slugs e aparecem em qualquer contagem de portfólios.
+
+
+## O que mudou depois que você olhou
+
+Todas as onze páginas foram refeitas com o produto corrigido. O que era template de programador
+virou template de qualquer profissão:
+
+| Antes | Agora |
+|---|---|
+| "MEUS PROJETOS", "STACKS DOMINADAS", "cases" iguais para todos | cada profissão escreve os títulos das próprias seções |
+| Uma cor só, roxo, para todo mundo | 12 paletas, validadas por contraste |
+| Fundo preto liso | 7 padrões em CSS puro, mais foto própria |
+| Uma foto por trabalho | até oito, em galeria dentro da janela |
+| Corte central fixo em toda imagem | enquadramento ajustável |
+| Ordem das seções fixa | ordem e visibilidade escolhidas pelo dono |
+| Portfólio nascia vazio | starter kit por área monta a página no wizard |
+| Selo "VibeCoder" para toda profissão | selo próprio, com 20 ícones |
+| Foto de iPhone (HEIC) recusada | sobe |
+| Endereço na fila se anunciava à venda | página "quase no ar", sem oferta |
+| Campo opcional inválido travava o trabalho inteiro | avisa e grava o resto |
+| Crédito da agência no rodapé do comprador | só na vitrine |
+
+**Para ver o antes e o depois do primeiro minuto do produto**, compare `demo-confeitaria`
+(montada à mão, antes dos kits) com `demo-kit` (nasceu pelo wizard, já montada).
