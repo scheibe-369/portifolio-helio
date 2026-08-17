@@ -1,5 +1,6 @@
 import { ANOS } from '../config/editor.config.js';
 import { ICONES_SELO } from '../../profile/lib/iconesSelo.js';
+import { PRESETS } from '../../portfolio/theme/presets.js';
 
 // As opcoes do icone do selo, em pares [valor gravado, rotulo mostrado].
 //
@@ -110,6 +111,12 @@ export const CAMPOS_PERFIL = [
   { key: 'rotulo_visit', tipo: 'texto', i18n: true, label: 'Na janela do trabalho: texto do link', help: 'Vazio, fica "Acessar".', maxLength: 40, passo: 'fino' },
 
   { key: 'avatar_shape', tipo: 'select', label: 'Formato da foto pequena', opcoes: [['circulo', 'Redonda'], ['oval', 'Oval']], passo: 'fino' },
+
+  // A PALETA. Fica no passo 3 e NAO tem cadeado: escolher entre cores prontas e da base, e o
+  // que continua sendo do bump e a cor livre em hex por cima dela. As opcoes saem de PRESETS,
+  // que e a mesma fonte que o render consulta e que scripts/testar-presets.mjs valida por
+  // contraste: uma lista escrita a mao aqui divergiria na primeira paleta nova.
+  { key: 'theme_preset', tipo: 'select', label: 'Paleta da página', help: 'Muda a cor de destaque e o fundo das placas. Vazio, fica a cor padrão.', opcoes: [['', 'Padrão'], ...Object.entries(PRESETS).map(([k, p]) => [k, p.nome])], passo: 3 },
 
   { key: 'seo_title', tipo: 'texto', i18n: true, label: 'Título no Google e no WhatsApp', maxLength: 70, passo: 'fino' },
   { key: 'seo_description', tipo: 'texto', i18n: true, label: 'Descrição no Google e no WhatsApp', maxLength: 180, passo: 'fino' },

@@ -31,8 +31,22 @@ export function renderPortfolioPage(ctx) {
   // componente, pelo mesmo motivo que o idioma ja desce assim: nada abaixo daqui le estado,
   // e e isso que deixa dois visitantes do mesmo isolate de Worker verem paginas diferentes.
   const ui = uiLabels || {};
+  // A COR DA PAGINA DESCE COMO VARIAVEL CSS, numa linha so, no elemento raiz.
+  //
+  // Ela nao vira classe do Tailwind porque o scanner do v4 le o codigo fonte e nao gera classe
+  // montada a partir de dado (risco R11, o mesmo que ja tinha obrigado o enquadramento do hero
+  // a virar style inline). E nao vira folha de estilo por tenant porque o CSS e um asset com
+  // hash, compartilhado e imutavel: cor por pessoa nao cabe nele.
+  //
+  // Quem consome sao as regras de global.css que antes tinham o roxo cravado, todas com o
+  // proprio valor de hoje como fallback do var(). Sem preset e sem bump, o computed style e
+  // identico ao de antes.
+  const tema = portfolio.theme || {};
+  const estiloTema = tema.accent || tema.plate
+    ? ` style="${tema.accent ? `--pf-accent: ${tema.accent};` : ''}${tema.plate ? `--pf-plate: ${tema.plate};` : ''}"`
+    : '';
   return `
-<section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8">
+<section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8"${estiloTema}>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
     ${renderHeroImage(profile, lang)}
     <div class="flex flex-col gap-5">

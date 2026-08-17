@@ -31,11 +31,15 @@ body {
 
 /* ===== Estética VibeCoder Button ===== */
 .vibecoder-btn {
+  /* A borda e o brilho do selo seguem a paleta escolhida. O fallback e exatamente o branco
+     translucido de antes, entao quem nao escolheu paleta nenhuma nao ve diferenca. O selo e
+     onde a cor cabe melhor: ele e o elemento de identidade do card e nao carrega texto de
+     leitura longa, entao colorir a borda nao custa contraste. */
   background:
     radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.2) 0%, transparent 60%),
     rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--pf-accent, rgba(255, 255, 255, 0.2));
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -353,7 +357,7 @@ body {
 }
 .filter-icon-btn.has-active {
   color: #fff;
-  border-color: #7c5cfc;
+  border-color: var(--pf-accent, #7c5cfc);
 }
 
 .filter-badge {
@@ -364,7 +368,7 @@ body {
   height: 15px;
   padding: 0 3px;
   border-radius: 999px;
-  background: #7c5cfc;
+  background: var(--pf-accent, #7c5cfc);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -421,8 +425,8 @@ body {
   color: #fff;
 }
 .filter-option.is-active .filter-dot {
-  background: #7c5cfc;
-  border-color: #7c5cfc;
+  background: var(--pf-accent, #7c5cfc);
+  border-color: var(--pf-accent, #7c5cfc);
   box-shadow: inset 0 0 0 2px rgba(15, 15, 18, 0.97);
 }
 

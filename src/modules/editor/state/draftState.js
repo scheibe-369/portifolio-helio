@@ -119,6 +119,7 @@ export function montarPayloadDoRascunho() {
     slug: pf.slug,
     lang: { default: pf.default_lang || 'pt', englishEnabled: Boolean(pf.english_enabled) },
     perPage: pf.projects_per_page || 6,
+    themePreset: pf.theme_preset || undefined,
     theme: custom
       ? Object.fromEntries(
           Object.entries({ accent: pf.theme_accent, plateBg: pf.theme_plate_bg }).filter(([, v]) => v),

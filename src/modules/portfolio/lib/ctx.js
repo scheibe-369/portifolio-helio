@@ -10,6 +10,8 @@
 // PAYLOAD_V_CORRENTE entra por parametro em vez de import: ele mora em worker/lib/env.js,
 // que e zona worker, e importar de la traria o Worker inteiro para dentro do bundle.
 
+import { resolverTema } from '../theme/presets.js';
+
 // PAYLOAD -> ctx.portfolio ---------------------------------------------------
 // O snapshot publicado guarda CAMINHO RELATIVO de midia e `videoId`, nunca URL montada
 // (achado 12). Quem monta a URL absoluta e este arquivo, no instante do request, e por isso
@@ -36,12 +38,30 @@ function adaptarPayload(payload, payloadV, payloadVCorrente) {
 // Traduz o payload publicado para a forma que o render consome. As chaves diferem de
 // proposito: no banco o nome fala de armazenamento (`avatarPath`), no render fala de
 // apresentacao (`avatar`), e e o Worker que faz a ponte.
+// O PLACAR HISTORICO. Enquanto a cor da placa nao existia, montar_payload_portfolio emitia
+// este hex fixo em todo projeto e em toda experiencia. Quem escolhe uma paleta espera que as
+// placas acompanhem, e nao que sigam pretas azuladas por causa de um default antigo gravado
+// linha a linha, entao o valor e reconhecido e cedido ao tema. Cor escolhida de proposito
+// pelo comprador (que so existe com o bump) e diferente deste hex e continua vencendo.
+const PLACA_HISTORICA = '#0b0b12';
+
 function montarPortfolio(cfg, payload, { origem }) {
   const perfil = payload.profile || {};
-  const projetos = (payload.projects || []).map((p) => ({ ...p, image: urlMidia(cfg, p.imagePath) }));
+  const tema = resolverTema(payload.theme || {});
+  const placa = (v) => (!v || String(v).toLowerCase() === PLACA_HISTORICA ? tema.plate : v);
+  const projetos = (payload.projects || []).map((p) => ({
+    ...p,
+    image: urlMidia(cfg, p.imagePath),
+    plateBg: placa(p.plateBg),
+    // A cor de destaque de um projeto sem cor propria passa a ser a do tema. Antes ela era o
+    // roxo de fabrica, entao a borda do modal e o check dos itens saiam roxos numa pagina
+    // inteira em ambar.
+    accent: p.accent && p.accent.toLowerCase() !== '#7c5cfc' ? p.accent : tema.accent,
+  }));
   const experiencias = (payload.experiences || []).map((x) => ({
     ...x,
     logo: urlMidia(cfg, x.logoPath),
+    plateBg: placa(x.plateBg),
     // O certificado e o unico arquivo do comprador que o visitante NAO busca no Storage: o
     // botao aponta para uma rota nossa, que assina uma URL de vida curta e responde 302. URL
     // assinada expira em minutos e o snapshot vive em cache por muito mais que isso, entao
@@ -60,6 +80,7 @@ function montarPortfolio(cfg, payload, { origem }) {
     // Os titulos que o dono da pagina reescreveu. Objeto vazio significa "usa os de hoje", e
     // e o estado de todo tenant publicado antes da migration 0015.
     uiLabels: payload.uiLabels || {},
+    theme: tema,
     projects: projetos,
     stacks: payload.stacks || [],
     // `experiences` ausente e lista vazia, e nao erro: um tenant publicado ANTES da migration
@@ -88,7 +109,13 @@ export function montarCtx(cfg, { payload, payloadV, slug, url, isPreview = false
     apexHost: cfg.apexHost,
     origin: origem,
     mediaBase: cfg.mediaBase,
-    flags: { hasCustom: Boolean(adaptado.theme && Object.keys(adaptado.theme).length), englishEnabled: Boolean(idioma.englishEnabled) },
+    // hasCustom olha as DUAS colunas do bump, e nao a presenca de `theme`. Desde a 0017 todo
+    // payload carrega theme.preset, que e da base: a deducao antiga passaria a dizer que todo
+    // comprador tem a personalizacao paga.
+    flags: {
+      hasCustom: Boolean(adaptado.theme && (adaptado.theme.accent || adaptado.theme.plateBg)),
+      englishEnabled: Boolean(idioma.englishEnabled),
+    },
     isPreview,
     // Vem por parametro e nao e deduzido aqui: quem sabe qual slug e a vitrine e o Worker
     // (APEX_SLUG), e o navegador so sabe o que foi injetado no payload.

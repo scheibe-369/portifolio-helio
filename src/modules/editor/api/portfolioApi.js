@@ -70,6 +70,7 @@ export function perfilDaLinha(pf) {
     badge_label: pf.badge_label ?? '',
     badge_icon: pf.badge_icon ?? '',
     avatar_shape: pf.avatar_shape ?? 'circulo',
+    theme_preset: pf.theme_preset ?? '',
     // ui_labels e UM objeto no banco e VARIOS campos no formulario, porque o motor de
     // formulario e uma lista plana de chaves. A ponte e feita aqui e no patch, e em nenhum
     // outro lugar: as duas funcoes sao gemeas e mexer numa sem a outra perde o texto que a
@@ -127,6 +128,7 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     badge_label: ouNulo(v.badge_label),
     badge_icon: ouNulo(v.badge_icon),
     avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
+    theme_preset: ouNulo(v.theme_preset),
     // Chave so entra no objeto se tiver texto. Guardar `{"stacks": {"pt": ""}}` faria o
     // render achar que existe rotulo proprio, e a regra de volta ao padrao (rotulos.js) teria
     // que reproduzir aqui a mesma limpeza. Um lugar so decide, e e este.
