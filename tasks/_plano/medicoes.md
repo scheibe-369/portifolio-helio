@@ -80,15 +80,15 @@ fazer. Com S15 de pé, o `max-age` da cópia de socorro pode continuar em 24 hor
 semana de um lugar diferente sempre vai dar miss. O cache protege o tenant com tráfego, não
 a cauda longa.
 
-### Render da página, medido em Node (2026-08-16)
+### Render da página, medido em Node (2026-08-17)
 
 50 execuções de aquecimento e 300 de medição, por idioma, sobre o
 portfólio do Helio (20 projetos, 5 experiências).
 
 | Idioma | Mediana | p95 | Bytes de HTML |
 |---|---|---|---|
-| PT | 0.182 ms | 0.730 ms | 54451 |
-| EN | 0.170 ms | 0.693 ms | 54207 |
+| PT | 0.191 ms | 1.387 ms | 54691 |
+| EN | 0.184 ms | 0.963 ms | 54455 |
 
 Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
 Resultado: **dentro do orçamento**.

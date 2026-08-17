@@ -1,11 +1,16 @@
 import { tui } from '../../../app/i18n.js';
 
-// Rodape com o credito de producao. Divida D4 do plano: a regra do dono manda que toda
-// entrega leve "Desenvolvida por Method Growth Hub" com link, e o portfolio nao tinha.
+// Rodape com o credito de producao.
 //
-// A partir da fase 1 este mesmo rodape aparece no portfolio de TODO comprador, o que faz
-// dele o unico elemento que a Growth Hub coloca em milhares de paginas de terceiros. Por
-// isso ele e discreto de proposito: cor de texto secundaria, sem caixa, sem borda.
+// SO NA VITRINE, nunca na pagina de um comprador. Decisao do dono em 16/08/2026, depois de
+// ver as dez paginas de nicho: "nesses portfolios pessoais nao tem que ter o DESENVOLVIDO POR
+// METHOD GROWTH HUB".
+//
+// A regra da casa continua valendo e continua cumprida: myportifolio.com.br, /comprar,
+// /termos e /privacidade sao a entrega da Growth Hub e levam o credito. O que a pessoa
+// comprou nao e: ela pagou por uma pagina no nome DELA, e assinar o trabalho dela com a nossa
+// marca e cobrar por um portfolio e entregar um outdoor. Era tambem o unico elemento que a
+// gente colocava em milhares de paginas de terceiros sem eles terem escolhido.
 export function renderSiteFooter(lang) {
   return `
   <footer class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 -mt-2">

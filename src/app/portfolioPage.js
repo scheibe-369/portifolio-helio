@@ -40,6 +40,6 @@ export function renderPortfolioPage(ctx) {
   ${renderExperienceSection(experience, lang)}
 </section>
 ${cta}
-${renderSiteFooter(lang)}
+${ctx.vitrine ? renderSiteFooter(lang) : ''}
 ${renderProjectModalRoot()}`;
 }
