@@ -73,8 +73,18 @@ export function montarPayloadDoRascunho() {
   // canvas mostraria a cor que o comprador escolheu e a pagina publicada sairia cinza.
   const cor = (v, padrao) => (custom && v ? v : padrao);
 
+  // OS EXEMPLOS DO STARTER KIT APARECEM NO EDITOR, e nunca na pagina publicada.
+  //
+  // O filtro `!is_sample` estava nos dois lados, e com isso os exemplos que o kit cria eram
+  // invisiveis ate para quem os recebeu: a pessoa escolhia a area no wizard, o banco criava
+  // dois trabalhos de exemplo, e ela caia num editor que dizia "voce ainda nao cadastrou
+  // nenhum trabalho". O ponto do exemplo e justamente ser visto e trocado.
+  //
+  // Quem continua filtrando e montar_payload_portfolio, no banco (0004:118), que e quem monta
+  // o que vai ao ar. Ou seja: exemplo nao vaza para o visitante nem se a pessoa publicar sem
+  // mexer neles.
   const projetos = estado.projetos
-    .filter((p) => p.is_visible && !p.is_sample)
+    .filter((p) => p.is_visible)
     .map(projetoDaLinha)
     .map((p, i) => ({ ...p, _ordem: i }));
 
@@ -88,7 +98,7 @@ export function montarPayloadDoRascunho() {
   });
 
   const experiencias = estado.experiencias
-    .filter((x) => x.is_visible && !x.is_sample)
+    .filter((x) => x.is_visible)
     .map(experienciaDaLinha);
 
   // REGRA 3, e e a de consequencia mais grave: sem o consentimento do titular, nem o CAMINHO

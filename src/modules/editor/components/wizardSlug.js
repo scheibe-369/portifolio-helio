@@ -1,7 +1,7 @@
 import { esc } from '../../portfolio/lib/sanitize.js';
 import { APEX_HOST } from '../config/editor.config.js';
 import { slugify } from '../lib/slugify.js';
-import { slugDisponivel, criarPortfolio } from '../api/portfolioApi.js';
+import { slugDisponivel, criarPortfolio, listarStarterKits } from '../api/portfolioApi.js';
 
 // O primeiro minuto depois da compra: escolher o endereco e dizer o nome. Zona [browser].
 //
@@ -39,7 +39,20 @@ export function renderWizardSlug(sugestaoNome = '') {
 
       <div class="ed-field">
         <label class="ed-label" for="wz-role">O que você faz</label>
-        <input id="wz-role" class="ed-input" type="text" maxlength="160" placeholder="Desenvolvedor e criador de produtos">
+        <input id="wz-role" class="ed-input" type="text" maxlength="160" placeholder="Ex: Chef de cozinha, advogada trabalhista, fotógrafo">
+      </div>
+
+      <!-- A PERGUNTA QUE FALTAVA. Ela e opcional e e a de maior efeito das tres: a resposta
+           escolhe o starter kit, e o kit e a diferenca entre cair num editor em branco e cair
+           numa pagina que ja fala a lingua da profissao (titulos das secoes, paleta, fundo,
+           selo, especialidades e dois exemplos marcados como exemplo).
+           Sem resposta, o portfolio nasce como nascia antes: vazio e neutro. -->
+      <div class="ed-field">
+        <label class="ed-label" for="wz-kit">Sua área</label>
+        <select id="wz-kit" class="ed-input">
+          <option value="">Prefiro começar do zero</option>
+        </select>
+        <p class="ed-help">Deixa a página já montada com os textos da sua área. Dá para trocar tudo depois.</p>
       </div>
 
       <button type="button" id="wz-criar" class="ed-btn e-primario ed-largo">Criar meu portfólio</button>
@@ -48,6 +61,21 @@ export function renderWizardSlug(sugestaoNome = '') {
 }
 
 export function initWizardSlug({ aoCriar }) {
+  // A lista vem do banco e nao do bundle, porque ela cresce com o marketing e crescer precisa
+  // ser um INSERT. Se a chamada falhar, o campo fica so com "começar do zero" e o wizard
+  // continua funcionando: kit e um acelerador, nunca um pre requisito para criar a pagina.
+  const kit = document.getElementById('wz-kit');
+  listarStarterKits()
+    .then((kits) => {
+      for (const k of kits) {
+        const op = document.createElement('option');
+        op.value = k.kit;
+        op.textContent = k.label;
+        kit.appendChild(op);
+      }
+    })
+    .catch(() => {});
+
   const nome = document.getElementById('wz-nome');
   const slug = document.getElementById('wz-slug');
   const role = document.getElementById('wz-role');
@@ -100,7 +128,7 @@ export function initWizardSlug({ aoCriar }) {
     msg.textContent = 'criando...';
     msg.className = 'ed-msg e-neutro';
     try {
-      await criarPortfolio({ slug: v, displayName: nome.value.trim(), role: role.value.trim() });
+      await criarPortfolio({ slug: v, displayName: nome.value.trim(), role: role.value.trim(), kit: kit.value || null });
       await aoCriar();
     } catch (erro) {
       botao.disabled = false;

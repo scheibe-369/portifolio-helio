@@ -25,15 +25,28 @@ export async function slugDisponivel(slug) {
   return Boolean(data);
 }
 
-export async function criarPortfolio({ slug, displayName, role }) {
+export async function criarPortfolio({ slug, displayName, role, kit = null }) {
   const { data, error } = await supabase.rpc('create_my_portfolio', {
     p_slug: slug,
     p_display_name: displayName,
     p_role: role || null,
-    p_kit: null,
+    // ATE 16/08/2026 ISTO ERA `null` FIXO, e essa unica palavra deixou parado todo o
+    // maquinario de starter kit que existia desde a 0002: a coluna starter_kit, o
+    // onboarding_step, a flag is_sample em projetos e experiencias e o filtro `not is_sample`
+    // no payload. Tudo pronto, nada escrevendo, e o comprador caindo num editor em branco no
+    // minuto seguinte ao pagamento.
+    p_kit: kit,
   });
   if (error) throw error;
   return data;
+}
+
+// Os kits que o wizard oferece. Le por RPC e nao pela tabela: `definition` e conteudo nosso e
+// nao precisa trafegar para o navegador de ninguem.
+export async function listarStarterKits() {
+  const { data, error } = await supabase.rpc('list_starter_kits');
+  if (error) throw error;
+  return data || [];
 }
 
 // Trocar de endereco quebra link ja distribuido e e o vetor de sequestro de namespace, por

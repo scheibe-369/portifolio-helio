@@ -127,4 +127,19 @@ export const DEMOS = [
   },
 ];
 
+// Persona extra, criada em 16/08/2026 para provar o starter kit de ponta a ponta: ela e a
+// unica que passa pelo wizard DEPOIS de os kits existirem, e por isso e a unica cujo portfolio
+// nasce montado em vez de em branco.
+DEMOS.push({
+  slug: 'demo-kit',
+  email: 'heliomonteiro164+demokit@gmail.com',
+  nome: 'Teresa Bogado',
+  profissao: 'Confeiteira',
+  role: 'Bolos artesanais · Encomendas · Santos, SP',
+  paleta: { accent: '#FF8FA3', plate: '#1B0F14', nome: 'rosa' },
+  fotoBusca: 'female baker portrait',
+  trabalhoBusca: 'decorated cake',
+  estressa: 'Nasce COM starter kit: prova que o portfolio deixa de nascer vazio.',
+});
+
 export const porSlug = (slug) => DEMOS.find((d) => d.slug === slug);

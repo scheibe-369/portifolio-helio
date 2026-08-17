@@ -1,4 +1,5 @@
 import { esc } from '../../portfolio/lib/sanitize.js';
+import { rotulo } from '../../../app/rotulos.js';
 import { renderPortfolioPage } from '../../../app/portfolioPage.js';
 import { enderecoPublico } from '../state/publishState.js';
 
@@ -51,9 +52,9 @@ const alvo = (chave, rotulo, extra = '') => `
 // criado nao teria nenhum alvo de clique para "adicionar experiencia". Mudar o '' para um
 // esqueleto seria publicar uma secao vazia no dominio do comprador, e o criterio 9 de 6.11
 // verifica exatamente isso com um grep no HTML publicado.
-const BLOCO_EXPERIENCIA_VAZIA = `
+const BLOCO_EXPERIENCIA_VAZIA = (ui = {}) => `
   <div class="ed-bloco-vazio" data-edit="experiencias">
-    <p class="ed-bloco-vazio-titulo">Experiência</p>
+    <p class="ed-bloco-vazio-titulo">${esc(rotulo(ui, 'experience', 'pt'))}</p>
     <p class="ed-bloco-vazio-texto">Suas passagens por empresas e cursos. Enquanto estiver vazia, esta seção não aparece na sua página.</p>
     <span class="ed-btn e-primario">Adicionar experiência</span>
   </div>`;
@@ -67,16 +68,18 @@ const BLOCO_EXPERIENCIA_VAZIA = `
 // renderizada: sem secao, sem alvo de clique, e o comprador recem chegado ficava sem caminho
 // visivel para o que mais importa. Estes dois blocos existem so no editor e nunca no HTML
 // publicado.
-const BLOCO_PROJETOS_VAZIO = `
+// O titulo dos blocos vazios acompanha o rotulo que a pessoa escolheu: quem chamou a secao de
+// "Meus doces" nao pode ver "Trabalhos" no lugar onde ela vai aparecer.
+const BLOCO_PROJETOS_VAZIO = (ui = {}) => `
   <div class="ed-bloco-vazio" data-edit="projetos">
-    <p class="ed-bloco-vazio-titulo">Trabalhos</p>
+    <p class="ed-bloco-vazio-titulo">${esc(rotulo(ui, 'projects', 'pt'))}</p>
     <p class="ed-bloco-vazio-texto">É o coração do portfólio: comece por um. Enquanto estiver vazia, esta seção não aparece na sua página.</p>
     <span class="ed-btn e-primario">Adicionar trabalho</span>
   </div>`;
 
-const BLOCO_STACKS_VAZIO = `
+const BLOCO_STACKS_VAZIO = (ui = {}) => `
   <div class="ed-bloco-vazio" data-edit="perfil-stacks">
-    <p class="ed-bloco-vazio-titulo">O que você usa no trabalho</p>
+    <p class="ed-bloco-vazio-titulo">${esc(rotulo(ui, 'stacks', 'pt'))}</p>
     <p class="ed-bloco-vazio-texto">Ferramentas, técnicas ou especialidades suas. Enquanto estiver vazia, esta seção não aparece na sua página.</p>
     <span class="ed-btn e-primario">Adicionar</span>
   </div>`;
@@ -88,8 +91,9 @@ const BLOCO_STACKS_VAZIO = `
  * onde nao existe um, por posicao dentro da grade do topo. Nao inventamos atributo novo nos
  * componentes por causa da regra do comentario do topo deste arquivo.
  */
-export function pintarCanvas(ctx, { temExperiencia }) {
+export function pintarCanvas(ctx, { temExperiencia, exemplos = [] }) {
   const canvas = document.getElementById('ed-canvas');
+  const ui = ctx.portfolio.uiLabels || {};
   canvas.innerHTML = renderPortfolioPage(ctx);
 
   const grade = canvas.querySelector('.grid');
@@ -100,13 +104,21 @@ export function pintarCanvas(ctx, { temExperiencia }) {
 
   canvas.querySelectorAll('.project-card[data-slug]').forEach((card) => {
     card.insertAdjacentHTML('beforeend', alvo(`projeto:${card.dataset.slug}`, 'Editar', 'e-canto'));
+    // O QUE VEIO DO KIT PRECISA SE ANUNCIAR. Exemplo aparece no editor (para a pessoa ver como
+    // a pagina fica e ter o que trocar) e NUNCA na pagina publicada, porque o payload filtra
+    // is_sample no banco. Sem esta faixa, a diferenca entre as duas telas nao teria explicacao
+    // nenhuma: ela veria dois trabalhos no editor e nenhum no ar.
+    if (exemplos.includes(card.dataset.slug)) {
+      card.insertAdjacentHTML('afterbegin',
+        '<span class="ed-selo-exemplo">Exemplo, troque por um seu</span>');
+    }
   });
 
   const secaoProjetos = canvas.querySelector('#project-count')?.closest('.glass-card');
   if (secaoProjetos) {
     secaoProjetos.insertAdjacentHTML('beforeend', alvo('projetos', 'Adicionar ou reordenar projetos', 'e-rodape'));
   } else {
-    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_PROJETOS_VAZIO);
+    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_PROJETOS_VAZIO(ui));
   }
 
   const experiencia = canvas.querySelector('#experiencia');
@@ -129,14 +141,14 @@ export function pintarCanvas(ctx, { temExperiencia }) {
       li.insertAdjacentHTML('beforeend', alvo(`experiencia:${lista[i].slug}`, 'Editar', 'e-canto'));
     });
   } else if (!temExperiencia) {
-    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_EXPERIENCIA_VAZIA);
+    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_EXPERIENCIA_VAZIA(ui));
   }
 
   const stacks = canvas.querySelector('.stacks-marquee')?.closest('div');
   if (stacks) {
     stacks.insertAdjacentHTML('beforeend', alvo('perfil-stacks', 'Editar', 'e-canto'));
   } else {
-    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_STACKS_VAZIO);
+    canvas.querySelector('section')?.insertAdjacentHTML('beforeend', BLOCO_STACKS_VAZIO(ui));
   }
 
   return canvas;

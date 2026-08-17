@@ -1016,3 +1016,23 @@ details[open] > .ed-passo-titulo::before {
   margin: 0 auto;
   padding: 16px 20px 0;
 }
+
+/* Faixa do que veio do starter kit. Ela existe porque exemplo aparece no editor e NAO aparece
+   na página publicada (o payload filtra is_sample no banco): sem a faixa, a pessoa veria dois
+   trabalhos aqui e nenhum no ar, sem explicação nenhuma. */
+.ed-selo-exemplo {
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 3;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.2rem 0.6rem;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}

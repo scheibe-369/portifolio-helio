@@ -38,7 +38,10 @@ export async function montarEditor({ raiz, temCustom, aoAbrirConta }) {
       portfolio,
       statusPublicacao: portfolio.first_published_at ? 'no_ar' : 'rascunho',
     });
-    pintarCanvas(montarCtxDoRascunho(), { temExperiencia: experiencias.length > 0 });
+    pintarCanvas(montarCtxDoRascunho(), {
+      temExperiencia: experiencias.length > 0,
+      exemplos: getRascunho().projetos.filter((p) => p.is_sample).map((p) => p.slug),
+    });
     // O MESMO mapa do bundle publico. Com tres icones fixos aqui, o selo que o comprador
     // acabou de escolher desenhava na pagina publicada e NAO desenhava no previa do editor,
     // que e onde ele decide se gostou. Duas listas de icone e uma delas sempre fica para tras.
