@@ -51,5 +51,13 @@ export function resolverTema({ preset, accent, plateBg } = {}) {
     accent: accent || base.accent,
     plate: plateBg || base.plate,
     preset: p,
+    // `explicito` responde "alguem escolheu alguma coisa?", e nao "qual e a cor?".
+    //
+    // Ele existe porque resolverTema SEMPRE devolve uma cor, inclusive a de fabrica, e sem
+    // esta marca a pagina de quem nunca escolheu nada passaria a carregar um `style` inline
+    // repetindo exatamente o valor que o CSS ja usa como reserva. Seria inofensivo e seria
+    // ruido: bytes a mais em toda pagina, e um diff de baseline sem nenhuma mudanca visual
+    // por tras. Ausencia de escolha produz ausencia de atributo.
+    explicito: Boolean(p || accent || plateBg),
   };
 }

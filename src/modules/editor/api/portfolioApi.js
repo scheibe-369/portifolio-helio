@@ -71,6 +71,10 @@ export function perfilDaLinha(pf) {
     badge_icon: pf.badge_icon ?? '',
     avatar_shape: pf.avatar_shape ?? 'circulo',
     theme_preset: pf.theme_preset ?? '',
+    background_kind: pf.background_kind ?? 'none',
+    background_image_path: pf.background_path ?? '',
+    background_image_url: url(pf.background_path),
+    background_overlay: String(pf.background_overlay ?? 55),
     // ui_labels e UM objeto no banco e VARIOS campos no formulario, porque o motor de
     // formulario e uma lista plana de chaves. A ponte e feita aqui e no patch, e em nenhum
     // outro lugar: as duas funcoes sao gemeas e mexer numa sem a outra perde o texto que a
@@ -129,6 +133,11 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     badge_icon: ouNulo(v.badge_icon),
     avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
     theme_preset: ouNulo(v.theme_preset),
+    // O tipo so vira 'photo' se houver foto: o CHECK do banco recusa a combinacao, e recusar
+    // aqui poupa o comprador de um erro de constraint depois de ele ja ter escolhido.
+    background_kind: v.background_kind === 'photo' && !v.background_image_path ? 'none' : (v.background_kind || 'none'),
+    background_path: v.background_kind === 'photo' ? ouNulo(v.background_image_path) : null,
+    background_overlay: Number(v.background_overlay) || 55,
     // Chave so entra no objeto se tiver texto. Guardar `{"stacks": {"pt": ""}}` faria o
     // render achar que existe rotulo proprio, e a regra de volta ao padrao (rotulos.js) teria
     // que reproduzir aqui a mesma limpeza. Um lugar so decide, e e este.

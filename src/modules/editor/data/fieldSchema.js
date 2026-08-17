@@ -116,6 +116,10 @@ export const CAMPOS_PERFIL = [
   // que continua sendo do bump e a cor livre em hex por cima dela. As opcoes saem de PRESETS,
   // que e a mesma fonte que o render consulta e que scripts/testar-presets.mjs valida por
   // contraste: uma lista escrita a mao aqui divergiria na primeira paleta nova.
+  // O FUNDO. Sete padroes em CSS puro mais a foto do proprio comprador. Fica ao lado da
+  // paleta porque as duas decisoes sao a mesma pergunta: com que cara a pagina abre.
+  { key: 'background_kind', tipo: 'select', label: 'Fundo da página', help: 'Escolha um padrão ou use uma foto sua. Todos são discretos de propósito: o texto da página é branco.', opcoes: [['none', 'Preto liso'], ['mesh', 'Névoa colorida'], ['grid', 'Grade técnica'], ['dots', 'Pontilhado'], ['vinheta', 'Vinheta'], ['grao', 'Grão de filme'], ['brilho', 'Brilho no topo'], ['photo', 'Foto sua']], passo: 3 },
+  { key: 'background_image', tipo: 'imagem', destino: 'hero', label: 'Imagem de fundo', help: 'Só aparece se você escolher \"Foto sua\" acima. Prefira imagem escura e sem detalhe no meio.', passo: 3, dependeDe: (v) => v.background_kind === 'photo' },
   { key: 'theme_preset', tipo: 'select', label: 'Paleta da página', help: 'Muda a cor de destaque e o fundo das placas. Vazio, fica a cor padrão.', opcoes: [['', 'Padrão'], ...Object.entries(PRESETS).map(([k, p]) => [k, p.nome])], passo: 3 },
 
   { key: 'seo_title', tipo: 'texto', i18n: true, label: 'Título no Google e no WhatsApp', maxLength: 70, passo: 'fino' },

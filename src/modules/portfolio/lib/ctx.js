@@ -81,6 +81,13 @@ function montarPortfolio(cfg, payload, { origem }) {
     // e o estado de todo tenant publicado antes da migration 0015.
     uiLabels: payload.uiLabels || {},
     theme: tema,
+    // O fundo escolhido.  ja sai montada aqui, porque o banco guarda caminho relativo
+    // e quem transforma em URL absoluta e este arquivo, no instante do request (achado 12).
+    background: {
+      kind: (payload.theme && payload.theme.background && payload.theme.background.kind) || "none",
+      url: urlMidia(cfg, payload.theme && payload.theme.background && payload.theme.background.path),
+      overlay: payload.theme && payload.theme.background && payload.theme.background.overlay,
+    },
     projects: projetos,
     stacks: payload.stacks || [],
     // `experiences` ausente e lista vazia, e nao erro: um tenant publicado ANTES da migration

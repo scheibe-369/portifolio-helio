@@ -187,6 +187,43 @@ const checar = (nome, condicao, detalhe) => {
   checar('circulo explicito continua redondo', circulo.includes('rounded-full'));
 }
 
+// ---------------------------------------------------------------- paleta e fundo
+{
+  const semNada = render({});
+  checar('sem paleta, nao sai variavel de cor', !semNada.includes('--pf-accent'),
+    'e o que garante que o computed style de quem nao escolheu nada seja o de sempre');
+  checar('sem fundo, nao sai camada de fundo', !semNada.includes('pf-bg'),
+    'markup escondido pesa; ausencia da feature produz ausencia de markup');
+
+  const comPaleta = render({ theme: { preset: 'brasa' } });
+  checar('a paleta vira variavel CSS', comPaleta.includes('--pf-accent: #E8833A'));
+  checar('e a placa do tema tambem', comPaleta.includes('--pf-plate: #1A1008'));
+
+  const inventada = render({ theme: { preset: 'paleta-que-nao-existe' } });
+  checar('paleta desconhecida cai no padrao sem quebrar', !inventada.includes('--pf-accent: #'),
+    'preset invalido nunca pode derrubar a pagina de um cliente pagante');
+
+  const comFundo = render({ theme: { preset: 'brasa', background: { kind: 'mesh' } } });
+  checar('o fundo escolhido vira camada', comFundo.includes('pf-bg-mesh'));
+  checar('e a camada leva a cor junto', /pf-bg-mesh[^>]*--pf-accent: #E8833A/.test(comFundo),
+    'a camada e IRMA da secao, entao nao herda a variavel declarada nela');
+
+  const fundoRuim = render({ theme: { background: { kind: 'nao-existe' } } });
+  checar('fundo desconhecido nao sai', !fundoRuim.includes('pf-bg'));
+
+  const fotoSemFoto = render({ theme: { background: { kind: 'photo' } } });
+  checar('fundo de foto sem foto nao sai', !fotoSemFoto.includes('pf-bg'),
+    'o CHECK do banco ja recusa, e o render nao confia em dado que veio de fora');
+
+  const comFoto = render({ theme: { background: { kind: 'photo', path: 'abc/hero/f-1234abcd.webp', overlay: 70 } } });
+  checar('fundo de foto monta a URL do caminho relativo', comFoto.includes('abc/hero/f-1234abcd.webp'));
+  checar('e aplica o veu pedido', comFoto.includes('rgba(0,0,0,0.7)'),
+    'o veu e o que garante texto branco legivel sobre foto que ninguem validou');
+
+  const veuBaixo = render({ theme: { background: { kind: 'photo', path: 'abc/hero/f-1234abcd.webp', overlay: 0 } } });
+  checar('veu abaixo do minimo e elevado', veuBaixo.includes('rgba(0,0,0,0.2)'));
+}
+
 // ---------------------------------------------------------------- credito de producao
 {
   const html = render({});

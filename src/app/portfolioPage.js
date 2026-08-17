@@ -6,6 +6,7 @@ import { renderExperienceSection } from '../modules/experience/components/experi
 import { renderProjectModalRoot } from '../modules/projects/components/projectModal.js';
 import { renderSiteFooter } from '../modules/portfolio/components/siteFooter.js';
 import { renderVitrineCta } from '../modules/oferta/components/vitrineCta.js';
+import { renderFundo } from '../modules/portfolio/theme/fundos.js';
 
 // Composição da página. Zona [iso]: este mesmo código roda no navegador e, a partir da
 // fase 1, dentro do Worker para montar o HTML de cada comprador no servidor.
@@ -42,10 +43,18 @@ export function renderPortfolioPage(ctx) {
   // proprio valor de hoje como fallback do var(). Sem preset e sem bump, o computed style e
   // identico ao de antes.
   const tema = portfolio.theme || {};
-  const estiloTema = tema.accent || tema.plate
-    ? ` style="${tema.accent ? `--pf-accent: ${tema.accent};` : ''}${tema.plate ? `--pf-plate: ${tema.plate};` : ''}"`
+  const estiloTema = tema.explicito
+    ? ` style="--pf-accent: ${tema.accent}; --pf-plate: ${tema.plate};"`
     : '';
-  return `
+  // A camada de fundo vem ANTES da secao e fora dela: ela e `position: fixed`, entao nao entra
+  // no fluxo, e precisa herdar a variavel de cor do elemento raiz do app, nao da secao.
+  const fundo = renderFundo({
+    kind: portfolio.background && portfolio.background.kind,
+    url: portfolio.background && portfolio.background.url,
+    overlay: portfolio.background && portfolio.background.overlay,
+    accent: tema.explicito ? tema.accent : null,
+  });
+  return `${fundo}
 <section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8"${estiloTema}>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
     ${renderHeroImage(profile, lang)}

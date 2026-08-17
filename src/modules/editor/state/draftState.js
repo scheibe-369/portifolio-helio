@@ -119,12 +119,28 @@ export function montarPayloadDoRascunho() {
     slug: pf.slug,
     lang: { default: pf.default_lang || 'pt', englishEnabled: Boolean(pf.english_enabled) },
     perPage: pf.projects_per_page || 6,
-    themePreset: pf.theme_preset || undefined,
-    theme: custom
-      ? Object.fromEntries(
-          Object.entries({ accent: pf.theme_accent, plateBg: pf.theme_plate_bg }).filter(([, v]) => v),
-        )
-      : {},
+    // O `theme` tem TRES origens com regras diferentes, e o previa so bate com a pagina se as
+    // tres forem respeitadas aqui do mesmo jeito que montar_payload_portfolio faz:
+    //   . accent e plateBg sao do bump, e somem quando a conta nao tem (REGRA 1, acima);
+    //   . preset e da base e vale sempre;
+    //   . background e da base e vale sempre, e 'none' nao vira ramo nenhum.
+    theme: {
+      ...(custom
+        ? Object.fromEntries(
+            Object.entries({ accent: pf.theme_accent, plateBg: pf.theme_plate_bg }).filter(([, v]) => v),
+          )
+        : {}),
+      ...(pf.theme_preset ? { preset: pf.theme_preset } : {}),
+      ...(pf.background_kind && pf.background_kind !== 'none'
+        ? {
+            background: {
+              kind: pf.background_kind,
+              path: pf.background_path || undefined,
+              overlay: pf.background_overlay,
+            },
+          }
+        : {}),
+    },
     profile: {
       name: pf.display_name,
       role: { pt: perfilAtual().role },
