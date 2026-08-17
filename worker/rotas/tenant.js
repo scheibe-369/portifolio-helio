@@ -11,7 +11,7 @@ import {
 } from '../lib/cache.js';
 import { montarCtx, montarHtml, ehDemo } from '../render/pagina.js';
 import { PAYLOAD_V_CORRENTE } from '../lib/env.js';
-import { naoExiste, bloqueado, indisponivel } from '../render/paginas.js';
+import { naoExiste, bloqueado, indisponivel, emRevisao } from '../render/paginas.js';
 
 // O caminho quente do produto: uma requisicao no subdominio de um comprador.
 //
@@ -88,6 +88,17 @@ export async function servirTenant({ request, url, slug, cfg, ctx }) {
     apagarTenant(ctx, cfg, slug, ponteiro && ponteiro.portfolioId);
     return html(bloqueado(), 410, {
       // Revogacao nao pode ficar presa na borda nem no navegador.
+      'cache-control': 'no-store',
+      'x-robots-tag': 'noindex, nofollow',
+    });
+  }
+
+  if (status === 'em_revisao') {
+    // 200 e nao 404: o endereco EXISTE e tem dono, so nao esta pintado ainda. Devolver 404
+    // aqui faria o WhatsApp e o LinkedIn mostrarem "pagina nao encontrada" no previa do link
+    // que o comprador acabou de mandar. `no-store` porque a aprovacao pode sair a qualquer
+    // minuto e ninguem tem como purgar a borda.
+    return html(emRevisao(), 200, {
       'cache-control': 'no-store',
       'x-robots-tag': 'noindex, nofollow',
     });

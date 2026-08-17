@@ -18,7 +18,23 @@
 
 // Allowlist de ENTRADA. SVG e GIF ficam de fora e a ausencia e a decisao: SVG e HTML
 // disfarcado de imagem (ele carrega <script>), e GIF nao tem uso neste produto.
-export const TIPOS_ACEITOS = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+//
+// HEIC E HEIF ENTRARAM EM 16/08/2026, e a ausencia deles era o defeito mais caro do produto
+// para o publico que ele diz atender. HEIC e o formato padrao da camera de todo iPhone desde
+// 2017. Sem ele nesta lista acontecia o pior tipo de barreira, que e a que nao se explica:
+//
+//   . o `accept` do input sai desta lista, e o iOS ACINZENTA na galeria toda foto que nao
+//     casa com ele. A confeiteira do teste abria o seletor e simplesmente nao conseguia tocar
+//     nas proprias fotos, sem mensagem nenhuma dizendo por que;
+//   . quem insistia por outro caminho levava "formato nao aceito. Envie JPG, PNG, WebP ou
+//     AVIF", quatro siglas que nao ajudam quem so tirou uma foto do bolo.
+//
+// Com o formato na lista, o iOS oferece as fotos e, na maioria dos casos, ja entrega JPEG
+// convertido. Quando entrega HEIC mesmo, o Safari decodifica nativo. Quem nao decodifica cai
+// na mensagem nova, que diz o que fazer.
+export const TIPOS_ACEITOS = [
+  'image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic', 'image/heif',
+];
 
 // 15 MB e o teto ANTES de decodificar. Decodificar 50 MP estoura a memoria do celular antes
 // de qualquer canvas existir, entao a recusa precisa vir do tamanho do arquivo, que e o
@@ -60,6 +76,20 @@ async function decodificar(arquivo) {
     img.src = url;
     await img.decode();
     return img;
+  } catch {
+    // A MENSAGEM PRECISA DIZER O QUE FAZER, e nao so que deu errado.
+    //
+    // Aqui chega, entre outros, o HEIC do iPhone aberto num navegador que nao sabe decodificar
+    // (Chrome e Firefox no Android e no desktop). Quem esta do outro lado nao sabe o que e
+    // HEIC, nao escolheu esse formato e nao vai deduzir sozinho que existe um botao no
+    // aparelho para mudar isso. "formato nao aceito" mandava a pessoa embora; o caminho de
+    // saida cabe numa frase.
+    const heic = /hei[cf]/i.test(arquivo.type || '') || /\.hei[cf]$/i.test(arquivo.name || '');
+    throw new ErroDeImagem(
+      heic
+        ? 'este navegador não abre foto de iPhone (HEIC). Abra pelo Safari, ou no iPhone vá em Ajustes, Câmera, Formatos e escolha "Mais compatível".'
+        : 'não consegui abrir esta imagem. Tente outra foto, ou salve esta como JPG e envie de novo.',
+    );
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -143,8 +173,14 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
 
   // Checagem por file.type, NUNCA pela extensao: um .pdf renomeado para .png passa no nome e
   // morre no tipo, que e o que o bucket tambem olha.
-  if (!TIPOS_ACEITOS.includes(arquivo.type)) {
-    throw new ErroDeImagem('formato nao aceito. Envie JPG, PNG, WebP ou AVIF.');
+  //
+  // TIPO VAZIO NAO E RECUSA, e essa excecao tem nome: o Android devolve `type` em branco para
+  // HEIC vindo da galeria, e alguns gerenciadores de arquivo fazem o mesmo com formatos que
+  // nao conhecem. Recusar ali seria barrar por ignorancia do sistema operacional, e nao por
+  // problema do arquivo. Quem decide de verdade e a DECODIFICACAO logo abaixo: um PDF
+  // renomeado nao vira bitmap, e o pipeline so grava o que ele mesmo redesenhou num canvas.
+  if (arquivo.type && !TIPOS_ACEITOS.includes(arquivo.type)) {
+    throw new ErroDeImagem('este arquivo não é uma imagem que a gente consiga usar. Envie uma foto (JPG, PNG ou a foto do seu celular).');
   }
   if (arquivo.size > TETO_BYTES_ENTRADA) {
     throw new ErroDeImagem('imagem muito grande (acima de 15 MB). Reduza antes de enviar.');

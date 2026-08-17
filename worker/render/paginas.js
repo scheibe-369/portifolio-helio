@@ -69,6 +69,26 @@ export function naoExiste({ slug, apexHost }) {
   return pagina({ titulo: 'Endereço livre', robots: 'noindex', corpo });
 }
 
+// EM CONFERENCIA. O endereco tem dono e a primeira publicacao dele esta na fila de revisao.
+//
+// Este estado nasceu porque, sem ele, o portfolio em conferencia caia na pagina de endereco
+// livre acima: o comprador publicava, mandava o link para o primeiro cliente, e o cliente lia
+// que aquele endereco estava a venda, com botao para compra-lo. Tres das dez personas de teste
+// bateram nisso no mesmo dia.
+//
+// SEM CTA e sem citar quem e o dono: o visitante nao tem nada a ver com o processo interno, e
+// o nome de quem esta esperando aprovacao nao e informacao publica. O tom e de espera curta,
+// porque e o que a fila e.
+export function emRevisao() {
+  const corpo = moldura(`
+    <h1 class="text-2xl font-bold tracking-tight text-white">Esta página está quase no ar</h1>
+    <p class="text-sm text-white/60 leading-relaxed">
+      Ela foi publicada e está passando por uma conferência rápida, do jeito que acontece com
+      toda página nova por aqui. Volte daqui a pouco.
+    </p>`);
+  return pagina({ titulo: 'Quase no ar', robots: 'noindex', corpo });
+}
+
 // 410. Sem CTA, sem citar o motivo. Quem saiu do ar por reembolso, chargeback, banimento,
 // vontade propria ou pedido de exclusao merece o mesmo texto, e o visitante nao tem nada a
 // ver com qual dos cinco foi.
