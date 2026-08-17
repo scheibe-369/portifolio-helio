@@ -224,6 +224,45 @@ const checar = (nome, condicao, detalhe) => {
   checar('veu abaixo do minimo e elevado', veuBaixo.includes('rgba(0,0,0,0.2)'));
 }
 
+// ---------------------------------------------------------------- ordem das secoes
+{
+  const cheio = {
+    stacks: ['A', 'B'],
+    projects: [{ slug: 'p', name: 'Trabalho', category: 'Cat', groups: [] }],
+    experiences: [{ slug: 'e', org: 'Casa', kind: 'work', role: 'Cargo', start: '2020', highlights: [] }],
+  };
+  const posicao = (html, texto) => html.indexOf(texto);
+
+  const padrao = render(cheio);
+  checar('sem lista, a ordem e a de sempre',
+    posicao(padrao, 'Stacks Dominadas') < posicao(padrao, 'Meus Projetos')
+      && posicao(padrao, 'Meus Projetos') < posicao(padrao, 'Experiência'),
+    'e o estado de todo tenant publicado antes desta feature, e do portfolio do Helio');
+
+  const invertido = render({ ...cheio, sections: [
+    { key: 'experience' }, { key: 'projects' }, { key: 'stacks' },
+  ] });
+  checar('a ordem escolhida vale',
+    posicao(invertido, 'Experiência') < posicao(invertido, 'Meus Projetos')
+      && posicao(invertido, 'Meus Projetos') < posicao(invertido, 'Stacks Dominadas'),
+    'para uma psicologa, que nao pode ter trabalho nenhum, a formacao E o portfolio');
+
+  const desligada = render({ ...cheio, sections: [{ key: 'stacks', on: false }] });
+  checar('secao desligada nao sai', !desligada.includes('Stacks Dominadas'));
+  checar('e as outras continuam, no lugar certo',
+    desligada.includes('Meus Projetos') && desligada.includes('Experiência'),
+    'secao que nao esta na lista entra no fim, ligada: e o que faz secao nova nascer visivel');
+
+  // As tres formas de dado ruim que nao podem derrubar a pagina de quem pagou.
+  const inventada = render({ ...cheio, sections: [{ key: 'secao_que_nao_existe' }, { key: 'projects' }] });
+  checar('chave desconhecida e ignorada sem lancar', inventada.includes('Meus Projetos'));
+  const duplicada = render({ ...cheio, sections: [{ key: 'projects' }, { key: 'projects' }] });
+  checar('duplicata nao renderiza duas vezes',
+    duplicada.split('data-cases-label').length - 1 === 1);
+  const lixo = render({ ...cheio, sections: 'isso nao e uma lista' });
+  checar('lista malformada cai na ordem padrao', lixo.includes('Stacks Dominadas'));
+}
+
 // ---------------------------------------------------------------- credito de producao
 {
   const html = render({});

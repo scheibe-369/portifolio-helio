@@ -194,3 +194,53 @@ arquitetura com SSR), 16, 17, 18, 20 a 27, 29, 30.
 O achado 28 (métrica de valor recorrente) muda de motivo: com pagamento único não existe
 churn de assinatura, mas contador de visitas continua sendo o único sinal de valor que o
 produto tem, e é o que sustenta venda futura de upgrade.
+
+---
+
+## Revisão de 16/08/2026: o que a decisão 4 travava e deixou de travar
+
+A decisão 4 dizia, e continua dizendo para quase tudo, que a base **só troca conteúdo**. A
+lista fechada do bump vinha com uma frase em caixa alta ao lado, em `bumpPanel.js`:
+
+> Não libera: tipografia, espaçamento, **ordem das seções** e CSS próprio. Isso é o LAYOUT,
+> e o layout é o produto.
+
+**Isso mudou, e é preciso dizer por quê, porque a decisão não estava errada quando foi
+tomada.** Ela foi tomada olhando um portfólio: o do dono. Em 16/08/2026 o produto foi
+vestido por dez profissões diferentes, com conteúdo real, e as dez publicaram. O que os dez
+mostraram:
+
+- uma **psicóloga** não pode expor caso clínico, por sigilo profissional. Para ela a seção de
+  trabalhos não é opcional, é proibida, e a formação **é** o portfólio. Com a ordem fixa, a
+  parte que a sustenta ficava por último, embaixo de uma seção que ela nunca vai preencher;
+- um **professor de concursos** vende titulação e aprovação, não material didático;
+- uma **confeiteira** publicava "STACKS DOMINADAS" acima de "Brigadeiro gourmet", e uma
+  advogada publicava "MEUS PROJETOS / 6 cases" para descrever processos trabalhistas.
+
+**O que passou a ser da base** (nada disso entra ou continua no bump):
+
+1. **Rótulo de cada seção** (migration 0015). Não é estética: é a página falar a língua da
+   pessoa. Cobrar por isso era cobrar de um chef para ele parar de dizer "Stacks Dominadas".
+2. **Selo do perfil** (0014). Era o item 4 do bump, e o valor de fábrica era `VibeCoder`:
+   estávamos cobrando R$ 37,90 para alguém parar de se declarar programador.
+3. **Paleta** (0017), escolhida de uma lista fechada e validada por contraste.
+4. **Fundo** (0018), sete padrões em CSS mais foto própria.
+5. **Enquadramento de imagem** (0016) e **galeria por trabalho** (0019).
+6. **Ordem e visibilidade das seções** (0020).
+
+**O que a decisão 4 protegia continua protegido**, e é isso que a mantém de pé no essencial:
+o comprador escolhe entre coisas que existem e foram desenhadas. Ele não escolhe tipografia,
+não escolhe espaçamento, não escreve CSS, não muda o par foto + perfil do topo e não define
+cor fora da lista validada. **Ele ordena o que já estava desenhado; não consegue estragar o
+layout.** O medo original, "um bump que deixa estragar o layout devolve dinheiro em forma de
+portfólio feio com o nosso nome no rodapé", segue endereçado, e de quebra o nosso nome saiu
+do rodapé do comprador (ele agora só aparece na vitrine).
+
+**O que o bump ficou sendo**, e ele ficou mais claro do que era: **cor livre em hex** por cima
+da paleta, cor por projeto, rótulo do botão principal e nome dos grupos de filtro. A fronteira
+agora é uma frase: **a base escolhe entre boas opções, a personalização foge delas.**
+
+Efeito colateral que vale registrar: antes desta rodada, **quatro dos seis itens vendidos no
+bump não chegavam à página** (`theme_accent`, `theme_plate_bg`, `badge_label` e
+`cta_label_i18n` viajavam no payload e nenhum componente os lia). Ou seja, a lista fechada não
+estava sendo cumprida nem no que prometia. Hoje é cumprida.

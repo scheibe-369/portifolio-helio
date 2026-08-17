@@ -7,6 +7,7 @@ import { renderProjectModalRoot } from '../modules/projects/components/projectMo
 import { renderSiteFooter } from '../modules/portfolio/components/siteFooter.js';
 import { renderVitrineCta } from '../modules/oferta/components/vitrineCta.js';
 import { renderFundo } from '../modules/portfolio/theme/fundos.js';
+import { resolverSecoes } from './secoes.js';
 
 // Composição da página. Zona [iso]: este mesmo código roda no navegador e, a partir da
 // fase 1, dentro do Worker para montar o HTML de cada comprador no servidor.
@@ -54,6 +55,24 @@ export function renderPortfolioPage(ctx) {
     overlay: portfolio.background && portfolio.background.overlay,
     accent: tema.explicito ? tema.accent : null,
   });
+  // AS SECOES DE BAIXO SAO UM MAPA E UM LOOP, e nao mais tres linhas cravadas.
+  //
+  // Elas eram literais na ordem stacks, projetos, experiencia, igual para todo mundo. Essa
+  // ordem foi desenhada para um portfolio de dev, onde o trabalho e a vitrine e a formacao e
+  // rodape. Ela e errada para metade das profissoes testadas: para uma psicologa, que por
+  // sigilo nao pode ter trabalho nenhum, a formacao E o portfolio; para um professor de
+  // concursos, titulacao e aprovacao valem mais que material didatico.
+  //
+  // Cada bloco continua sendo o mesmo componente de antes, e quem decide a ordem e o dado.
+  const blocos = {
+    stacks: () => renderStacksMarquee(stacks, lang, ui),
+    projects: () => renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui }),
+    experience: () => renderExperienceSection(experience, lang, ui),
+  };
+  const corpo = resolverSecoes(portfolio.sections)
+    .filter((s) => s.on)
+    .map((s) => blocos[s.key]())
+    .join('\n  ');
   return `${fundo}
 <section class="sm:px-6 lg:px-8 lg:py-10 max-w-6xl mx-auto pt-8 px-4 pb-8 flex flex-col gap-6 lg:gap-8"${estiloTema}>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
@@ -62,9 +81,7 @@ export function renderPortfolioPage(ctx) {
       ${renderProfilePanel(profile, lang, ui)}
     </div>
   </div>
-  ${renderStacksMarquee(stacks, lang, ui)}
-  ${renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui })}
-  ${renderExperienceSection(experience, lang, ui)}
+  ${corpo}
 </section>
 ${cta}
 ${ctx.vitrine ? renderSiteFooter(lang) : ''}

@@ -133,6 +133,12 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     badge_icon: ouNulo(v.badge_icon),
     avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
     theme_preset: ouNulo(v.theme_preset),
+    // A lista de secoes so entra no patch quando quem chamou passou uma: o painel de secoes
+    // manda, e os outros formularios do editor nao. Sem esta guarda, salvar a bio zeraria a
+    // ordem que a pessoa arrumou, porque o formulario de perfil nao conhece este campo.
+    ...(Array.isArray(v.sections)
+      ? { sections: v.sections.map((x) => ({ key: x.key, on: x.on !== false })) }
+      : {}),
     // O tipo so vira 'photo' se houver foto: o CHECK do banco recusa a combinacao, e recusar
     // aqui poupa o comprador de um erro de constraint depois de ele ja ter escolhido.
     background_kind: v.background_kind === 'photo' && !v.background_image_path ? 'none' : (v.background_kind || 'none'),

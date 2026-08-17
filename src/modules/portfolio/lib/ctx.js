@@ -83,6 +83,10 @@ function montarPortfolio(cfg, payload, { origem }) {
     // Os titulos que o dono da pagina reescreveu. Objeto vazio significa "usa os de hoje", e
     // e o estado de todo tenant publicado antes da migration 0015.
     uiLabels: payload.uiLabels || {},
+    // A ordem e a visibilidade das secoes, cruas. Quem valida e resolve e o render
+    // (src/app/secoes.js), porque a regra de 'chave desconhecida e ignorada' tem que valer
+    // igual no Worker e no editor.
+    sections: payload.sections || [],
     theme: tema,
     // O fundo escolhido.  ja sai montada aqui, porque o banco guarda caminho relativo
     // e quem transforma em URL absoluta e este arquivo, no instante do request (achado 12).

@@ -168,6 +168,7 @@ export function montarPayloadDoRascunho() {
     // "Stacks Dominadas" por "Minhas especialidades", salvaria, e continuaria vendo o texto
     // antigo no proprio editor, o que parece defeito de salvamento.
     uiLabels: pf.ui_labels || {},
+    sections: pf.sections || [],
     filterGroups: vistos.map((k) => ({ key: k, label: { pt: k, en: k } })),
     projects: ordenados.map((p) => ({
       slug: p.slug,

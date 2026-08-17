@@ -30,6 +30,7 @@ export function renderCasca({ portfolio, statusPublicacao }) {
         <button type="button" class="ed-barra-btn" data-abrir="perfil">Perfil</button>
         <button type="button" class="ed-barra-btn" data-abrir="projetos">Projetos</button>
         <button type="button" class="ed-barra-btn" data-abrir="experiencias">Experiência</button>
+        <button type="button" class="ed-barra-btn" data-abrir="secoes">Seções</button>
         <button type="button" class="ed-barra-btn" data-abrir="conta">Conta</button>
         <button type="button" class="ed-barra-btn e-fantasma" data-ver-visitante title="Atalho: V">Ver como visitante</button>
         <button type="button" class="ed-barra-btn e-primario" data-abrir="publicar">Publicar</button>

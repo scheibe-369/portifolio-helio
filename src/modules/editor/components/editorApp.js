@@ -7,6 +7,7 @@ import { abrirPainelPerfil } from '../panels/perfilPanel.js';
 import { abrirPainelProjetos, abrirFormularioProjeto } from '../panels/projetosPanel.js';
 import { abrirPainelExperiencias, abrirFormularioExperiencia } from '../panels/experienciasPanel.js';
 import { abrirPainelPublicar } from '../panels/publicarPanel.js';
+import { abrirPainelSecoes } from '../panels/secoesPanel.js';
 import { abrirPainelBump } from '../panels/bumpPanel.js';
 
 // A montagem do editor. Zona [browser]. Este arquivo e cola: quem decide alguma coisa sao os
@@ -55,6 +56,7 @@ export async function montarEditor({ raiz, temCustom, aoAbrirConta }) {
     if (chave === 'perfil' || chave === 'perfil-foto' || chave === 'perfil-stacks') return abrirPainelPerfil({ aoMudar });
     if (chave === 'projetos') return abrirPainelProjetos({ aoMudar });
     if (chave === 'experiencias') return abrirPainelExperiencias({ aoMudar });
+    if (chave === 'secoes') return abrirPainelSecoes({ aoSalvar: aoMudar });
     if (chave === 'publicar') return abrirPainelPublicar({ aoMudar });
     if (chave === 'conta') return aoAbrirConta();
     if (chave.startsWith('projeto:')) {
