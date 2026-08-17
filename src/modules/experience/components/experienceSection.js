@@ -2,7 +2,7 @@ import { tui, tuin } from '../../../app/i18n.js';
 import { rotulo } from '../../../app/rotulos.js';
 import { ex } from '../lib/experienceField.js';
 import { iniciais } from '../lib/iniciais.js';
-import { esc, safeUrl, safeColor } from '../../portfolio/lib/sanitize.js';
+import { esc, safeUrl, safeColor, safePosition } from '../../portfolio/lib/sanitize.js';
 
 const ICONE_DIPLOMA = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`;
 const ICONE_ANEXO = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>`;
@@ -13,9 +13,11 @@ const ICONE_ANEXO = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="
 // Sem padding aqui de propósito: o respiro em volta da arte já vem assado no WebP, igual em
 // todas as logos (a arte ocupa 80% do quadrado). Padding no CSS por cima reintroduziria a
 // margem dobrada que fazia cada logo aparecer num tamanho diferente.
+const CENTRO = '50% 50%';
+
 const placa = (e) => {
   const interno = e.logo
-    ? `<img src="${safeUrl(e.logo)}" alt="${esc(e.org)}" loading="lazy" decoding="async" class="w-full h-full object-cover">`
+    ? `<img src="${safeUrl(e.logo)}" alt="${esc(e.org)}" loading="lazy" decoding="async" class="w-full h-full object-cover" style="object-position: ${safePosition(e.logoPosition, CENTRO)};">`
     : `<span class="text-[13px] font-black tracking-tight text-white/45">${esc(iniciais(e.org))}</span>`;
   return `
             <div class="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style="background-color: ${safeColor(e.plateBg)};">

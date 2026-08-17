@@ -1,7 +1,7 @@
 import { px } from '../lib/projectField.js';
 import { t, tui } from '../../../app/i18n.js';
 import { rotulo } from '../../../app/rotulos.js';
-import { esc, safeColor, safeUrl } from '../../portfolio/lib/sanitize.js';
+import { esc, safeColor, safeUrl, safePosition } from '../../portfolio/lib/sanitize.js';
 
 // Badge de "play" pra cards que têm vídeo.
 const PLAY_BADGE = `
@@ -12,6 +12,10 @@ const PLAY_BADGE = `
 const FUNNEL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>`;
 const CHEVRON_L = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>`;
 const CHEVRON_R = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`;
+
+// Centro geometrico. O padrao de safePosition e '50% 36%', que e o enquadramento de ROSTO
+// do hero: aplicado a uma imagem de trabalho, ele subiria o corte sem motivo.
+const CENTRO = '50% 50%';
 
 const card = (p, lang, grupos) => {
   const isCover = p.fit === 'cover';
@@ -27,7 +31,7 @@ const card = (p, lang, grupos) => {
               // `src=""`, que faz o navegador rebuscar o proprio documento como imagem e
               // desenha o icone de figura quebrada em cima da placa colorida.
               p.image
-                ? `<img src="${safeUrl(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105">`
+                ? `<img src="${safeUrl(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105" style="object-position: ${safePosition(p.imagePosition, CENTRO)};">`
                 : `<span class="px-5 text-center text-[13px] font-semibold leading-snug text-white/70">${nome}</span>`
             }
             <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">

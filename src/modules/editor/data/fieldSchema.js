@@ -149,7 +149,14 @@ export const CAMPOS_PROJETO = [
   { key: 'groups', tipo: 'chips', label: 'Grupos de filtro', help: 'No máximo 4. É o que vira a barra de filtro da grade.', maxLinhas: 4, maxLength: 40, passo: 3 },
 
   { key: 'slug', tipo: 'texto', label: 'Endereço do case', help: 'Sai do nome sozinho. Só letras, números e hífen.', maxLength: 60, passo: 'fino' },
-  { key: 'image_fit', tipo: 'select', label: 'Tipo da imagem', opcoes: [['contain', 'Logo (com respiro)'], ['cover', 'Print (preenche a placa)']], passo: 'fino' },
+  // "Logo (com respiro)" e "Print (preenche a placa)" descreviam o portfolio de onde o produto
+  // nasceu, onde todo trabalho e uma logo de cliente ou um screenshot de sistema. Um fotografo,
+  // uma confeiteira e um tatuador sobem FOTO, e nenhuma das duas palavras dizia nada para eles.
+  // A ordem tambem inverteu: preencher passou a ser o primeiro porque virou o padrao.
+  { key: 'image_fit', tipo: 'select', label: 'Como a imagem se encaixa', opcoes: [['cover', 'Preencher o card'], ['contain', 'Caber inteira, com respiro']], passo: 'fino' },
+  // Enquadramento, o mesmo controle que a foto do topo ja tinha. Ele so faz sentido quando a
+  // imagem preenche o card: com "caber inteira" nao ha corte para reposicionar.
+  { key: 'image_position', tipo: 'enquadramento', label: 'Enquadramento da imagem', help: 'Sobe ou desce o corte. Serve quando a imagem preenche o card.', passo: 'fino', dependeDe: (v) => v.image_fit !== 'contain' },
   { key: 'accent', tipo: 'cor', label: 'Cor de destaque do card', padrao: '#7C5CFC', passo: 'fino', feature: 'custom' },
   { key: 'plate_bg', tipo: 'cor', label: 'Fundo da placa', padrao: '#0b0b12', passo: 'fino', feature: 'custom' },
 ];
@@ -180,6 +187,9 @@ export const CAMPOS_EXPERIENCIA = [
   { key: 'period_end', tipo: 'periodo', label: 'Até', help: 'Ano (2025) ou mês e ano (11/2025).', passo: 1, dependeDe: (v) => !v.atual },
 
   { key: 'logo', tipo: 'imagem', destino: 'experience', label: 'Logo', help: 'Quadrada, até 90 KB. PNG com fundo transparente fica melhor.', passo: 2 },
+  // A placa da logo recorta em quadrado de 56px, e ate aqui o corte era o centro geometrico,
+  // fixo. Logo que nao esteja centrada no arquivo saia torta e nao havia como arrumar.
+  { key: 'logo_position', tipo: 'enquadramento', label: 'Enquadramento da logo', help: 'Sobe ou desce o corte da logo dentro da placa.', passo: 'fino', dependeDe: (v) => Boolean(v.logo_path) },
   { key: 'location', tipo: 'texto', i18n: true, label: 'Onde', help: 'Ex: São Paulo, remoto.', maxLength: 60, passo: 2 },
   { key: 'highlights', tipo: 'linhas', i18n: true, label: (v) => rotulo('highlights', v), help: 'Um por linha, até 6.', maxLinhas: 6, maxLength: 300, passo: 2 },
 

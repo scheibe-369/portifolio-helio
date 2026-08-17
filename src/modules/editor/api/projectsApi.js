@@ -44,7 +44,8 @@ export function projetoDaLinha(p) {
     image_path: p.image_path ?? '',
     image_url: p.image_path ? `${base}/${p.image_path}` : '',
     image_mime: p.image_mime ?? '',
-    image_fit: p.image_fit || 'contain',
+    image_fit: p.image_fit || 'cover',
+    image_position: p.image_position ?? '50% 50%',
     accent: p.accent || '#7C5CFC',
     plate_bg: p.plate_bg || '#0b0b12',
     position: p.position ?? 0,
@@ -78,7 +79,8 @@ export function patchDoProjeto(v, linha = {}) {
     image_path: ouNulo(v.image_path),
     // canvas.toBlob cai em image/png em silencio: o mime REAL do que subiu, nunca a extensao.
     image_mime: ouNulo(v.image_mime),
-    image_fit: v.image_fit === 'cover' ? 'cover' : 'contain',
+    image_fit: v.image_fit === 'contain' ? 'contain' : 'cover',
+    image_position: ouNulo(v.image_position),
     accent: v.accent || '#7C5CFC',
     plate_bg: v.plate_bg || '#0b0b12',
   };

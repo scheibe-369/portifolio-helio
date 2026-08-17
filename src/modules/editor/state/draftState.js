@@ -103,6 +103,7 @@ export function montarPayloadDoRascunho() {
     end: x.period_end || undefined,
     location: x.location || undefined,
     logoPath: x.logo_path || undefined,
+    logoPosition: x.logo_position || undefined,
     plateBg: cor(x.plate_bg, '#0b0b12'),
     highlights: x.highlights,
     note: x.note || undefined,
@@ -161,6 +162,7 @@ export function montarPayloadDoRascunho() {
       plateBg: cor(p.plate_bg, '#0b0b12'),
       fit: p.image_fit === 'cover' ? 'cover' : undefined,
       imagePath: p.image_path || undefined,
+      imagePosition: p.image_position || undefined,
       // O previa usa o MESMO parser do salvar, e nao um split de barra. Com o split, um link
       // no formato `watch?v=ID` virava o id "watch?v=ID" e o iframe do previa nascia morto,
       // enquanto o que ia para o banco estava certo: o editor mentia sobre a propria pagina.

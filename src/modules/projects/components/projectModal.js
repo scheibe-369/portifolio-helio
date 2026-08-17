@@ -1,7 +1,7 @@
 import { px } from '../lib/projectField.js';
 import { tui } from '../../../app/i18n.js';
 import { rotulo } from '../../../app/rotulos.js';
-import { esc, safeUrl, safeColor } from '../../portfolio/lib/sanitize.js';
+import { esc, safeUrl, safeColor, safePosition } from '../../portfolio/lib/sanitize.js';
 
 // SVGs inline (evita uma 2ª chamada de createIcons que re-escaneia o DOM inteiro).
 const CLOSE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`;
@@ -82,7 +82,7 @@ export function renderProjectModal(p, lang, ui = {}) {
                 // safeUrl e nao por esc. Este era o ultimo `src` da arvore montado so com
                 // escape de HTML.
                 p.image
-                  ? `<img src="${safeUrl(p.image)}" alt="${nome}" class="w-full h-full ${chipImgClass}">`
+                  ? `<img src="${safeUrl(p.image)}" alt="${nome}" class="w-full h-full ${chipImgClass}" style="object-position: ${safePosition(p.imagePosition, '50% 50%')};">`
                   : `<span class="text-[11px] font-bold text-white/50">${esc((px(p, 'name', lang) || '?').slice(0, 2).toUpperCase())}</span>`
               }
             </div>
