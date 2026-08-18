@@ -28,7 +28,7 @@ export function renderPortfolioPage(ctx) {
   // documento e cacheado por (portfolio_id, content_hash), identico para o apex e para o
   // subdominio da vitrine, entao conteudo que dependesse do host colidiria em cache.
   const cta = ctx.vitrine ? renderVitrineCta(lang, ctx.apexHost) : '';
-  const { profile, projects, stacks, experience, projectGroups, filterGroups, uiLabels } = portfolio;
+  const { profile, projects, stacks, experience, projectGroups, filterGroups, uiLabels, perPage } = portfolio;
   // Os titulos das secoes descem por parametro, e nao sao lidos de um modulo dentro de cada
   // componente, pelo mesmo motivo que o idioma ja desce assim: nada abaixo daqui le estado,
   // e e isso que deixa dois visitantes do mesmo isolate de Worker verem paginas diferentes.
@@ -66,7 +66,7 @@ export function renderPortfolioPage(ctx) {
   // Cada bloco continua sendo o mesmo componente de antes, e quem decide a ordem e o dado.
   const blocos = {
     stacks: () => renderStacksMarquee(stacks, lang, ui),
-    projects: () => renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui }),
+    projects: () => renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui, perPage }),
     experience: () => renderExperienceSection(experience, lang, ui),
   };
   const corpo = resolverSecoes(portfolio.sections)

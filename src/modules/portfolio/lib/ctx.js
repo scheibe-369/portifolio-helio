@@ -88,6 +88,9 @@ function montarPortfolio(cfg, payload, { origem }) {
     // igual no Worker e no editor.
     sections: payload.sections || [],
     theme: tema,
+    // Quantos cards por pagina. O select existe no editor desde sempre e nao mudava nada,
+    // porque a interacao tinha o numero cravado.
+    perPage: Number(payload.perPage) || 6,
     // O fundo escolhido.  ja sai montada aqui, porque o banco guarda caminho relativo
     // e quem transforma em URL absoluta e este arquivo, no instante do request (achado 12).
     background: {

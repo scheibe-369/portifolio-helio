@@ -55,6 +55,20 @@ export function renderProjectModal(p, lang, ui = {}) {
   // youtube_orientation existe desde a 0007 e o payload ja a publicava (0007:515); faltava
   // consumidor. As duas classes sao LITERAIS no fonte de proposito: o Tailwind v4 varre o
   // codigo e nao gera classe montada a partir de dado (risco R11 do plano).
+  // A CAPA APARECE GRANDE QUANDO O TRABALHO E FOTO.
+  //
+  // A janela mostrava a imagem num selo de 64px ao lado do titulo, e so. Isso funciona para o
+  // portfolio de onde o produto nasceu, onde a imagem e a LOGO do cliente e o produto de
+  // verdade e o link; e falha em tudo que e visual: uma arquiteta publicou o estudo de um
+  // sobrado, cuja razao de existir e mostrar a planta redesenhada, e na janela a planta era um
+  // quadradinho ilegivel seguido de 600 palavras. Fotografo e tatuador chegaram na mesma
+  // conclusao por caminhos diferentes.
+  //
+  // Quem decide e o mesmo campo que ja decide como a imagem se encaixa no card: "preencher"
+  // significa foto, e foto merece tamanho; "caber inteira, com respiro" significa logo, e logo
+  // fica melhor pequena, que e o caso do Helio e por isso a pagina dele nao muda.
+  const capaGrande = p.image && p.fit === 'cover';
+
   const vertical = p.videoOrientation === 'portrait';
   const molduraVideo = vertical
     ? 'aspect-[9/16] max-w-[320px] mx-auto'
@@ -98,7 +112,7 @@ export function renderProjectModal(p, lang, ui = {}) {
         </button>
         <div class="max-h-[85vh] overflow-y-auto p-7 sm:p-8">
           <div class="flex items-center gap-4 pr-10">
-            <div class="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 border border-white/10" style="background-color: ${safeColor(p.plateBg)};">
+            ${capaGrande ? '' : `<div class="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 border border-white/10" style="background-color: ${safeColor(p.plateBg)};">
               ${
                 // Mesma regra do card da grade: sem imagem nao sai <img>, e a URL passa por
                 // safeUrl e nao por esc. Este era o ultimo `src` da arvore montado so com
@@ -107,7 +121,7 @@ export function renderProjectModal(p, lang, ui = {}) {
                   ? `<img src="${safeUrl(p.image)}" alt="${nome}" class="w-full h-full ${chipImgClass}" style="object-position: ${safePosition(p.imagePosition, '50% 50%')};">`
                   : `<span class="text-[11px] font-bold text-white/50">${esc((px(p, 'name', lang) || '?').slice(0, 2).toUpperCase())}</span>`
               }
-            </div>
+            </div>`}
             <div>
               <h2 class="text-xl font-bold text-white tracking-tight metallic-silver w-fit">${nome}</h2>
               <!-- Categoria, ano e cliente, juntados so quando existem. Com os tres cravados
@@ -127,6 +141,13 @@ export function renderProjectModal(p, lang, ui = {}) {
           ${
             px(p, 'highlight', lang)
               ? `<p class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold" style="border-color: ${accent}; color: ${accent};">${esc(px(p, 'highlight', lang))}</p>`
+              : ''
+          }
+          ${
+            capaGrande
+              ? `<div class="mt-5 rounded-2xl overflow-hidden border border-white/10" style="background-color: ${safeColor(p.plateBg)};">
+            <img src="${safeUrl(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full max-h-[60vh] object-contain">
+          </div>`
               : ''
           }
           ${linkHtml}

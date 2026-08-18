@@ -275,6 +275,25 @@ const checar = (nome, condicao, detalhe) => {
   checar('e o nome continua la', comDestaque.includes('Bolo'));
 }
 
+// ---------------------------------------------------------------- capa grande e per-page
+{
+  const foto = renderProjectModal({ slug: 'a', name: 'Obra', image: 'https://x/f.webp', fit: 'cover', features: [], stack: [] }, 'pt');
+  const logo = renderProjectModal({ slug: 'b', name: 'Logo', image: 'https://x/l.webp', features: [], stack: [] }, 'pt');
+  checar('trabalho com FOTO mostra a capa grande', foto.includes('max-h-[60vh]'),
+    'a obra de uma arquiteta aparecia num selo de 64px seguido de 600 palavras');
+  checar('e sem o selo pequeno junto', !foto.includes('w-16 h-16'), 'senao a imagem sai duas vezes');
+  checar('trabalho com LOGO mantem o selo', logo.includes('w-16 h-16'),
+    'logo fica melhor pequena, e e o caso do portfolio do Helio');
+  checar('e logo nao vira capa grande', !logo.includes('max-h-[60vh]'));
+
+  const seis = render({ projects: [{ slug: 'p', name: 'P', category: 'C', groups: [] }] });
+  checar('perPage 6 nao emite atributo', !seis.includes('data-per-page'),
+    'o padrao nao muda o HTML de quem nunca mexeu no select');
+  const nove = render({ perPage: 9, projects: [{ slug: 'p', name: 'P', category: 'C', groups: [] }] });
+  checar('perPage 9 emite o atributo', nove.includes('data-per-page="9"'),
+    'um fotografo escolheu 9 e continuou vendo 6');
+}
+
 // ---------------------------------------------------------------- credito de producao
 {
   const html = render({});

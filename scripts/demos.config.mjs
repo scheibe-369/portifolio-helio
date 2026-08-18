@@ -142,4 +142,53 @@ DEMOS.push({
   estressa: 'Nasce COM starter kit: prova que o portfolio deixa de nascer vazio.',
 });
 
+
+// SEGUNDA RODADA, 16/08/2026. Tres nichos escolhidos para testar hipoteses que as onze
+// primeiras NAO cobriram, e nao para repetir o que ja se sabe:
+//
+//   . corretor de imovel   dado ESTRUTURADO por trabalho (preco, area, quartos, bairro), e um
+//                          catalogo que muda: imovel vendido sai do ar;
+//   . cerimonialista       o produto e DEPOIMENTO de cliente e DATA do evento, e nao existe
+//                          secao de depoimento em lugar nenhum do template;
+//   . funileiro            ANTES e DEPOIS lado a lado, endereco fisico e horario, e o menor
+//                          letramento digital de todas as catorze personas.
+//
+// Nenhuma das tres tem starter kit correspondente, o que tambem e proposital: e o teste de o
+// que acontece com quem chega e nao se acha na lista de dez areas.
+DEMOS.push(
+  {
+    slug: 'demo-corretor',
+    email: 'heliomonteiro164+democorretor@gmail.com',
+    nome: 'Wilson Tavares',
+    profissao: 'Corretor de imóveis',
+    role: 'Imóveis residenciais · Zona Sul · CRECI-SP 214.556',
+    paleta: { accent: '#C9A227', plate: '#0B1220', nome: 'ouro' },
+    fotoBusca: 'real estate agent portrait suit',
+    trabalhoBusca: 'apartment interior sao paulo',
+    estressa: 'Trabalho e um IMOVEL: preco, area, quartos, bairro. Dado estruturado que nao cabe em texto corrido, e catalogo que muda quando vende.',
+  },
+  {
+    slug: 'demo-eventos',
+    email: 'heliomonteiro164+demoeventos@gmail.com',
+    nome: 'Clarice Bonfim',
+    profissao: 'Cerimonialista',
+    role: 'Casamentos e eventos · Assessoria completa · Belo Horizonte, MG',
+    paleta: { accent: '#C4A7E7', plate: '#141021', nome: 'lavanda' },
+    fotoBusca: 'wedding planner portrait woman',
+    trabalhoBusca: 'wedding reception decoration',
+    estressa: 'O que vende e DEPOIMENTO de noiva e DATA do evento. Nao existe secao de depoimento no template, e nem campo de data por trabalho.',
+  },
+  {
+    slug: 'demo-funilaria',
+    email: 'heliomonteiro164+demofunil@gmail.com',
+    nome: 'Zé Ricardo Pimenta',
+    profissao: 'Funileiro e pintor',
+    role: 'Funilaria e pintura automotiva · Orçamento na hora · Contagem, MG',
+    paleta: { accent: '#FF4D4D', plate: '#0F0A0A', nome: 'sangue' },
+    fotoBusca: 'auto body shop mechanic portrait',
+    trabalhoBusca: 'car body repair paint shop',
+    estressa: 'ANTES e DEPOIS lado a lado, endereco fisico e horario de funcionamento. O menor letramento digital de todas as personas: ele so usa WhatsApp.',
+  },
+);
+
 export const porSlug = (slug) => DEMOS.find((d) => d.slug === slug);
