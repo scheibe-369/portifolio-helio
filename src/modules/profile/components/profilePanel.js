@@ -122,7 +122,7 @@ const renderCta = (profile, lang) => {
 // caracteres. O conserto e o `gap` minimo garantido, o rotulo que nao encolhe, e o valor
 // cedendo espaco com reticencia por ser o texto secundario. A altura nao muda.
 const socialItem = ({ label, value, href }, lang) => `
-            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="flex-1 max-h-16 flex items-center justify-between gap-3 rounded-xl glass-button px-4 py-2.5">
+            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="flex-1 max-h-16 flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
               <span class="shrink-0">${esc(label)}</span>
               <span class="min-w-0 truncate text-right text-white/40 font-normal">${esc(t(value, lang))}</span>
             </a>`;
@@ -135,6 +135,12 @@ const socialItem = ({ label, value, href }, lang) => `
 // saiu impresso na vertical em producao, uma letra embaixo da outra. A largura minima da
 // identidade, mais o flex-wrap no pai, sao o que garante que quem desce para a linha de baixo
 // e a fileira de numeros, nunca o nome da pessoa.
+// QUATRO NUMEROS NAO CABEM NUMA FILEIRA, e com `flex-wrap` + `justify-end` o quarto caia
+// sozinho numa segunda linha, colado na direita, parecendo sobra. Um professor de concursos
+// tem "aprovados", "anos", "turmas" e "horas de aula", e e o quarto que ele mais quer mostrar.
+//
+// Ate tres, fileira. De quatro em diante, duas colunas: 2x2 fica equilibrado, 3x2 tambem, e
+// nenhum numero vira orfao. O Helio tem tres e continua exatamente como estava.
 export function renderProfilePanel(profile, lang, ui = {}) {
   return `
     <!-- Card de Perfil -->
@@ -151,7 +157,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
         </div>
       </div>
       <div class="flex flex-col gap-3 sm:items-end">
-        <div class="flex flex-wrap items-end justify-start sm:justify-end gap-x-5 gap-y-3 text-xs text-white/80">${profile.stats.map((s) => statItem(s, lang)).join('')}
+        <div class="${profile.stats.length > 3 ? 'grid grid-cols-2 justify-items-center sm:justify-items-end' : 'flex flex-wrap items-end justify-start sm:justify-end'} gap-x-5 gap-y-3 text-xs text-white/80">${profile.stats.map((s) => statItem(s, lang)).join('')}
         </div>
         ${renderSelo(profile, lang)}
       </div>

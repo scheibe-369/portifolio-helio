@@ -17,7 +17,12 @@ export function montarChecklist({ portfolio, projetos, experiencias }) {
     { ok: Boolean(perfil.avatar_path || perfil.hero_path), texto: 'Tem pelo menos uma foto sua' },
     { ok: Boolean(perfil.bio_i18n?.pt), texto: 'Tem um texto sobre você' },
     { ok: projetos.length > 0, texto: 'Tem pelo menos um projeto' },
-    { ok: projetos.every((p) => p.image_path), texto: 'Todos os projetos têm imagem' },
+    // "Todos os projetos tem imagem" SAIU do checklist, e a razao e que ele contradizia o
+    // proprio render: a pagina publica decidiu, e documentou, que trabalho sem imagem e
+    // legitimo, porque nem toda profissao tem print (um caso trabalhista, uma consultoria, uma
+    // aula). Para uma advogada esse item ficava eternamente vermelho, o unico nao marcado de
+    // oito, e resolve-lo exigiria violar sigilo profissional. Duas partes do produto
+    // respondendo coisas diferentes sobre a mesma regra e pior que a regra mais frouxa.
     { ok: Boolean(perfil.cta_url), texto: 'O botão principal tem um link' },
     { ok: experiencias.length > 0, texto: 'Tem pelo menos uma experiência' },
   ];

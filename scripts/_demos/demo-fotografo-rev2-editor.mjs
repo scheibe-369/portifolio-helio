@@ -27,17 +27,27 @@ const dump = async (rot) => {
 const abas = await pagina.evaluate(() => [...document.querySelectorAll('button')].map((b) => b.innerText.trim()).filter((t) => t && t.length < 24));
 log('BOTOES DO TOPO:'); log(abas.slice(0, 40));
 
+const fechar = async () => {
+  await pagina.keyboard.press('Escape').catch(() => {});
+  await esperar(500);
+  const x = pagina.locator('#ed-gaveta [data-fechar], #ed-gaveta button[aria-label*="echar"]').first();
+  if (await x.count()) { await x.click().catch(() => {}); await esperar(600); }
+};
+
 for (const nome of ['Perfil', 'Projetos', 'Experiência', 'Seções', 'Conta']) {
   try {
-    await abrirPainel(pagina, nome);
+    await fechar();
+    await pagina.locator(`[data-abrir]`).filter({ hasText: new RegExp(`^${nome}$`, 'i') }).first().click({ timeout: 15000 });
+    await esperar(1400);
     await dump(nome.toLowerCase().replace(/[^a-z]/g, ''));
   } catch (e) { log(`!! painel ${nome} falhou: ${String(e).slice(0, 200)}`); }
 }
 
 // Abrir um trabalho especifico
 try {
-  await abrirPainel(pagina, 'Projetos');
-  await esperar(600);
+  await fechar();
+  await pagina.locator('[data-abrir]').filter({ hasText: /^Projetos$/i }).first().click({ timeout: 15000 });
+  await esperar(1400);
   const alvo = pagina.locator('#ed-gaveta button, #ed-gaveta li, #ed-gaveta [data-abrir]').filter({ hasText: /Quem fotografa/i }).first();
   if (await alvo.count()) { await alvo.click(); await esperar(1500); await dump('projeto-quem-fotografa'); }
   else {

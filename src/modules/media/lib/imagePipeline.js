@@ -53,8 +53,27 @@ export const DESTINOS = {
   // imagem. 60 KB e o dobro do que uma foto de rosto de 512px costuma pedir e continua
   // irrelevante perto da cota de 40 MB por conta.
   avatar: { pasta: 'avatar', proporcao: 1, lado: 512, orcamento: 60 * 1024 },
-  hero: { pasta: 'hero', proporcao: 4 / 5, lado: 1000, orcamento: 120 * 1024 },
-  project: { pasta: 'project', proporcao: 3 / 2, lado: 1200, orcamento: 90 * 1024 },
+  // Mesma razao do project: o hero ja tem `object-cover` e `object-position` no CSS, e cortar
+  // em 4:5 no arquivo tirava do slider de enquadramento justamente o curso que ele controla.
+  hero: { pasta: 'hero', proporcao: null, lado: 1400, orcamento: 160 * 1024 },
+  // SEM CORTE, e esta e a correcao mais importante do pipeline.
+  //
+  // `proporcao: 3/2` cortava o ARQUIVO no upload. Um tatuador subia 1000x1500 e o Storage
+  // guardava 1000x667: 55% da tatuagem descartado para sempre, sem original nenhum. O
+  // "Enquadramento da imagem", que existe justamente para salvar foto vertical, agia DEPOIS e
+  // sobre um arquivo que ja tinha perdido o que importava, entao sobravam 16px de curso.
+  // Fotografo, arquiteta e confeiteira bateram no mesmo muro com retrato, panoramica e
+  // quadrada.
+  //
+  // Agora guardamos a imagem INTEIRA, so reduzida ao lado maximo, e quem recorta e o CSS
+  // (`object-cover` + `object-position`), no navegador, na hora de desenhar. Duas coisas boas
+  // caem daqui: o enquadramento passa a ter curso de verdade, e o mesmo arquivo serve a
+  // molduras diferentes (o card e 3:2 no desktop e quase retrato no celular, e a galeria tem
+  // proporcao propria).
+  //
+  // O orcamento sobe de 90 para 140 KB porque a imagem agora carrega as bordas que antes eram
+  // jogadas fora. Continua irrelevante perto da cota de 40 MB por conta.
+  project: { pasta: 'project', proporcao: null, lado: 1400, orcamento: 140 * 1024 },
   // A placa da experiencia e quadrada (w-14 h-14) e NAO tem padding no CSS, de proposito: o
   // respiro vem assado no WebP, igual em todas as logos. Padding por cima reintroduziria a
   // margem dobrada que fazia cada logo aparecer num tamanho diferente na fileira.

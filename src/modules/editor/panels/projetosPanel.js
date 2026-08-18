@@ -1,6 +1,7 @@
 import { abrirGaveta, repintarCorpo } from '../components/editorDrawer.js';
 import { renderLista, mover } from './listaPanel.js';
 import { abrirFormulario } from './formPanel.js';
+import { CHAVES_ROTULO } from '../../../app/rotulos.js';
 import { CAMPOS_PROJETO, PASSOS_PROJETO } from '../data/fieldSchema.js';
 import { ANOS } from '../config/editor.config.js';
 import { slugify, slugUnico } from '../lib/slugify.js';
@@ -48,6 +49,13 @@ export function abrirFormularioProjeto({ id = null, aoVoltar = null, aoMudar }) 
   const { portfolio, projetos, temCustom } = getRascunho();
   const linha = id ? projetos.find((p) => p.id === id) : null;
   const valores = linha ? projetoDaLinha(linha) : vazioNovo();
+  // Os titulos que a pessoa escolheu descem para DENTRO do formulario, para que os rotulos
+  // dos campos falem a lingua dela. Sem isto, a pagina dizia "Casos e atuacoes" e o formulario
+  // logo atras continuava perguntando "O que o sistema faz?" e pedindo a "Stack usada".
+  // Prefixo `_` pela mesma convencao de `_slugTocado`: nao e coluna, nao vai para o patch.
+  valores._ui = Object.fromEntries(
+    CHAVES_ROTULO.map((k) => [k, (getRascunho().portfolio?.ui_labels || {})[k]?.pt || '']),
+  );
 
   // O slug SAI DO NOME sozinho, e so vira campo em "Ajustes finos". Pedir o endereco do case
   // antes do nome e pedir que a pessoa nomeie uma coisa que ela ainda nao descreveu.

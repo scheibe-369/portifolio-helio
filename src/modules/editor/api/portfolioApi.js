@@ -2,6 +2,7 @@ import { supabase } from '../../../shared/supabase/client.js';
 import { baseMidiaPublica } from '../../media/lib/storage.js';
 import { doI18n, paraI18n, ouNulo } from './mapear.js';
 import { CHAVES_ROTULO } from '../../../app/rotulos.js';
+import { resolverTema } from '../../portfolio/theme/presets.js';
 
 // Acesso ao portfolio do comprador. Zona [browser].
 //
@@ -67,6 +68,7 @@ export async function ehTitular(portfolioId) {
 // LINHA -> RASCUNHO ----------------------------------------------------------
 export function perfilDaLinha(pf) {
   const base = baseMidiaPublica();
+  const efetivo = resolverTema({ preset: pf.theme_preset });
   const url = (caminho) => (caminho ? (/^https?:\/\/|^\//.test(caminho) ? caminho : `${base}/${caminho}`) : '');
   return {
     display_name: pf.display_name ?? '',
@@ -95,8 +97,18 @@ export function perfilDaLinha(pf) {
     ...Object.fromEntries(CHAVES_ROTULO.map((k) => [`rotulo_${k}`, doI18n((pf.ui_labels || {})[k])])),
     cta_url: pf.cta_url ?? '',
     cta_label: doI18n(pf.cta_label_i18n),
-    theme_accent: pf.theme_accent ?? '#7C5CFC',
-    theme_plate_bg: pf.theme_plate_bg ?? '#0b0b12',
+    // O CAMPO DE COR MOSTRA A COR EFETIVA DA PAGINA, e nao a de fabrica.
+    //
+    // Isto e metade do conserto de um defeito que matava os 12 presets: `<input type="color">`
+    // nunca fica vazio, entao o formulario nascia com '#7C5CFC' escrito nele, e bastava a
+    // pessoa abrir o perfil e salvar UMA vez, mesmo sem tocar na cor, para esse roxo ser
+    // gravado em theme_accent. Como cor livre vence preset (presets.js), a paleta "Prata" que
+    // ela escolheu passava a publicar roxo. Atingia toda conta com o bump.
+    //
+    // Mostrando a cor EFETIVA (a do preset, quando ha preset), o campo passa a dizer a verdade
+    // e o patch consegue distinguir "nao mexeu" de "escolheu exatamente esta cor".
+    theme_accent: pf.theme_accent ?? efetivo.accent,
+    theme_plate_bg: pf.theme_plate_bg ?? efetivo.plate,
     socials: (pf.socials || []).map((s) => ({ label: s.label ?? '', valor: doI18n(s.value), extra: s.href ?? '' })),
     stats: (pf.stats || []).map((s) => ({ label: doI18n(s.label), valor: doI18n(s.value), extra: '' })),
     stacks: pf.stacks || [],
@@ -107,6 +119,15 @@ export function perfilDaLinha(pf) {
     seo_description: doI18n(pf.seo_description_i18n),
   };
 }
+
+// Cor que a pessoa realmente escolheu, ou null quando ela apenas aceitou a da paleta. A
+// comparacao e sem caixa porque `<input type="color">` sempre devolve minusculo, e as paletas
+// sao escritas em maiuscula no codigo.
+const corPropria = (valor, efetiva) => {
+  const v = ouNulo(valor);
+  if (!v) return null;
+  return String(v).toLowerCase() === String(efetiva).toLowerCase() ? null : v;
+};
 
 // RASCUNHO -> PATCH ----------------------------------------------------------
 // Toda chave daqui esta no `grant update (...)` de 0002, e manter as duas listas em sincronia
@@ -178,8 +199,12 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
   return {
     ...base,
     cta_label_i18n: v.cta_label ? paraI18n(v.cta_label, pf.cta_label_i18n) : null,
-    theme_accent: ouNulo(v.theme_accent),
-    theme_plate_bg: ouNulo(v.theme_plate_bg),
+    // A outra metade: cor IGUAL a efetiva da paleta nao e escolha, e sim o campo devolvendo o
+    // que ele mesmo mostrou. Gravar isso transformaria "abri o perfil e salvei" em "abri mao
+    // da paleta para sempre". Null significa "siga a paleta", que e o que a pessoa pediu ao
+    // escolher uma.
+    theme_accent: corPropria(v.theme_accent, resolverTema({ preset: v.theme_preset }).accent),
+    theme_plate_bg: corPropria(v.theme_plate_bg, resolverTema({ preset: v.theme_preset }).plate),
   };
 }
 

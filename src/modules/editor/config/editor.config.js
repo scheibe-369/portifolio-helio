@@ -20,5 +20,11 @@ export const LINK_BUMP_CUSTOM = env.VITE_CHECKOUT_BUMP_CUSTOM || '';
 // pessoa ja preencheu o resto.
 export const ANOS = (() => {
   const atual = new Date().getFullYear();
-  return Array.from({ length: 8 }, (_, i) => String(atual - i));
+  // 25 e nao 8. Oito anos foi calibrado para um portfolio de dev com tres anos de carreira, e
+  // recusa a realidade de quase toda profissao testada: um fotografo com doze anos de estrada
+  // nao achava 2013, uma advogada com doze de OAB nao achava a primeira atuacao, e um
+  // professor nao achava o mestrado. O campo nao aceita digitacao (o CHECK do banco recusa
+  // '20024' depois que a pessoa preencheu o resto), entao o que nao esta na lista simplesmente
+  // nao existe para ela.
+  return Array.from({ length: 25 }, (_, i) => String(atual - i));
 })();

@@ -136,16 +136,28 @@ export function renderProjectModal(p, lang, ui = {}) {
           <div class="mt-6 flex flex-col gap-5">
             ${block(rotulo(ui, 'challenge', lang), px(p, 'problem', lang))}
             ${block(rotulo(ui, 'solution', lang), px(p, 'solution', lang))}
-            <div>
+            ${
+              // Lista vazia nao desenha titulo, mesma regra que o `block()` acima ja seguia
+              // para os textos. Sem isto a janela publicava "O QUE ESTA INCLUSO" e
+              // "EQUIPAMENTO" com nada embaixo, que e pior do que nao ter a secao: parece
+              // conteudo que falhou em carregar.
+              (px(p, 'features', lang) || []).length
+                ? `<div>
               <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(rotulo(ui, 'features', lang))}</h3>
               <ul class="flex flex-col gap-2">${(px(p, 'features', lang) || []).map((f) => feature(f, accent)).join('')}
               </ul>
-            </div>
-            <div>
+            </div>`
+                : ''
+            }
+            ${
+              (px(p, 'stack', lang) || []).length
+                ? `<div>
               <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2.5 metallic-silver w-fit">${esc(rotulo(ui, 'stackLabel', lang))}</h3>
               <div class="flex flex-wrap gap-2">${(px(p, 'stack', lang) || []).map(chip).join('')}
               </div>
-            </div>
+            </div>`
+                : ''
+            }
           </div>
         </div>
       </div>`;

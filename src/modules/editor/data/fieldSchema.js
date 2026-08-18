@@ -39,6 +39,40 @@ const OPCOES_ICONE_SELO = [['', 'Sem ícone'], ...Object.keys(ICONES_SELO).map((
 // entao pedir o texto seria pedir trabalho que nao vira pagina) e a pilula PT|EN (fase 3, o
 // ex() e o px() ja caem no PT sozinhos enquanto isso).
 
+// O FORMULARIO DE TRABALHO FALA A LINGUA DA PROFISSAO, e nao a de quem escreveu o produto.
+//
+// A pagina publica ja renomeava tudo desde a migration 0015, mas o EDITOR nao: uma advogada
+// com a pagina dizendo "Casos e atuacoes" continuava digitando o resultado do processo num
+// campo chamado "O que o sistema faz?", as materias do caso em "Stack usada", e lendo
+// "Ex: Landing page, Automacao, App." na ajuda do segundo campo obrigatorio do primeiro caso
+// que ela cadastra. A pagina virou dela; o formulario continuou de outra pessoa.
+//
+// O mecanismo ja existia neste arquivo e so nao tinha sido aplicado aqui: `label` aceita
+// funcao de `valores`, que e como LABEL_POR_KIND troca "Empresa" por "Instituicao". Os
+// rotulos que a pessoa escreveu chegam em `valores._ui`, injetados por projetosPanel.js.
+const rotuloUi = (valores, chave, padrao) => {
+  const v = valores && valores._ui && valores._ui[chave];
+  const s = typeof v === 'string' ? v.trim() : '';
+  return s || padrao;
+};
+
+// A palavra da profissao no SINGULAR, para entrar no meio de uma frase ("Nome deste prato").
+//
+// Ela e DERIVADA do plural que a pessoa ja escreveu em "Como voce chama cada trabalho", e nao
+// e um campo novo: pedir as duas formas seria cobrar da pessoa uma aula de gramatica para
+// preencher um formulario. A regra e a que resolve os casos reais das dez profissoes testadas
+// ("casos", "pratos", "ensaios", "tattoos", "encomendas", "programas", "faixas"), e quando
+// ela nao serve o resultado ainda e uma palavra comum, nunca um erro visivel.
+const oTrabalho = (valores) => {
+  const plural = rotuloUi(valores, 'cases', '').toLowerCase();
+  if (!plural) return 'trabalho';
+  if (plural.endsWith('ns')) return `${plural.slice(0, -2)}m`;
+  if (plural.endsWith('is')) return `${plural.slice(0, -2)}l`;
+  if (plural.endsWith('es') && plural.length > 4) return plural.slice(0, -2);
+  if (plural.endsWith('s')) return plural.slice(0, -1);
+  return plural;
+};
+
 export const PASSOS_PROJETO = {
   1: 'O básico',
   2: 'O case',
@@ -140,8 +174,8 @@ export const CAMPOS_PERFIL = [
 // na grade atras da gaveta, e o projeto ja e publicavel ao fim do passo 1.
 export const CAMPOS_PROJETO = [
   { key: 'image', tipo: 'imagem', destino: 'project', label: 'Imagem do case', help: 'É a capa deste trabalho na grade.', passo: 1 },
-  { key: 'name', tipo: 'texto', i18n: true, label: 'Nome do projeto', maxLength: 60, passo: 1, obrigatorio: true },
-  { key: 'category', tipo: 'texto', i18n: true, label: 'Categoria', help: 'Ex: Landing page, Automação, App.', maxLength: 40, passo: 1, obrigatorio: true },
+  { key: 'name', tipo: 'texto', i18n: true, label: (v) => `Nome deste ${oTrabalho(v)}`, maxLength: 60, passo: 1, obrigatorio: true },
+  { key: 'category', tipo: 'texto', i18n: true, label: 'Categoria', help: (v) => `Como você agrupa este tipo de ${oTrabalho(v)}. Ex: "Retrato", "Contencioso", "Bolo de festa".`, maxLength: 40, passo: 1, obrigatorio: true },
   // Preco, prazo ou condicao. Fica no passo 1 porque para quem vende encomenda isso nao e
   // detalhe: e a informacao que decide o contato.
   { key: 'highlight', tipo: 'texto', i18n: true, label: 'Preço, prazo ou condição', help: 'Uma linha curta, que aparece já na grade. Ex: "A partir de R$ 180", "Sessão de 3h", "Encomende com 7 dias".', maxLength: 60, passo: 1 },
@@ -149,20 +183,20 @@ export const CAMPOS_PROJETO = [
 
   // Os rotulos do passo 2 sao PERGUNTAS de proposito: "Problema" faz a pessoa escrever um
   // substantivo, "O que estava travando antes?" faz ela contar a historia.
-  { key: 'problem', tipo: 'textarea', i18n: true, label: 'O que estava travando antes?', maxLength: 2500, passo: 2 },
-  { key: 'solution', tipo: 'textarea', i18n: true, label: 'O que você entregou?', maxLength: 2500, passo: 2 },
-  { key: 'features', tipo: 'linhas', i18n: true, label: 'O que o sistema faz?', help: 'Um por linha, até 12.', maxLinhas: 12, maxLength: 200, passo: 2 },
+  { key: 'problem', tipo: 'textarea', i18n: true, label: (v) => rotuloUi(v, 'challenge', 'O que estava travando antes?'), maxLength: 2500, passo: 2 },
+  { key: 'solution', tipo: 'textarea', i18n: true, label: (v) => rotuloUi(v, 'solution', 'O que você entregou?'), maxLength: 2500, passo: 2 },
+  { key: 'features', tipo: 'linhas', i18n: true, label: (v) => rotuloUi(v, 'features', 'O que está incluído?'), help: 'Um por linha, até 12.', maxLinhas: 12, maxLength: 200, passo: 2 },
 
   { key: 'video', tipo: 'youtube', label: 'Vídeo no YouTube', help: 'Cole o link como ele veio. Shorts, live e link curto funcionam.', passo: 3 },
-  { key: 'link', tipo: 'texto', label: 'Link do projeto no ar', help: 'Precisa começar com https://', maxLength: 300, passo: 3 },
+  { key: 'link', tipo: 'texto', label: (v) => `Link deste ${oTrabalho(v)}`, help: 'Precisa começar com https://', maxLength: 300, passo: 3 },
   { key: 'link_note', tipo: 'texto', i18n: true, label: 'Observação sobre o link', maxLength: 120, passo: 3, dependeDe: (v) => Boolean(v.link) },
-  { key: 'stack', tipo: 'chips', i18n: true, label: 'Stack usada', maxLinhas: 16, maxLength: 60, passo: 3 },
+  { key: 'stack', tipo: 'chips', i18n: true, label: (v) => rotuloUi(v, 'stackLabel', 'Ferramentas e materiais'), maxLinhas: 16, maxLength: 60, passo: 3 },
   { key: 'tem_cliente', tipo: 'switch', label: 'Foi para um cliente', help: 'Desligado, o projeto é seu.', passo: 3 },
   { key: 'client', tipo: 'texto', label: 'Nome do cliente', maxLength: 60, passo: 3, dependeDe: (v) => Boolean(v.tem_cliente) },
   { key: 'year', tipo: 'select', label: 'Ano', opcoes: ANOS, passo: 3 },
   { key: 'groups', tipo: 'chips', label: 'Grupos de filtro', help: 'No máximo 4. É o que vira a barra de filtro da grade.', maxLinhas: 4, maxLength: 40, passo: 3 },
 
-  { key: 'slug', tipo: 'texto', label: 'Endereço do case', help: 'Sai do nome sozinho. Só letras, números e hífen.', maxLength: 60, passo: 'fino' },
+  { key: 'slug', tipo: 'texto', label: 'Endereço desta página', help: 'Sai do nome sozinho. Só letras, números e hífen.', maxLength: 60, passo: 'fino' },
   // "Logo (com respiro)" e "Print (preenche a placa)" descreviam o portfolio de onde o produto
   // nasceu, onde todo trabalho e uma logo de cliente ou um screenshot de sistema. Um fotografo,
   // uma confeiteira e um tatuador sobem FOTO, e nenhuma das duas palavras dizia nada para eles.

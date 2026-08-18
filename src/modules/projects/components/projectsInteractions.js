@@ -9,7 +9,14 @@
 // arquivo. Deixar a constante do outro lado foi o defeito que quebrou o boot inteiro: o
 // ReferenceError acontecia DEPOIS do innerHTML, entao a pagina pintava certa e nada mais
 // funcionava, sem erro visivel na tela.
-const PER_PAGE = 6;
+// Quantos cards por pagina. Vem do DOM e nao de uma constante: `projects_per_page` e um
+// select do editor desde sempre, com 3, 4, 6, 8, 9 e 12, e nao mudava absolutamente nada
+// porque este numero estava cravado aqui. Um fotografo escolheu 9 e continuou vendo 6.
+//
+// Lido do atributo por request, e nao por parametro, porque applyProjects() roda DEPOIS do
+// render e e chamada de novo a cada repintura: o DOM ja e a fonte da verdade dela, como ja
+// era para o rotulo de "cases".
+const perPageDoDom = () => Number(document.getElementById('project-count')?.dataset.perPage) || 6;
 
 // Estado do filtro/paginação (em módulo: sobrevive ao re-render de troca de idioma).
 // Isto é [browser] de propósito: só roda depois do render, no navegador.
@@ -46,10 +53,10 @@ export function applyProjects() {
     const g = (c.dataset.groups || '').split(',').filter(Boolean);
     return active.size === 0 || g.some((x) => active.has(x));
   });
-  const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+  const pages = Math.max(1, Math.ceil(list.length / perPageDoDom()));
   if (page > pages - 1) page = pages - 1;
   if (page < 0) page = 0;
-  const onPage = new Set(list.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE));
+  const onPage = new Set(list.slice(page * perPageDoDom(), page * perPageDoDom() + perPageDoDom()));
   cards.forEach((c) => c.classList.toggle('hidden', !onPage.has(c)));
 
   if (countEl) countEl.textContent = `${list.length} ${countEl.dataset.casesLabel || ''}`.trim();

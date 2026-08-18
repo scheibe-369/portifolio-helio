@@ -26,14 +26,17 @@ const card = (p, lang, grupos) => {
         <div data-slug="${esc(p.slug)}" data-groups="${esc(grupos)}" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
           <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: ${safeColor(p.plateBg)};">
             ${
-              // SEM IMAGEM, NAO SAI <img>. Nem todo trabalho tem print: um caso de uma
-              // advogada, uma consultoria, uma aula. O card continua de pe com a placa e a
-              // categoria, e o titulo passa a ocupar o espaco da imagem. Antes saia
-              // `src=""`, que faz o navegador rebuscar o proprio documento como imagem e
-              // desenha o icone de figura quebrada em cima da placa colorida.
+              // SEM IMAGEM, NAO SAI NADA. Nem todo trabalho tem print: um caso de uma
+              // advogada, uma consultoria, uma aula. O card continua de pe com a placa colorida
+              // e o selo de categoria, e o nome fica onde sempre esteve, no rodape.
+              //
+              // A primeira versao disto punha o nome DENTRO da placa, e o resultado foi o
+              // titulo impresso duas vezes no mesmo card, com a segunda copia cortada em 375px.
+              // Antes de tudo isso saia `src=""`, que faz o navegador rebuscar o proprio
+              // documento como imagem e desenha o icone de figura quebrada sobre a placa.
               p.image
                 ? `<img src="${safeUrl(p.image)}" alt="${nome}" loading="lazy" decoding="async" class="w-full h-full ${imgClass} transition duration-700 group-hover:scale-105" style="object-position: ${safePosition(p.imagePosition, CENTRO)};">`
-                : `<span class="px-5 text-center text-[13px] font-semibold leading-snug text-white/70">${nome}</span>`
+                : ''
             }
             <span class="absolute left-3 top-3 rounded-md glass-card px-2 py-1 text-[9px] font-black uppercase tracking-tighter text-white border-white/10">
               ${esc(px(p, 'category', lang))}
@@ -76,7 +79,7 @@ const filterOption = (g, lang) => `
 // O rótulo de "cases" vai para data-cases-label: applyProjects() roda DEPOIS do render e
 // precisa desse texto para recontar. Antes ela chamava tui() direto, o que a obrigava a
 // conhecer o idioma, que e estado. Lendo do DOM, ela vira pura em relacao a idioma.
-export function renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui = {} }) {
+export function renderProjectsSection(projects, lang, { projectGroups, filterGroups, ui = {}, perPage = 6 }) {
   // Grade vazia nao desenha secao, mesma regra das stacks e da experiencia. Sem isto, quem
   // acabou de comprar publicava um card escrito "Meus Projetos / 0 cases" com um funil de
   // filtro que nao filtra nada, e essa e a primeira coisa que ele mostraria para alguem.
@@ -90,7 +93,7 @@ export function renderProjectsSection(projects, lang, { projectGroups, filterGro
           <i data-lucide="arrow-right" class="h-3 w-3 text-white/20"></i>
         </div>
         <div class="flex items-center gap-3">
-          <span id="project-count" data-cases-label="${rotuloCases}" class="text-[10px] font-medium text-white/30">${projects.length} ${rotuloCases}</span>
+          <span id="project-count" data-cases-label="${rotuloCases}"${Number(perPage) && Number(perPage) !== 6 ? ` data-per-page="${Number(perPage)}"` : ''} class="text-[10px] font-medium text-white/30">${projects.length} ${rotuloCases}</span>
           <div class="relative" id="project-filter-wrap">
             <button type="button" id="project-filter-toggle" class="filter-icon-btn" aria-label="${esc(tui('filterAria', lang))}">
               ${FUNNEL_SVG}

@@ -87,8 +87,8 @@ portfólio do Helio (20 projetos, 5 experiências).
 
 | Idioma | Mediana | p95 | Bytes de HTML |
 |---|---|---|---|
-| PT | 0.189 ms | 0.506 ms | 55541 |
-| EN | 0.143 ms | 0.324 ms | 55305 |
+| PT | 0.090 ms | 0.226 ms | 55589 |
+| EN | 0.083 ms | 0.249 ms | 55353 |
 
 Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
 Resultado: **dentro do orçamento**.
