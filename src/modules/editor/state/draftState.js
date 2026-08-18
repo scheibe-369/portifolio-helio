@@ -164,6 +164,8 @@ export function montarPayloadDoRascunho() {
       // duas linhas espelhavam a normalizacao do banco, e a normalizacao tambem deixou de
       // forcar: o previa tem que mostrar exatamente o que a pagina publicada vai mostrar.
       registro: pf.registro_profissional || undefined,
+      endereco: pf.endereco || undefined,
+      horario: pf.horario || undefined,
       badgeLabel: pf.badge_label || undefined,
       badgeIcon: pf.badge_icon || undefined,
       avatarShape: pf.avatar_shape || undefined,
@@ -205,6 +207,8 @@ export function montarPayloadDoRascunho() {
       })(),
       tagline: p.tagline,
       highlight: p.highlight || undefined,
+      depoimento: p.depoimento || undefined,
+      depoimentoAutor: p.depoimento_autor || undefined,
       problem: p.problem || undefined,
       solution: p.solution || undefined,
       features: p.features,

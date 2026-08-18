@@ -120,6 +120,11 @@ export const CAMPOS_PERFIL = [
   // socials e stats sao listas curtas de pares, editadas em BLOCO, uma por linha. Nao ganham
   // um construtor visual proprio na v1 de proposito: seriam o setimo e o oitavo primitivo de
   // um sistema que 6.2 fecha em seis, e o ganho sobre "rotulo | valor" e estetico.
+  // ONDE E QUANDO, para quem atende num lugar. Texto livre e nao grade por dia da semana:
+  // horario comercial brasileiro tem almoco, sabado ate meio-dia e "ou combine pelo WhatsApp",
+  // e sete linhas de formulario para isso seria maior que o resto do perfil.
+  { key: 'endereco', tipo: 'texto', label: 'Endereço', help: 'Se você atende num lugar. Ex: "Rua das Palmeiras, 340, Contagem, MG".', maxLength: 160, passo: 2 },
+  { key: 'horario', tipo: 'textarea', label: 'Horário de atendimento', help: 'Como você quiser escrever. Ex: "Seg a sex, 8h às 18h. Sábado até meio-dia."', maxLength: 160, passo: 2 },
   { key: 'socials', tipo: 'pares', label: 'Suas redes', help: 'Uma por linha, no formato: rótulo | texto ao lado | https://link', maxLength: 8, passo: 2 },
   { key: 'stats', tipo: 'pares', label: 'Números da capa', help: 'Um por linha, no formato: rótulo | valor', maxLength: 6, passo: 2 },
 
@@ -194,6 +199,11 @@ export const CAMPOS_PROJETO = [
   { key: 'solution', tipo: 'textarea', i18n: true, label: (v) => rotuloUi(v, 'solution', 'O que você entregou?'), maxLength: 2500, passo: 2 },
   { key: 'features', tipo: 'linhas', i18n: true, label: (v) => rotuloUi(v, 'features', 'O que está incluído?'), help: 'Um por linha, até 12.', maxLinhas: 12, maxLength: 200, passo: 2 },
 
+  // DEPOIMENTO DE CLIENTE. Fica no passo das provas, ao lado do video e do link, porque e
+  // exatamente isso: prova. Para varias profissoes (cerimonialista, personal, professor,
+  // arquiteta) e a peca que mais vende, e ate aqui nao tinha onde morar.
+  { key: 'depoimento', tipo: 'textarea', i18n: true, label: 'Depoimento de quem contratou', help: 'A fala da pessoa, com as palavras dela. Aparece quando alguém abre este trabalho.', maxLength: 400, passo: 3 },
+  { key: 'depoimento_autor', tipo: 'texto', label: 'Quem falou', help: 'Nome, ou nome e relação. Ex: "Marina, noiva", "Dr. Paulo, cliente". Só peça se a pessoa autorizar.', maxLength: 80, passo: 3, dependeDe: (v) => Boolean(String(v.depoimento || '').trim()) },
   { key: 'video', tipo: 'youtube', label: 'Vídeo no YouTube', help: 'Cole o link como ele veio. Shorts, live e link curto funcionam.', passo: 3 },
   { key: 'link', tipo: 'texto', label: (v) => `Link deste ${oTrabalho(v)}`, help: 'Precisa começar com https://', maxLength: 300, passo: 3 },
   { key: 'link_note', tipo: 'texto', i18n: true, label: 'Observação sobre o link', maxLength: 120, passo: 3, dependeDe: (v) => Boolean(v.link) },

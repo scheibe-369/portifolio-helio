@@ -29,6 +29,8 @@ export function projetoDaLinha(p) {
     category: doI18n(p.category_i18n),
     tagline: doI18n(p.tagline_i18n),
     highlight: doI18n(p.highlight_i18n),
+    depoimento: doI18n(p.depoimento_i18n),
+    depoimento_autor: p.depoimento_autor ?? '',
     problem: doI18n(p.problem_i18n),
     solution: doI18n(p.solution_i18n),
     features: listaDoI18n(p.features_i18n),
@@ -80,6 +82,10 @@ export function patchDoProjeto(v, linha = {}) {
     category_i18n: paraI18n(v.category, linha.category_i18n),
     tagline_i18n: paraI18n(v.tagline, linha.tagline_i18n),
     highlight_i18n: v.highlight ? paraI18n(v.highlight, linha.highlight_i18n) : null,
+    depoimento_i18n: v.depoimento ? paraI18n(v.depoimento, linha.depoimento_i18n) : null,
+    // Autor sem fala nao e depoimento, e uma assinatura solta: o CHECK do banco recusa, e
+    // limpar aqui poupa a pessoa de um erro de constraint por um campo que ela nem ve.
+    depoimento_autor: v.depoimento ? ouNulo(v.depoimento_autor) : null,
     problem_i18n: v.problem ? paraI18n(v.problem, linha.problem_i18n) : null,
     solution_i18n: v.solution ? paraI18n(v.solution, linha.solution_i18n) : null,
     features_i18n: listaParaI18n(v.features, linha.features_i18n),

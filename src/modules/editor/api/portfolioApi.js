@@ -3,6 +3,7 @@ import { baseMidiaPublica } from '../../media/lib/storage.js';
 import { doI18n, paraI18n, ouNulo } from './mapear.js';
 import { CHAVES_ROTULO } from '../../../app/rotulos.js';
 import { resolverTema } from '../../portfolio/theme/presets.js';
+import { coresDoBump } from '../lib/corDoTema.js';
 
 // Acesso ao portfolio do comprador. Zona [browser].
 //
@@ -84,6 +85,8 @@ export function perfilDaLinha(pf) {
     show_online_dot: Boolean(pf.show_online_dot),
     badge_label: pf.badge_label ?? '',
     registro_profissional: pf.registro_profissional ?? '',
+    endereco: pf.endereco ?? '',
+    horario: pf.horario ?? '',
     badge_icon: pf.badge_icon ?? '',
     avatar_shape: pf.avatar_shape ?? 'circulo',
     theme_preset: pf.theme_preset ?? '',
@@ -121,15 +124,6 @@ export function perfilDaLinha(pf) {
   };
 }
 
-// Cor que a pessoa realmente escolheu, ou null quando ela apenas aceitou a da paleta. A
-// comparacao e sem caixa porque `<input type="color">` sempre devolve minusculo, e as paletas
-// sao escritas em maiuscula no codigo.
-const corPropria = (valor, efetiva) => {
-  const v = ouNulo(valor);
-  if (!v) return null;
-  return String(v).toLowerCase() === String(efetiva).toLowerCase() ? null : v;
-};
-
 // RASCUNHO -> PATCH ----------------------------------------------------------
 // Toda chave daqui esta no `grant update (...)` de 0002, e manter as duas listas em sincronia
 // e obrigacao de code review: coluna nova de conteudo entra nas duas, coluna de seguranca
@@ -166,6 +160,8 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     // programador. O grant update das duas colunas foi aberto na mesma migration.
     badge_label: ouNulo(v.badge_label),
     registro_profissional: ouNulo(v.registro_profissional),
+    endereco: ouNulo(v.endereco),
+    horario: ouNulo(v.horario),
     badge_icon: ouNulo(v.badge_icon),
     avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
     theme_preset: ouNulo(v.theme_preset),
@@ -205,8 +201,16 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     // que ele mesmo mostrou. Gravar isso transformaria "abri o perfil e salvei" em "abri mao
     // da paleta para sempre". Null significa "siga a paleta", que e o que a pessoa pediu ao
     // escolher uma.
-    theme_accent: corPropria(v.theme_accent, resolverTema({ preset: v.theme_preset }).accent),
-    theme_plate_bg: corPropria(v.theme_plate_bg, resolverTema({ preset: v.theme_preset }).plate),
+    //
+    // A COMPARACAO E COM O PRESET QUE ESTAVA CARREGADO (`pf`), e nao com o que ela acabou de
+    // escolher (`v`). A primeira versao usava `v` e criou um defeito pior que o original:
+    // trocar de paleta no mesmo formulario deixa o campo de cor mostrando o accent da paleta
+    // ANTIGA (ele foi preenchido quando a gaveta abriu e ninguem o tocou), e comparar isso com
+    // a paleta NOVA da diferente, entao o codigo concluia "escolheu cor livre" e gravava a cor
+    // velha para sempre. Um funileiro trocou para Sangue e publicou roxo, e salvar de novo nao
+    // consertava. Comparando com o preset de origem, "nao toquei no campo" volta a ser
+    // reconhecido como o que e.
+    ...coresDoBump(v, pf),
   };
 }
 

@@ -73,7 +73,14 @@ export const DESTINOS = {
   //
   // O orcamento sobe de 90 para 140 KB porque a imagem agora carrega as bordas que antes eram
   // jogadas fora. Continua irrelevante perto da cota de 40 MB por conta.
-  project: { pasta: 'project', proporcao: null, lado: 1400, orcamento: 140 * 1024 },
+  // 220 KB, e o numero subiu junto com a decisao de nao cortar. Tirar o corte 3:2 salvou a
+  // foto vertical do tatuador e, no mesmo movimento, fez todo arquivo carregar as bordas que
+  // antes eram descartadas: o teto nao acompanhou, e quatro das seis fotos de um casamento
+  // foram recusadas. Multidao, folhagem, renda e bokeh sao ruido fino, que e exatamente o que
+  // WebP nao comprime, e "tente uma imagem mais simples" nao e instrucao que se cumpra numa
+  // foto de casamento. Com os dois degraus de reducao antes da recusa, este teto e o piso de
+  // qualidade, e nao mais o portao.
+  project: { pasta: 'project', proporcao: null, lado: 1400, orcamento: 220 * 1024 },
   // A placa da experiencia e quadrada (w-14 h-14) e NAO tem padding no CSS, de proposito: o
   // respiro vem assado no WebP, igual em todas as logos. Padding por cima reintroduziria a
   // margem dobrada que fazia cada logo aparecer num tamanho diferente na fileira.

@@ -18,6 +18,9 @@ meta tag e no header, e estão marcadas como cortesia para não entrarem na conc
 | 9 | Adriano Peçanha | Professor de concursos | https://demo-professor.myportifolio.com.br |
 | 10 | Rafa Ximenes | Tatuador | https://demo-tattoo.myportifolio.com.br |
 | 11 | Teresa Bogado | Confeiteira (nasceu com starter kit) | https://demo-kit.myportifolio.com.br |
+| 12 | Wilson Tavares | Corretor de imóveis | https://demo-corretor.myportifolio.com.br |
+| 13 | Clarice Bonfim | Cerimonialista | https://demo-eventos.myportifolio.com.br |
+| 14 | Zé Ricardo Pimenta | Funileiro e pintor | https://demo-funilaria.myportifolio.com.br |
 
 ## O que cada uma existe para quebrar
 
@@ -106,3 +109,20 @@ virou template de qualquer profissão:
 
 **Para ver o antes e o depois do primeiro minuto do produto**, compare `demo-confeitaria`
 (montada à mão, antes dos kits) com `demo-kit` (nasceu pelo wizard, já montada).
+
+
+## Segunda rodada: as três últimas
+
+Escolhidas por hipótese que as onze primeiras não cobriam, e não por variedade. Nenhuma tem
+starter kit correspondente, o que também é teste: é o que acontece com quem chega e não se
+acha na lista de dez áreas.
+
+| Persona | Hipótese | O que ela provou |
+|---|---|---|
+| **Corretor** | trabalho é dado estruturado (preço, m², quartos) | a coluna `registro_profissional` estava órfã, quebra de linha sumia em todo texto longo, e não havia como tirar um imóvel vendido do ar sem apagar |
+| **Cerimonialista** | o que vende é depoimento de cliente | quatro das seis fotos de casamento eram recusadas no upload, e não existia onde escrever a fala da noiva |
+| **Funileiro** | antes/depois, endereço físico, menor letramento digital | não havia campo de endereço nem horário, e o antes/depois não se distingue sem legenda |
+
+**O que saiu dessas três:** registro profissional ligado de ponta a ponta, endereço e horário,
+depoimento por trabalho, quebras de linha preservadas, esconder trabalho sem apagar, redução de
+imagem antes de recusar, e a correção de uma regressão minha que matava a paleta ao trocá-la.

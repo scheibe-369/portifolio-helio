@@ -158,6 +158,17 @@ export function renderProjectModal(p, lang, ui = {}) {
           </div>`
               : ''
           }
+          ${
+            // O DEPOIMENTO, quando existe. Ele vem ANTES da descricao tecnica de proposito:
+            // numa profissao de prova social, a fala do cliente e o argumento, e o resto e
+            // detalhamento. Aspas de verdade e citacao semantica, porque e fala de terceiro.
+            px(p, 'depoimento', lang)
+              ? `<figure class="mt-6 border-l-2 pl-4" style="border-color: ${accent};">
+            <blockquote class="text-sm text-white/85 leading-relaxed italic whitespace-pre-line">“${esc(px(p, 'depoimento', lang))}”</blockquote>
+            ${p.depoimentoAutor ? `<figcaption class="mt-2 text-[11px] font-semibold uppercase tracking-widest text-white/40">${esc(p.depoimentoAutor)}</figcaption>` : ''}
+          </figure>`
+              : ''
+          }
           ${linkHtml}
           ${videoHtml}
           ${galeria}

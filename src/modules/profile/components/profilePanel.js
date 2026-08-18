@@ -180,6 +180,24 @@ export function renderProfilePanel(profile, lang, ui = {}) {
       <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
         <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotuloSecao(ui, 'about', lang))}</h2>
         <p class="text-sm text-white/80 leading-relaxed font-medium whitespace-pre-line">${esc(t(profile.bio, lang))}</p>
+        ${
+          // ONDE E QUANDO, para quem atende num lugar fisico.
+          //
+          // FICA NA COLUNA LARGA, e nao junto das redes, e a primeira versao errou justamente
+          // isso: a coluna das redes tem 126px, e um endereco de rua precisa de 267. Foi
+          // exatamente o defeito que fez um funileiro escrever a oficina dele dentro de "Suas
+          // redes" e ver "Rua Sao Geraldo, 412, b..." publicado. Colocar o campo novo no mesmo
+          // lugar apertado seria repetir o defeito com outro nome.
+          //
+          // Sem link de mapa de proposito: escolher entre Google, Apple e Waze pela pessoa e
+          // decidir por ela em qual aplicativo o cliente dela vai abrir.
+          profile.endereco || profile.horario
+            ? `<div class="mt-1 pt-4 border-t border-white/10 flex flex-col gap-1">
+          ${profile.endereco ? `<p class="text-[12px] font-semibold text-white/85 leading-snug">${esc(profile.endereco)}</p>` : ''}
+          ${profile.horario ? `<p class="text-[11px] font-medium text-white/50 leading-snug whitespace-pre-line">${esc(profile.horario)}</p>` : ''}
+        </div>`
+            : ''
+        }
       </div>
 
       <div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">
