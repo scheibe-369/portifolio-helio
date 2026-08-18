@@ -55,7 +55,7 @@ const item = (e, lang) => {
                 <span>${periodo(e, lang)}</span>${local ? `<span class="text-white/15">·</span><span>${esc(local)}</span>` : ''}
               </div>
               ${destaques.length ? `<ul class="flex flex-col gap-1 mt-0.5">${destaques.map(marcador).join('')}</ul>` : ''}
-              ${nota ? `<p class="text-[11.5px] leading-relaxed text-white/45 italic border-l border-white/10 pl-3">${esc(nota)}</p>` : ''}
+              ${nota ? `<p class="text-[11.5px] leading-relaxed text-white/45 italic border-l border-white/10 pl-3 whitespace-pre-line">${esc(nota)}</p>` : ''}
               ${cert ? `<a href="${safeUrl(cert.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 w-fit rounded-lg glass-button px-2.5 py-1.5 text-[10px] font-semibold text-white/75 hover:text-white">${ICONE_ANEXO}${esc(cert.label || tui('certificate', lang))}</a>` : ''}
             </div>
           </li>`;

@@ -154,6 +154,18 @@ export function renderProfilePanel(profile, lang, ui = {}) {
         <div class="min-w-0">
           <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">${esc(profile.name)}</h1>
           <p class="text-xs font-medium text-white/40 metallic-silver">${esc(t(profile.role, lang))}</p>
+          ${
+            // O REGISTRO NO CONSELHO, logo abaixo da profissao, que e onde um cliente procura.
+            //
+            // A coluna foi criada na migration 0024 e ficou orfa: nenhum arquivo de src
+            // escrevia nela nem a lia, entao o payload publicava `"registro": null` e um
+            // corretor continuou enfiando o CRECI no campo "O que voce faz", que era
+            // exatamente o contorno que a migration dizia estar eliminando. Migration sem
+            // consumidor e feature que nao existe.
+            profile.registro
+              ? `<p class="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">${esc(profile.registro)}</p>`
+              : ''
+          }
         </div>
       </div>
       <div class="flex flex-col gap-3 sm:items-end">
@@ -167,7 +179,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
         <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotuloSecao(ui, 'about', lang))}</h2>
-        <p class="text-sm text-white/80 leading-relaxed font-medium">${esc(t(profile.bio, lang))}</p>
+        <p class="text-sm text-white/80 leading-relaxed font-medium whitespace-pre-line">${esc(t(profile.bio, lang))}</p>
       </div>
 
       <div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">

@@ -104,6 +104,13 @@ export const CAMPOS_PERFIL = [
   { key: 'display_name', tipo: 'texto', label: 'Seu nome', maxLength: 80, passo: 1, obrigatorio: true },
   { key: 'role', tipo: 'texto', i18n: true, label: 'O que você faz', help: 'Uma linha. Ex: "Desenvolvedor e criador de produtos".', maxLength: 160, passo: 1, obrigatorio: true },
   { key: 'bio', tipo: 'textarea', i18n: true, label: 'Sobre você', maxLength: 2000, passo: 1 },
+  // O numero do conselho. Nao e vaidade: CRECI, OAB, CRP, CRM, CREA e CAU sao obrigatorios em
+  // peca publicitaria por resolucao do proprio conselho, e publicar sem eles e infracao
+  // disciplinar de quem publicou. Sem este campo, as personas regulamentadas escondiam o
+  // registro em "O que voce faz" ou num slot de "Numeros da capa", ao lado de metricas de
+  // marketing.
+  { key: 'registro_profissional', tipo: 'texto', label: 'Registro no conselho', help: 'Se a sua profissão tem. Ex: "CRECI-SP 214.556", "OAB/MG 123.456", "CRP 06/148372".', maxLength: 40, passo: 1 },
+
   { key: 'hero_object_position', tipo: 'enquadramento', label: 'Enquadramento da foto', help: 'Sobe ou desce o corte da foto grande.', passo: 1 },
 
   { key: 'contact_email', tipo: 'texto', label: 'E-mail de contato', maxLength: 120, passo: 2 },
@@ -196,6 +203,11 @@ export const CAMPOS_PROJETO = [
   { key: 'year', tipo: 'select', label: 'Ano', opcoes: ANOS, passo: 3 },
   { key: 'groups', tipo: 'chips', label: 'Grupos de filtro', help: 'No máximo 4. É o que vira a barra de filtro da grade.', maxLinhas: 4, maxLength: 40, passo: 3 },
 
+  // ESCONDER SEM APAGAR. `is_visible` existe na tabela desde a 0003 e o payload ja filtra por
+  // ela, mas o formulario nunca a expos: quem vendeu o imovel, encerrou o servico ou parou de
+  // aceitar aquele tipo de encomenda so tinha a opcao de APAGAR, perdendo foto, texto, galeria
+  // e o que ja gastou de cota. Um corretor acabou escrevendo "VENDIDO" no campo de preco.
+  { key: 'is_visible', tipo: 'switch', label: 'Mostrar na página', help: 'Desligado, ele fica guardado aqui e some da sua página. Nada é apagado.', passo: 'fino' },
   { key: 'slug', tipo: 'texto', label: 'Endereço desta página', help: 'Sai do nome sozinho. Só letras, números e hífen.', maxLength: 60, passo: 'fino' },
   // "Logo (com respiro)" e "Print (preenche a placa)" descreviam o portfolio de onde o produto
   // nasceu, onde todo trabalho e uma logo de cliente ou um screenshot de sistema. Um fotografo,

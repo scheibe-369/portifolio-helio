@@ -83,6 +83,7 @@ export function perfilDaLinha(pf) {
     hero_object_position: pf.hero_object_position ?? '50% 36%',
     show_online_dot: Boolean(pf.show_online_dot),
     badge_label: pf.badge_label ?? '',
+    registro_profissional: pf.registro_profissional ?? '',
     badge_icon: pf.badge_icon ?? '',
     avatar_shape: pf.avatar_shape ?? 'circulo',
     theme_preset: pf.theme_preset ?? '',
@@ -164,6 +165,7 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     // entao cobrar para troca-lo significava cobrar de um chef para ele parar de dizer que e
     // programador. O grant update das duas colunas foi aberto na mesma migration.
     badge_label: ouNulo(v.badge_label),
+    registro_profissional: ouNulo(v.registro_profissional),
     badge_icon: ouNulo(v.badge_icon),
     avatar_shape: v.avatar_shape === 'oval' ? 'oval' : null,
     theme_preset: ouNulo(v.theme_preset),

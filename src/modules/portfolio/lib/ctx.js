@@ -78,6 +78,7 @@ function montarPortfolio(cfg, payload, { origem }) {
       avatar: urlMidia(cfg, perfil.avatarPath),
       mainImage: urlMidia(cfg, perfil.mainImagePath),
       stats: perfil.stats || [],
+      registro: perfil.registro || '',
       socials: perfil.socials || [],
     },
     // Os titulos que o dono da pagina reescreveu. Objeto vazio significa "usa os de hoje", e

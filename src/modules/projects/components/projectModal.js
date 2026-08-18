@@ -20,13 +20,21 @@ const feature = (f, accent) => `
 // Bloco de texto opcional. Devolve '' quando o texto e vazio: sem isso, um projeto sem
 // "problema" ou sem "solucao" (o que passa a acontecer no minuto em que o comprador
 // preenche so metade do formulario) renderiza um titulo sozinho, pendurado.
+// `whitespace-pre-line` nos textos longos: o que a pessoa escreveu em varias linhas aparece
+// em varias linhas.
+//
+// Sem ele, todo Enter digitado no editor virava um espaco no HTML, e a ficha tecnica de um
+// imovel (bairro, area util e quartos, uma linha cada) saia como um paragrafo corrido. O dado
+// chegava inteiro ao banco; quem perdia a formatacao era so o render, e a pessoa via o texto
+// dela desmontado sem entender por que. Atinge bio, descricao do trabalho e observacao de
+// experiencia, ou seja todo campo de texto longo do produto.
 const block = (title, text) => {
   const t = String(text ?? '').trim();
   if (!t) return '';
   return `
           <div>
             <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1.5 metallic-silver w-fit">${esc(title)}</h3>
-            <p class="text-sm text-white/70 leading-relaxed">${esc(t)}</p>
+            <p class="text-sm text-white/70 leading-relaxed whitespace-pre-line">${esc(t)}</p>
           </div>`;
 };
 

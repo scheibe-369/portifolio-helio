@@ -163,6 +163,7 @@ export function montarPayloadDoRascunho() {
       // R$ 37,90 ainda mais tendo como valor de fabrica o nome de outra profissao. Estas
       // duas linhas espelhavam a normalizacao do banco, e a normalizacao tambem deixou de
       // forcar: o previa tem que mostrar exatamente o que a pagina publicada vai mostrar.
+      registro: pf.registro_profissional || undefined,
       badgeLabel: pf.badge_label || undefined,
       badgeIcon: pf.badge_icon || undefined,
       avatarShape: pf.avatar_shape || undefined,

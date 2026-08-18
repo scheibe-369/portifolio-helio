@@ -245,7 +245,7 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
 
   const reduzido = reduzirEmDegraus(recortado, recorte.l, recorte.a, lAlvo, aAlvo);
 
-  const saida = document.createElement('canvas');
+  let saida = document.createElement('canvas');
   saida.width = lAlvo;
   saida.height = aAlvo;
   const ctx = saida.getContext('2d');
@@ -262,10 +262,35 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
     ctx.drawImage(reduzido, 0, 0, lAlvo, aAlvo);
   }
 
-  const blob = await codificarDentroDoOrcamento(saida, cfg.orcamento);
+  // ANTES DE RECUSAR, REDUZ. Se as tres qualidades nao couberem no orcamento, a saida obvia e
+  // diminuir a imagem, e nao devolver o problema para quem so queria subir uma foto.
+  //
+  // Sem estes dois degraus, uma foto de interior perfeitamente comum era recusada com "tente
+  // uma imagem mais simples ou menor": um pedido que a pessoa nao sabe atender (o que e uma
+  // imagem "mais simples"?) e que ela nao deveria precisar atender, porque redimensionar e
+  // exatamente o que este arquivo faz. Foto com muito detalhe (interior, mata, multidao) e o
+  // caso normal, nao o excepcional.
+  //
+  // Dois degraus de 80% cobrem o caso real sem virar um laco: cada um corta ~36% da area, e
+  // depois disso a imagem ja estaria pequena demais para o lugar onde vai aparecer.
+  let blob = await codificarDentroDoOrcamento(saida, cfg.orcamento);
+  let larguraFinal = lAlvo;
+  let alturaFinal = aAlvo;
+  for (let tentativa = 0; !blob && tentativa < 2; tentativa += 1) {
+    larguraFinal = Math.max(1, Math.round(larguraFinal * 0.8));
+    alturaFinal = Math.max(1, Math.round(alturaFinal * 0.8));
+    const menor = document.createElement('canvas');
+    menor.width = larguraFinal;
+    menor.height = alturaFinal;
+    const c = menor.getContext('2d');
+    c.imageSmoothingQuality = 'high';
+    c.drawImage(saida, 0, 0, larguraFinal, alturaFinal);
+    saida = menor;
+    blob = await codificarDentroDoOrcamento(saida, cfg.orcamento);
+  }
   if (!blob) {
     throw new ErroDeImagem(
-      `nao consegui deixar esta imagem abaixo de ${Math.round(cfg.orcamento / 1024)} KB. Tente uma imagem mais simples ou menor.`,
+      'não consegui preparar esta imagem para a web. Tente outra foto.',
     );
   }
 

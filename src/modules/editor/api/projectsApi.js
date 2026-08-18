@@ -24,6 +24,7 @@ export function projetoDaLinha(p) {
   return {
     id: p.id,
     slug: p.slug,
+    is_visible: p.is_visible !== false,
     name: doI18n(p.name_i18n),
     category: doI18n(p.category_i18n),
     tagline: doI18n(p.tagline_i18n),
@@ -74,6 +75,7 @@ export function patchDoProjeto(v, linha = {}) {
   const yt = v.video ? parseYoutubeId(v.video) : { id: null, orientation: null };
   return {
     slug: v.slug,
+    is_visible: v.is_visible !== false,
     name_i18n: paraI18n(v.name, linha.name_i18n),
     category_i18n: paraI18n(v.category, linha.category_i18n),
     tagline_i18n: paraI18n(v.tagline, linha.tagline_i18n),
