@@ -45,7 +45,14 @@ const TETO_PIXELS = 50 * 1000 * 1000;
 // Um destino por lugar onde a imagem aparece. Orcamento diferente por destino porque um
 // numero solto nao reprova nada: 90 KB e generoso para um card e absurdo para um avatar.
 export const DESTINOS = {
-  avatar: { pasta: 'avatar', proporcao: 1, lado: 512, orcamento: 25 * 1024 },
+  // 60 KB e nao 25. O orcamento antigo foi calibrado para uma LOGO quadrada, que e o que o
+  // portfolio de origem tinha ali: pouca cor, muita area chapada, e WebP fecha em 20 KB. Foto
+  // de ROSTO e o oposto (pele, cabelo, fundo desfocado), e uma foto real de 800x800 nao cabia
+  // em 25 KB nem na terceira tentativa de qualidade: ela saia em 0.62 e ainda estourava, ou
+  // seja a foto de perfil da pessoa era recusada por um numero herdado de outro tipo de
+  // imagem. 60 KB e o dobro do que uma foto de rosto de 512px costuma pedir e continua
+  // irrelevante perto da cota de 40 MB por conta.
+  avatar: { pasta: 'avatar', proporcao: 1, lado: 512, orcamento: 60 * 1024 },
   hero: { pasta: 'hero', proporcao: 4 / 5, lado: 1000, orcamento: 120 * 1024 },
   project: { pasta: 'project', proporcao: 3 / 2, lado: 1200, orcamento: 90 * 1024 },
   // A placa da experiencia e quadrada (w-14 h-14) e NAO tem padding no CSS, de proposito: o

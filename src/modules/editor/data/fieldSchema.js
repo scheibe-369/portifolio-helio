@@ -65,8 +65,8 @@ export const PASSOS_PERFIL = {
 // que nao esta naquele grant responde 42501 no PATCH, ANTES de a RLS ser avaliada, e nenhuma
 // interface consegue contornar isso, que e exatamente o objetivo do achado 2.
 export const CAMPOS_PERFIL = [
-  { key: 'hero', tipo: 'imagem', destino: 'hero', label: 'Sua foto grande', help: 'Aparece no topo. Corte 4:5, ate 120 KB.', passo: 1 },
-  { key: 'avatar', tipo: 'imagem', destino: 'avatar', label: 'Foto pequena', help: 'A do cantinho. Quadrada, ate 25 KB.', passo: 1 },
+  { key: 'hero', tipo: 'imagem', destino: 'hero', label: 'Sua foto grande', help: 'A foto grande do topo. Ela é cortada em pé (4:5), e você ajusta o enquadramento logo abaixo.', passo: 1 },
+  { key: 'avatar', tipo: 'imagem', destino: 'avatar', label: 'Foto pequena', help: 'A do cantinho, que aparece ao lado do seu nome. Quadrada.', passo: 1 },
   { key: 'display_name', tipo: 'texto', label: 'Seu nome', maxLength: 80, passo: 1, obrigatorio: true },
   { key: 'role', tipo: 'texto', i18n: true, label: 'O que você faz', help: 'Uma linha. Ex: "Desenvolvedor e criador de produtos".', maxLength: 160, passo: 1, obrigatorio: true },
   { key: 'bio', tipo: 'textarea', i18n: true, label: 'Sobre você', maxLength: 2000, passo: 1 },
@@ -139,9 +139,12 @@ export const CAMPOS_PERFIL = [
 // projeto e o ponto exato onde o comprador fecha a aba. Ao digitar o nome, o card ja aparece
 // na grade atras da gaveta, e o projeto ja e publicavel ao fim do passo 1.
 export const CAMPOS_PROJETO = [
-  { key: 'image', tipo: 'imagem', destino: 'project', label: 'Imagem do case', help: 'Corte 3:2, ate 90 KB.', passo: 1 },
+  { key: 'image', tipo: 'imagem', destino: 'project', label: 'Imagem do case', help: 'É a capa deste trabalho na grade.', passo: 1 },
   { key: 'name', tipo: 'texto', i18n: true, label: 'Nome do projeto', maxLength: 60, passo: 1, obrigatorio: true },
   { key: 'category', tipo: 'texto', i18n: true, label: 'Categoria', help: 'Ex: Landing page, Automação, App.', maxLength: 40, passo: 1, obrigatorio: true },
+  // Preco, prazo ou condicao. Fica no passo 1 porque para quem vende encomenda isso nao e
+  // detalhe: e a informacao que decide o contato.
+  { key: 'highlight', tipo: 'texto', i18n: true, label: 'Preço, prazo ou condição', help: 'Uma linha curta, que aparece já na grade. Ex: "A partir de R$ 180", "Sessão de 3h", "Encomende com 7 dias".', maxLength: 60, passo: 1 },
   { key: 'tagline', tipo: 'textarea', i18n: true, label: 'Uma frase sobre ele', maxLength: 280, passo: 1 },
 
   // Os rotulos do passo 2 sao PERGUNTAS de proposito: "Problema" faz a pessoa escrever um

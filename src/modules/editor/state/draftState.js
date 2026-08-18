@@ -203,6 +203,7 @@ export function montarPayloadDoRascunho() {
           : { videoId: undefined, videoOrientation: undefined };
       })(),
       tagline: p.tagline,
+      highlight: p.highlight || undefined,
       problem: p.problem || undefined,
       solution: p.solution || undefined,
       features: p.features,

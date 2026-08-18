@@ -124,6 +124,11 @@ export function renderProjectModal(p, lang, ui = {}) {
           </div>
 
           <p class="text-sm text-white/80 leading-relaxed font-medium mt-5">${esc(px(p, 'tagline', lang))}</p>
+          ${
+            px(p, 'highlight', lang)
+              ? `<p class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold" style="border-color: ${accent}; color: ${accent};">${esc(px(p, 'highlight', lang))}</p>`
+              : ''
+          }
           ${linkHtml}
           ${videoHtml}
           ${galeria}

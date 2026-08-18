@@ -263,6 +263,18 @@ const checar = (nome, condicao, detalhe) => {
   checar('lista malformada cai na ordem padrao', lixo.includes('Stacks Dominadas'));
 }
 
+// ---------------------------------------------------------------- destaque do trabalho
+{
+  const semDestaque = render({ projects: [{ slug: 'b', name: 'Bolo', category: 'Doce', groups: [] }] });
+  checar('sem destaque, o markup do card e o de sempre', !semDestaque.includes('mt-0.5 text-[10px] font-semibold'),
+    'ausencia da feature produz ausencia de markup: 20 cards de quem nao usa o campo nao podem mudar');
+
+  const comDestaque = render({ projects: [{ slug: 'b', name: 'Bolo', category: 'Doce', groups: [], highlight: 'A partir de R$ 180' }] });
+  checar('o destaque aparece na grade', comDestaque.includes('A partir de R$ 180'),
+    'preco escondido atras de um clique e preco que nao vende');
+  checar('e o nome continua la', comDestaque.includes('Bolo'));
+}
+
 // ---------------------------------------------------------------- credito de producao
 {
   const html = render({});

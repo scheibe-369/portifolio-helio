@@ -21,6 +21,7 @@ const card = (p, lang, grupos) => {
   const isCover = p.fit === 'cover';
   const imgClass = isCover ? 'object-cover' : 'object-contain p-5';
   const nome = esc(px(p, 'name', lang));
+  const destaque = String(px(p, 'highlight', lang) ?? '').trim();
   return `
         <div data-slug="${esc(p.slug)}" data-groups="${esc(grupos)}" tabindex="0" role="button" class="project-card group relative rounded-2xl bg-zinc-950 border border-white/5 overflow-hidden flex flex-col cursor-pointer hover:border-white/15 focus:outline-none focus-visible:border-white/40 transition">
           <div class="relative overflow-hidden h-44 md:h-52 flex items-center justify-center" style="background-color: ${safeColor(p.plateBg)};">
@@ -39,9 +40,27 @@ const card = (p, lang, grupos) => {
             </span>${p.videoId ? PLAY_BADGE : ''}
           </div>
           <div class="p-3 flex items-center justify-between">
-            <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
+            ${
+              // A LINHA DE DESTAQUE (preco, prazo, condicao) aparece AQUI, na grade, e nao so
+              // dentro da janela: quem vende encomenda precisa que o "a partir de R$ 180" seja
+              // lido ANTES do clique, e preco escondido atras de um clique e preco que nao
+              // vende.
+              //
+              // SEM DESTAQUE, O MARKUP E O DE SEMPRE. A versao com destaque precisa de um
+              // container a mais para empilhar as duas linhas, e emitir esse container para
+              // todo mundo mudava o HTML de 20 cards de quem nunca vai usar o campo. Ausencia
+              // da feature produz ausencia de markup, que e a regra do arquivo.
+              destaque
+                ? `<div class="min-w-0 max-w-[80%]">
+              <p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight metallic-silver">
+                ${nome}
+              </p>
+              <p class="mt-0.5 text-[10px] font-semibold text-white/45 truncate">${esc(destaque)}</p>
+            </div>`
+                : `<p class="text-[11px] font-medium text-white uppercase tracking-wider leading-tight max-w-[80%] metallic-silver">
               ${nome}
-            </p>
+            </p>`
+            }
             <i data-lucide="arrow-up-right" class="h-4 w-4 text-white/20 group-hover:text-white transition"></i>
           </div>
         </div>`;

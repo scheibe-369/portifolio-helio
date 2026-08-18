@@ -216,19 +216,19 @@ export function lerMudanca(el, valores) {
 // recusa. O que isto evita e o comprador descobrir a regra depois de preencher o formulario.
 export function validarCampo(campo, valor, valores) {
   if (campo.obrigatorio && !String(valor ?? '').trim()) return 'preencha este campo';
-  if (campo.tipo === 'periodo' && valor && !periodoValido(valor)) return 'use 2024 ou 03/2024';
+  if (campo.tipo === 'periodo' && valor && !periodoValido(valor)) return 'escreva o ano (2024) ou mês e ano (03/2024)';
   if (campo.tipo === 'youtube' && valor) {
     const r = parseYoutubeId(valor);
-    if (!r.id) return 'nao reconheci este link do YouTube';
+    if (!r.id) return 'não reconheci este link. Cole o endereço do vídeo no YouTube';
   }
-  if (campo.key === 'link' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa comecar com https://';
-  if (campo.key === 'cta_url' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa comecar com https://';
-  if (campo.key === 'contact_email' && valor && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(String(valor))) return 'e-mail invalido';
+  if (campo.key === 'link' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa começar com https://';
+  if (campo.key === 'cta_url' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa começar com https://';
+  if (campo.key === 'contact_email' && valor && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(String(valor))) return 'e-mail inválido';
   // Mesma pergunta do constraint experiences_ordem_ok, com a MESMA funcao de periodoChave.js.
   // Divergir daqui e exatamente como "03/2024 a 2024" passaria no editor e seria recusado no
   // insert, com o comprador perdendo o que digitou.
   if (campo.key === 'period_end' && valor && valores.period_start && periodoValido(valor)) {
-    if (!periodoCoerente(valores.period_start, valor)) return 'o fim vem antes do inicio';
+    if (!periodoCoerente(valores.period_start, valor)) return 'a data de fim vem antes da de início';
   }
   return '';
 }
