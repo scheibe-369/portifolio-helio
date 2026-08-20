@@ -175,6 +175,12 @@ body {
      sobe esse 1px e passa a ficar no centro de verdade. Medido: 361 pixels de 5 milhoes na
      pagina do apex, e nenhum outro ponto da pagina se move. Fica registrado porque mudanca
      na pagina do dono, por menor que seja, e sempre deliberada aqui. */
+  /* NAO ENCOLHE. No hover a placa do icone cresce ate `calc(100% - 12px)` e engole o botao;
+     como os dois sao itens do mesmo flex, o texto era espremido junto e, agora que ele quebra
+     linha, REFLUIA enquanto saia: "CHAMAR NO WHATSAPP" virava "CH / NO" no meio da animacao.
+     Com `flex-shrink: 0` ele mantem a largura e apenas desliza para fora, que e o efeito que
+     sempre esteve desenhado ali. */
+  flex-shrink: 0;
   line-height: 22px;
   max-width: calc(100% - 50px);
   max-height: 44px;

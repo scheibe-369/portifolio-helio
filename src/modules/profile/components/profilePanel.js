@@ -155,8 +155,20 @@ const socialItem = ({ label, value, href }, lang, opcoes = {}) => {
   const longo = texto.length > 12;
   const icone = opcoes.icones ? svgRede(redeDoLink(href, label)) : '';
   const altura = opcoes.esticar === false ? '' : `flex-1 ${longo ? 'max-h-20' : 'max-h-16'} `;
+  // O TEXTO FICA JUNTO, E A SOBRA VAI PARA AS PONTAS.
+  //
+  // Quando o valor desce uma linha, o cartao passa a ter duas linhas de flex, e o padrao do
+  // `align-content` e `stretch`: a altura que sobra e distribuida ENTRE elas. Como o cartao
+  // estica para acompanhar a coluna, sobra muita: na pagina de um funileiro deu 12px de buraco
+  // entre "WhatsApp" e o telefone dele, dentro de um cartao de 80px com 46px de texto. Lido de
+  // fora nao parece espaco, parece desalinhamento, e foi assim que ele foi reportado.
+  //
+  // `content-center` mantem as duas linhas coladas e joga a sobra para cima e para baixo, em
+  // partes iguais. So entra quando ha duas linhas: cartao de uma linha nao tem align-content
+  // nenhum para respeitar, e o do dono do produto continua byte a byte igual.
+  const juntas = longo ? 'content-center ' : '';
   return `
-            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
+            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}${juntas}flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
               ${icone ? `<span class="shrink-0 flex items-center gap-2">${icone}${esc(label)}</span>` : `<span class="shrink-0">${esc(label)}</span>`}
               <span class="${longo ? 'basis-full break-words' : 'min-w-0 truncate'} text-right text-white/40 font-normal">${esc(texto)}</span>
             </a>`;
@@ -298,7 +310,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
       </div>`
           : socials.length || cta
             ? `<div class="md:col-span-5 flex flex-col gap-3 glass-card rounded-3xl p-5">
-        ${socials.length ? `<div class="grid ${colunasRedes(socials.length)} gap-2 text-[11px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones, esticar: false })).join('')}
+        ${socials.length ? `<div class="grid ${colunasRedes(socials.length)} gap-2 text-[12.5px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones, esticar: false })).join('')}
         </div>` : ''}
         ${
           // O BOTAO EM LINHA PROPRIA, e nao ao lado das redes. Ao lado ele levava 224px dos
