@@ -188,6 +188,34 @@ export function abrirFormulario({
         if (ev.target.closest('[data-abrir-bump]')) {
           document.dispatchEvent(new CustomEvent('editor:abrir-bump'));
         }
+        // A ESTANTE DE ICONES ESCREVE NA LINHA DO CURSOR.
+        //
+        // O campo e um textarea de varias linhas no formato `nome | icone | link`, e o clique
+        // precisa saber em QUAL linha mexer. A resposta e a linha onde a pessoa estava
+        // digitando; se ela nunca clicou no campo, e a ultima linha escrita, que e onde ela
+        // parou. Escrever sempre no fim seria adivinhar errado toda vez que alguem voltasse
+        // para corrigir a segunda de quatro redes.
+        //
+        // O `input` no fim nao e enfeite: o estado do editor e alimentado por esse evento, e
+        // sem ele o texto apareceria na tela e nao chegaria ao rascunho, que e o pior dos dois
+        // mundos (parece salvo e nao esta).
+        const botao = ev.target.closest('[data-icone]');
+        if (!botao) return;
+        const campo = botao.closest('.ed-field');
+        const area = campo && campo.querySelector('textarea[data-pares]');
+        if (!area) return;
+        ev.preventDefault();
+        const QUEBRA = '\n';
+        const linhas = area.value.split(QUEBRA);
+        const ate = area.selectionStart != null ? area.value.slice(0, area.selectionStart) : area.value;
+        const alvo = Math.min(ate.split(QUEBRA).length - 1, linhas.length - 1);
+        const partes = (linhas[alvo] || '').split('|').map((x) => x.trim());
+        while (partes.length < 3) partes.push('');
+        partes[1] = botao.dataset.icone;
+        linhas[alvo] = partes.join(' | ');
+        area.value = linhas.join(QUEBRA);
+        area.dispatchEvent(new Event('input', { bubbles: true }));
+        area.focus();
       });
     },
   });

@@ -1,5 +1,6 @@
 import { ANOS } from '../config/editor.config.js';
 import { ICONES_SELO } from '../../profile/lib/iconesSelo.js';
+import { legendaDeIcones } from '../fields/legendaIcones.js';
 import { PRESETS } from '../../portfolio/theme/presets.js';
 
 // As opcoes do icone do selo, em pares [valor gravado, rotulo mostrado].
@@ -125,7 +126,11 @@ export const CAMPOS_PERFIL = [
   // e sete linhas de formulario para isso seria maior que o resto do perfil.
   { key: 'endereco', tipo: 'texto', label: 'Endereço', help: 'Se você atende num lugar. Ex: "Rua das Palmeiras, 340, Contagem, MG".', maxLength: 160, passo: 2 },
   { key: 'horario', tipo: 'textarea', label: 'Horário de atendimento', help: 'Como você quiser escrever. Ex: "Seg a sex, 8h às 18h. Sábado até meio-dia."', maxLength: 160, passo: 2 },
-  { key: 'socials', tipo: 'pares', label: 'Suas redes', help: 'Uma por linha, no formato: rótulo | texto ao lado | https://link', maxLength: 8, passo: 2 },
+  // O MEIO DA LINHA VIROU O ICONE. Ele guardava um segundo texto que o cartao mostrava ao
+  // lado do nome, e esse texto era o defeito: telefone, arroba e razao social nao cabem em
+  // 128px, entao ou eram cortados ou desalinhavam o cartao. Quem deixar em branco continua
+  // ganhando icone, adivinhado pelo link e pelo rotulo.
+  { key: 'socials', tipo: 'pares', label: 'Seus contatos e redes', help: 'Uma por linha: nome | ícone | https://link. O ícone é opcional, a gente adivinha pelo link.', maxLength: 8, passo: 2, segmentos: 3, legenda: legendaDeIcones },
   { key: 'socials_icons', tipo: 'switch', label: 'Mostrar o símbolo de cada rede', help: 'O símbolo sai do próprio link: wa.me vira WhatsApp. Rede que a gente não reconhece fica só com o nome.', passo: 2 },
   { key: 'stats', tipo: 'pares', label: 'Números da capa', help: 'Um por linha, no formato: rótulo | valor', maxLength: 6, passo: 2 },
 

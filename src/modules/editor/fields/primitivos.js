@@ -32,12 +32,46 @@ function moldura(campo, valores, interno, { erro = '' } = {}) {
       </label>
       ${interno}
       ${help ? `<p class="ed-help">${esc(help)}</p>` : ''}
+      ${
+        // HTML CRU, e a unica coisa do formulario que e. Vale porque a legenda e montada por
+        // codigo nosso a partir de uma lista fechada, e nunca a partir de texto do comprador:
+        // nada aqui vem do banco. Campo que quiser mostrar dado de gente continua passando por
+        // `esc`, como todo o resto deste arquivo.
+        typeof campo.legenda === 'function' ? campo.legenda() : ''
+      }
       <p class="ed-erro" data-erro>${esc(erro)}</p>
     </div>`;
 }
 
 const chip = (texto, i) => `
   <span class="ed-chip">${esc(texto)}<button type="button" class="ed-chip-x" data-chip-remover="${i}" aria-label="Remover ${esc(texto)}">×</button></span>`;
+
+// O FORMATO DE LINHA DOS CAMPOS DE LISTA, e a regra que faz ele voltar inteiro.
+//
+// O campo de contatos e `nome | icone | link`, e o icone e opcional. A juncao antiga
+// descartava TODO segmento vazio, entao um contato sem icone era escrito
+// `WhatsApp | https://wa.me/...`, com duas partes. Na volta, a leitura posicional punha o link
+// no campo do meio e deixava o link vazio, e o `.filter(s => s.label && s.extra)` do
+// salvamento jogava a linha fora. Ou seja: abrir o formulario e salvar sem tocar em nada
+// APAGARIA todos os contatos da pessoa. Nao chegou a producao, mas chegou perto o bastante
+// para virar regra escrita.
+//
+// A REGRA: em campo de tres segmentos, o ULTIMO E SEMPRE O LINK. Duas partes significam nome e
+// link, que e exatamente o que alguem escreve quando nao quer icone. Tres significam nome,
+// icone e link. O do meio e o unico que pode faltar, porque e o unico opcional.
+const partesEmTexto = (p, campo) => {
+  const semMeio = campo && campo.segmentos === 3 && !String(p.valor ?? '').trim();
+  const partes = semMeio ? [p.label, p.extra] : [p.label, p.valor, p.extra];
+  while (partes.length && String(partes[partes.length - 1] ?? '').trim() === '') partes.pop();
+  return partes.map((x) => String(x ?? '').trim()).join(' | ');
+};
+
+const textoEmPartes = (linha, tresSegmentos) => {
+  const p = linha.split('|').map((s) => s.trim());
+  if (tresSegmentos && p.length === 2) return { label: p[0] || '', valor: '', extra: p[1] || '' };
+  const [label = '', valor = '', extra = ''] = p;
+  return { label, valor, extra };
+};
 
 // Render de um campo. `bloqueado` chega true quando o campo e do bump e a conta nao comprou:
 // o campo APARECE, com o valor padrao preenchido e um cadeado, porque esconde-lo faria o
@@ -145,11 +179,11 @@ export function renderCampo(campo, valores, { bloqueado = false } = {}) {
 
     case 'pares': {
       const lista = Array.isArray(v) ? v : [];
-      const texto = lista.map((p) => [p.label, p.valor, p.extra].filter((x) => x != null && x !== '').join(' | ')).join('\n');
+      const texto = lista.map((p) => partesEmTexto(p, campo)).join('\n');
       return moldura(
         campo,
         valores,
-        `<textarea id="${id}" class="ed-textarea" rows="4" data-pares="${esc(campo.key)}"${dis}>${esc(texto)}</textarea>
+        `<textarea id="${id}" class="ed-textarea" rows="4" data-pares="${esc(campo.key)}"${campo.segmentos === 3 ? ' data-tres' : ''}${dis}>${esc(texto)}</textarea>
          <span class="ed-contador" data-contador>${lista.length}/${max}</span>`,
       );
     }
@@ -195,13 +229,10 @@ export function lerMudanca(el, valores) {
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean)
-      .map((l) => {
-        // Ate tres segmentos: rotulo, texto e link. Um formato so para os dois campos de lista
-        // curta (redes e numeros da capa), porque um construtor visual por campo seria o
-        // setimo primitivo de um sistema que 6.2 fecha em seis.
-        const [label = '', valor = '', extra = ''] = l.split('|').map((s) => s.trim());
-        return { label, valor, extra };
-      });
+      // Um formato so para os dois campos de lista curta (contatos e numeros da capa), porque
+      // um construtor visual por campo seria o setimo primitivo de um sistema que 6.2 fecha
+      // em seis. `data-tres` diz quais deles tem o segmento do meio opcional.
+      .map((l) => textoEmPartes(l, el.dataset.tres != null));
     return { key: el.dataset.pares, valor: lista };
   }
   if (el.dataset.cor != null) return { key: el.dataset.cor, valor: el.value };

@@ -4,6 +4,7 @@ import { doI18n, paraI18n, ouNulo } from './mapear.js';
 import { CHAVES_ROTULO } from '../../../app/rotulos.js';
 import { resolverTema } from '../../portfolio/theme/presets.js';
 import { coresDoBump } from '../lib/corDoTema.js';
+import { iconeValido } from '../../profile/lib/iconesRede.js';
 
 // Acesso ao portfolio do comprador. Zona [browser].
 //
@@ -114,7 +115,7 @@ export function perfilDaLinha(pf) {
     // e o patch consegue distinguir "nao mexeu" de "escolheu exatamente esta cor".
     theme_accent: pf.theme_accent ?? efetivo.accent,
     theme_plate_bg: pf.theme_plate_bg ?? efetivo.plate,
-    socials: (pf.socials || []).map((s) => ({ label: s.label ?? '', valor: doI18n(s.value), extra: s.href ?? '' })),
+    socials: (pf.socials || []).map((s) => ({ label: s.label ?? '', valor: s.icon ?? '', extra: s.href ?? '' })),
     stats: (pf.stats || []).map((s) => ({ label: doI18n(s.label), valor: doI18n(s.value), extra: '' })),
     stacks: pf.stacks || [],
     english_enabled: Boolean(pf.english_enabled),
@@ -142,10 +143,17 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     show_online_dot: Boolean(v.show_online_dot),
     socials_icons: Boolean(v.socials_icons),
     cta_url: ouNulo(v.cta_url),
+    // `value` NAO VOLTA. O cartao deixou de ter o segundo texto, e guardar um campo que
+    // ninguem le e a mesma armadilha da coluna orfa: ele parece existir para quem preenche e
+    // nao existe para quem visita. Quem tinha texto ali perde na primeira gravacao, que e o
+    // momento certo, porque e quando a pessoa esta olhando o formulario novo.
     socials: (v.socials || [])
       .filter((s) => s.label && s.extra)
       .slice(0, 8)
-      .map((s) => ({ label: s.label, value: s.valor || '', href: s.extra })),
+      .map((s) => {
+        const icone = iconeValido(s.valor);
+        return icone ? { label: s.label, icon: icone, href: s.extra } : { label: s.label, href: s.extra };
+      }),
     stats: (v.stats || [])
       .filter((s) => s.label)
       .slice(0, 6)

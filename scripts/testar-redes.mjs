@@ -10,7 +10,7 @@
 // nao for reconhecido nao ganha desenho nenhum.
 //
 //   node scripts/testar-redes.mjs
-import { ICONES_REDE, redeDoLink, svgRede } from '../src/modules/profile/lib/iconesRede.js';
+import { ICONES_REDE, iconeDoContato, iconeValido, redeDoLink, svgRede } from '../src/modules/profile/lib/iconesRede.js';
 
 let falhas = 0;
 const checar = (nome, condicao, detalhe) => {
@@ -60,36 +60,66 @@ checar('sem link reconhecido, o rotulo decide', redeDoLink('https://bit.ly/abc',
 checar('rotulo com acento e caixa alta tambem', redeDoLink('', 'INSTAGRAM') === 'instagram');
 checar('rotulo com espaco', redeDoLink('', 'Tik Tok') === 'tiktok');
 
-// O QUE NAO E REDE NAO GANHA DESENHO. O corretor tem uma linha "Imobiliaria" apontando para o
-// Google Maps, e o funileiro usa o campo como slot generico para a oficina.
-checar('mapa nao vira marca', redeDoLink('https://maps.google.com/?q=x', 'Imobiliária') === null);
-checar('site proprio nao vira marca', redeDoLink('https://oficinadozeh.com.br', 'Oficina') === null);
+// O QUE NAO E REDE TAMBEM PRECISA DE DESENHO, e isso mudou quando o cartao perdeu o texto de
+// apoio: antes "Onde fica" se explicava pelo endereco escrito ao lado, e agora so o icone
+// sobra para explicar. A lista deixou de ser so de marcas por causa disso.
+checar('mapa vira alfinete', redeDoLink('https://maps.google.com/?q=x', 'Imobiliária') === 'mapa');
+checar('"Onde fica" vira alfinete sem depender do link', redeDoLink('', 'Onde fica') === 'mapa');
+checar('"Oficina" tambem', redeDoLink('https://oficinadozeh.com.br', 'Oficina') === 'mapa');
+checar('"Horário" vira relogio', redeDoLink('', 'Horário') === 'relogio');
+checar('"E-mail" vira envelope', redeDoLink('', 'E-mail') === 'email');
+checar('"Cardápio" vira cardapio', redeDoLink('', 'Cardápio') === 'cardapio');
+
+// O ROTULO GENERICO GANHA DO LINK, e so nesse caso. Um funileiro escreveu "Horário" e pos um
+// link de WhatsApp ali porque o campo exige link: pelo host, o cartao do horario dele ganharia
+// o logo do WhatsApp.
+checar('rotulo de linha ganha do host', redeDoLink('https://wa.me/5531988447120', 'Horário') === 'relogio');
+checar('entre duas marcas, o host ganha', redeDoLink('https://instagram.com/a', 'Zap') === 'instagram',
+  '"Zap" apontando para o Instagram e rotulo desatualizado, nao escolha');
+
+// A ESCOLHA DA PESSOA GANHA DOS DOIS.
+checar('icone escolhido ganha do palpite', iconeDoContato({ label: 'Zap', href: 'https://wa.me/1', icon: 'coracao' }) === 'coracao');
+checar('icone invalido nao envenena', iconeDoContato({ label: 'Zap', href: 'https://wa.me/1', icon: 'nao-existe' }) === 'whatsapp');
+checar('icone escrito com espaco e caixa alta vale', iconeValido('  MAPA ') === 'mapa');
+checar('icone vazio nao vale', iconeValido('') === null && iconeValido(null) === null);
 checar('entrada vazia nao quebra', redeDoLink('', '') === null);
 checar('entrada nula nao quebra', redeDoLink(null, undefined) === null);
-checar('texto que nao e link nao quebra', redeDoLink('rua sao geraldo, 412', 'Endereço') === null);
+checar('texto que nao e link nao quebra', redeDoLink('rua sao geraldo, 412', 'Endereço') === 'mapa',
+  'o texto nao e URL nenhuma, entao quem responde e o rotulo, e ele diz alfinete');
 
 // O SVG.
 checar('rede desconhecida nao emite svg', svgRede(null) === '' && svgRede('orkut') === '');
 const svg = svgRede('whatsapp');
 checar('o svg sai pronto no HTML', svg.startsWith('<svg') && svg.includes('<path d="M17.4'));
-checar('o svg e solido e herda a cor', svg.includes('fill="currentColor"'));
+checar('a marca e solida e herda a cor', svg.includes('fill="currentColor"'));
+const linha = svgRede('mapa');
+checar('o de linha e contorno, e nao mancha', linha.includes('fill="none"') && linha.includes('stroke="currentColor"'),
+  'alfinete de mapa pintado solido vira uma gota preta');
+checar('as duas familias usam a mesma grade', svg.includes('viewBox="0 0 24 24"') && linha.includes('viewBox="0 0 24 24"'));
 checar('o svg nao e lido em voz alta', svg.includes('aria-hidden="true"'),
   'o nome da rede ja esta escrito ao lado: sem isto o leitor de tela diria "Instagram Instagram"');
-
-// O invariante que impede glifo quebrado: todo path e um caminho SVG de verdade, e nenhum
 // deles carrega aspas que fechariam o atributo do lado de fora.
-for (const [nome, d] of Object.entries(ICONES_REDE)) {
-  checar(`${nome}: o path comeca com um comando de movimento`, /^[Mm]/.test(d), d.slice(0, 12));
-  checar(`${nome}: o path nao escapa do atributo`, !d.includes('"') && !d.includes('<'));
-  checar(`${nome}: o path tem tamanho de logo`, d.length > 100);
+// O invariante que impede glifo quebrado. Vale para as duas familias.
+for (const [nome, ic] of Object.entries(ICONES_REDE)) {
+  checar(`${nome}: tem desenho`, ic && typeof ic.i === 'string' && ic.i.length > 20, JSON.stringify(ic).slice(0, 40));
+  checar(`${nome}: declara a familia`, ic.m === 0 || ic.m === 1);
+  checar(`${nome}: o desenho e uma forma svg`, /^<(path|circle|rect|line|polyline|polygon|ellipse)[ /]/.test(ic.i), ic.i.slice(0, 20));
+  checar(`${nome}: o nome e digitavel sem acento`, /^[a-z0-9-]+$/.test(nome),
+    'o comprador digita este nome no campo; acento ou maiuscula viram erro que ele nao ve');
 }
 
-// O mapa de apelidos nao pode apontar para marca que nao existe.
-const semDesenho = Object.keys(ICONES_REDE).filter((k) => !ICONES_REDE[k]);
-checar('toda marca listada tem desenho', semDesenho.length === 0, semDesenho.join(', '));
+// Todo apelido de rotulo tem que apontar para um icone que existe. Um apelido quebrado nao
+// derruba nada: ele so nao desenha, em silencio, e e assim que ele fica anos no arquivo.
+for (const rotulo of ['Onde fica', 'Horário', 'E-mail', 'Telefone', 'Site', 'Agenda', 'Cardápio',
+  'Catálogo', 'Currículo', 'Avaliações', 'Pix', 'Ateliê', 'Consultório', 'Escritório', 'Loja',
+  'Estúdio', 'Zap', 'Insta', 'Canal', 'Twitter']) {
+  const k = redeDoLink('', rotulo);
+  checar(`apelido "${rotulo}" aponta para icone existente`, k && ICONES_REDE[k], `deu ${JSON.stringify(k)}`);
+}
 
 if (falhas) {
   console.error(`\n${falhas} falha(s) no reconhecimento de redes`);
   process.exit(1);
 }
-console.log(`OK: ${Object.keys(ICONES_REDE).length} marcas, reconhecidas por link e por rotulo`);
+const marcas = Object.values(ICONES_REDE).filter((i) => i.m).length;
+console.log(`OK: ${marcas} marcas e ${Object.keys(ICONES_REDE).length - marcas} icones de linha, escolhidos por campo, link e rotulo`);

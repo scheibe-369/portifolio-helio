@@ -1036,3 +1036,54 @@ details[open] > .ed-passo-titulo::before {
   color: rgba(255, 255, 255, 0.85);
   pointer-events: none;
 }
+
+/* A ESTANTE DE ICONES do campo de contatos. Fechada por padrao: sao 37 desenhos, e aberta
+   ela seria maior que o resto do formulario. */
+.ed-icones { margin-top: 8px; }
+.ed-icones > summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 4px 0;
+  list-style: none;
+}
+.ed-icones > summary::-webkit-details-marker { display: none; }
+.ed-icones > summary::before { content: '+ '; }
+.ed-icones[open] > summary::before { content: '- '; }
+.ed-icones > summary:hover { color: rgba(255, 255, 255, 0.8); }
+.ed-icones-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 4px;
+  margin-top: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.ed-icone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9.5px;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ed-icone > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ed-icone:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.ed-icone-svg { width: 18px; height: 18px; flex-shrink: 0; }

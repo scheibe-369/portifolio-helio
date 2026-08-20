@@ -1,7 +1,7 @@
 import { t, tui } from '../../../app/i18n.js';
 import { esc, safeUrl } from '../../portfolio/lib/sanitize.js';
 import { iconeSeloValido } from '../lib/iconesSelo.js';
-import { redeDoLink, svgRede } from '../lib/iconesRede.js';
+import { iconeDoContato, svgRede } from '../lib/iconesRede.js';
 import { rotulo as rotuloSecao } from '../../../app/rotulos.js';
 
 // UM NUMERO DA CAPA.
@@ -141,36 +141,32 @@ const renderCta = (profile, lang, margem = 'mt-2') => {
 // "Instagram@renata.trabalhista", sem espaco, e "LinkedIn" colado num usuario de 22
 // caracteres. O conserto e o `gap` minimo garantido, o rotulo que nao encolhe, e o valor
 // cedendo espaco com reticencia por ser o texto secundario. A altura nao muda.
-// O VALOR COMPRIDO DESCE UMA LINHA EM VEZ DE SER CORTADO. O cartao das redes tem 128px de
-// texto util, e ate agora o que nao coubesse virava reticencia: "Tavares Negocios Imobil...",
-// "@rafaxime..." e "(51) 99612...". Telefone cortado ao meio nao e um texto encurtado, e um
-// numero errado, e foi por isso que este item entrou. `basis-full` aproveita o `flex-wrap`
-// que ja existe no `<a>`: o valor desce e passa a ter o cartao inteiro para ele.
+// UM CARTAO DE CONTATO: simbolo e nome, e nada mais.
 //
-// `flex-1` FICA, e isso e deliberado: e ele que faz as redes dividirem a altura da coluna e
-// acompanharem o cartao "Sobre" ao lado, que e o desenho do layout. Some quando as redes
-// deixam de morar numa coluna e viram fileira, porque ai nao ha altura para dividir.
-const socialItem = ({ label, value, href }, lang, opcoes = {}) => {
-  const texto = String(t(value, lang) ?? '');
-  const longo = texto.length > 12;
-  const icone = opcoes.icones ? svgRede(redeDoLink(href, label)) : '';
-  const altura = opcoes.esticar === false ? '' : `flex-1 ${longo ? 'max-h-20' : 'max-h-16'} `;
-  // O TEXTO FICA JUNTO, E A SOBRA VAI PARA AS PONTAS.
-  //
-  // Quando o valor desce uma linha, o cartao passa a ter duas linhas de flex, e o padrao do
-  // `align-content` e `stretch`: a altura que sobra e distribuida ENTRE elas. Como o cartao
-  // estica para acompanhar a coluna, sobra muita: na pagina de um funileiro deu 12px de buraco
-  // entre "WhatsApp" e o telefone dele, dentro de um cartao de 80px com 46px de texto. Lido de
-  // fora nao parece espaco, parece desalinhamento, e foi assim que ele foi reportado.
-  //
-  // `content-center` mantem as duas linhas coladas e joga a sobra para cima e para baixo, em
-  // partes iguais. So entra quando ha duas linhas: cartao de uma linha nao tem align-content
-  // nenhum para respeitar, e o do dono do produto continua byte a byte igual.
-  const juntas = longo ? 'content-center ' : '';
+// ELE TINHA UM SEGUNDO TEXTO, e era ele que estragava o cartao. A ideia era boa no portfolio
+// de origem, onde o campo guardava numero de seguidor ("1000+" ao lado de Instagram), e virou
+// entulho em todo o resto: telefone, arroba, razao social, endereco inteiro. Nenhum deles
+// cabia em 128px, entao ou era cortado ("Tavares Negocios Imobil...") ou descia uma linha e
+// deixava o cartao desalinhado do vizinho. Foi reportado tres vezes, com tres palavras
+// diferentes, e as tres descreviam a mesma coisa: texto jogado dentro do cartao.
+//
+// O QUE SE PERDE E POUCO, e o que se ganha e o cartao ser lido de relance. O numero continua
+// clicavel no link; a arroba esta na propria pagina para onde ele leva; e numero de capa tem
+// lugar proprio, que e a fileira de estatisticas logo acima.
+//
+// O SIMBOLO ENTRA NO LUGAR. Sem o segundo texto, o cartao precisa ser reconhecido pelo
+// desenho, e nao mais pela informacao que ele carregava. Por isso a lista de icones deixou de
+// ser so de marcas: quem escreve "Onde fica", "Horario" ou "Cardapio" tambem precisa de um.
+const socialItem = ({ label, value, href, icon }, lang, opcoes = {}) => {
+  void value;
+  const icone = opcoes.icones ? svgRede(iconeDoContato({ label, href, icon })) : '';
+  // Na coluna estreita os cartoes sao uma lista, e lista se le pela margem esquerda. Na
+  // fileira eles sao pastilhas largas lado a lado, e ai o conteudo centrado e o que faz as
+  // tres parecerem tres, em vez de tres retangulos com texto encostado num canto.
+  const altura = opcoes.esticar === false ? 'justify-center ' : 'flex-1 max-h-16 ';
   return `
-            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}${juntas}flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
-              ${icone ? `<span class="shrink-0 flex items-center gap-2">${icone}${esc(label)}</span>` : `<span class="shrink-0">${esc(label)}</span>`}
-              <span class="${longo ? 'basis-full break-words' : 'min-w-0 truncate'} text-right text-white/40 font-normal">${esc(texto)}</span>
+            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}flex items-center gap-2.5 rounded-xl glass-button px-4 py-3">
+              ${icone}<span class="min-w-0 truncate">${esc(label)}</span>
             </a>`;
 };
 

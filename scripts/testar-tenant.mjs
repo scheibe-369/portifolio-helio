@@ -370,29 +370,54 @@ const checar = (nome, condicao, detalhe) => {
   checar('com menos de quatro redes, elas viram fileira', poucas.includes('sm:grid-cols-3'));
   checar('na fileira as redes nao esticam', !poucas.includes('max-h-16'),
     'flex-1 existe para dividir a altura de uma coluna; em fileira nao ha altura a dividir');
+  checar('na fileira o conteudo fica centrado', poucas.includes('justify-center'));
 
   const muitas = render({ profile: { ...RECEM_COMPRADO.profile, socials: quatro } });
   checar('com quatro redes, a coluna estreita continua', muitas.includes('md:col-span-2'),
     'o Helio tem quatro e a pagina dele nao pode mudar');
   checar('com quatro redes, as redes ainda esticam', muitas.includes('max-h-16'));
 
-  // Valor comprido: descer uma linha em vez de virar reticencia.
-  checar('valor curto continua na mesma linha', muitas.includes('min-w-0 truncate'));
-  checar('valor comprido ganha a linha inteira', poucas.includes('basis-full break-words'),
-    'meio telefone nao e um texto encurtado, e um numero errado');
+  // O SEGUNDO TEXTO NAO EXISTE MAIS. Ele era o defeito: telefone, arroba e razao social nao
+  // cabem em 128px, e ou eram cortados ou desciam uma linha e desalinhavam o cartao.
+  checar('o numero de telefone nao aparece no cartao', !poucas.includes('98214-7730'),
+    'o cartao mostra so o nome; o numero continua no link');
+  checar('a arroba nao aparece no cartao', !poucas.includes('@wilsontavares.imoveis'));
+  checar('a razao social nao aparece no cartao', !poucas.includes('Tavares Negócios'));
+  checar('o nome do contato aparece', poucas.includes('WhatsApp') && poucas.includes('Imobiliária'));
+  checar('nem cortado nem quebrado: nao ha o que cortar', !poucas.includes('basis-full'));
 
-  // O simbolo da marca.
-  checar('sem o interruptor, nenhum simbolo entra', !muitas.includes('<svg viewBox="0 0 24 24" fill="currentColor"'),
+  // O SIMBOLO.
+  checar('sem o interruptor, nenhum simbolo entra', !muitas.includes('<svg viewBox="0 0 24 24"'),
     'o padrao do render protege o oraculo visual: quem nao pediu nao ganha');
   const comIcone = render({ profile: { ...RECEM_COMPRADO.profile, socials: quatro, socialsIcons: true } });
-  checar('com o interruptor, o simbolo sai no primeiro byte', comIcone.includes('fill="currentColor"'),
+  checar('com o interruptor, o simbolo sai no primeiro byte', comIcone.includes('<svg viewBox="0 0 24 24"'),
     'nada de data-lucide aqui: no HTML da borda ele seria uma tag vazia');
   checar('o simbolo herda a cor do cartao', !comIcone.includes('#25D366'),
     'verde do WhatsApp e vermelho do YouTube brigariam entre si e com as doze paletas');
 
-  const semMarca = render({ profile: { ...RECEM_COMPRADO.profile, socials: tres, socialsIcons: true } });
-  checar('rede desconhecida fica so com o nome', semMarca.split('fill="currentColor"').length === 3,
-    'WhatsApp e Instagram sim, "Imobiliária" apontando para o Google Maps nao');
+  // O que nao e marca tambem ganha desenho, e este e o ponto da lista nova: sem o segundo
+  // texto, o cartao precisa ser reconhecido pelo icone.
+  const genericos = render({
+    profile: {
+      ...RECEM_COMPRADO.profile,
+      socialsIcons: true,
+      socials: [
+        { label: 'Onde fica', href: 'https://maps.google.com/?q=x' },
+        { label: 'Horário', href: 'https://wa.me/5531988447120' },
+        { label: 'Cardápio', href: 'https://exemplo.com/menu' },
+      ],
+    },
+  });
+  checar('"Onde fica" ganha o alfinete de mapa', genericos.includes('stroke="currentColor"'),
+    'a lista deixou de ser so de marcas quando o cartao deixou de ter texto de apoio');
+  checar('os tres ganham desenho', genericos.split('<svg viewBox="0 0 24 24"').length === 4);
+
+  // O icone escolhido a mao ganha do adivinhado.
+  const escolhido = render({
+    profile: { ...RECEM_COMPRADO.profile, socialsIcons: true, socials: [{ label: 'Zap', href: 'https://wa.me/1', icon: 'coracao' }] },
+  });
+  checar('a escolha da pessoa ganha do palpite do link', escolhido.includes('stroke="currentColor"'),
+    'wa.me daria a marca do WhatsApp; ela pediu um coracao');
 }
 
 if (falhas) {

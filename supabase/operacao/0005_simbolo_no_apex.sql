@@ -1,0 +1,25 @@
+-- 0005_simbolo_no_apex.sql
+--
+-- LIGA O SIMBOLO DAS REDES NA LINHA DO APEX.
+--
+-- A migration 0027 criou `socials_icons` com padrao ligado e desligou no apex, por um motivo
+-- que valia naquele dia: o cartao ainda mostrava um segundo texto ao lado do nome ("1000+"
+-- para o Instagram, "Perfil" para o LinkedIn), o simbolo era um acrescimo, e acrescentar
+-- alguma coisa na pagina do dono por efeito colateral de uma feature pedida para OS OUTROS ja
+-- tinha dado errado antes.
+--
+-- O motivo caiu quando o segundo texto saiu do render inteiro. Sem "1000+" e sem desenho, o
+-- cartao dele vira a palavra "Instagram" sozinha dentro de um retangulo. Aqui o simbolo deixa
+-- de ser acrescimo e passa a ser o que substitui a informacao que saiu.
+--
+-- A fixture src/modules/profile/data/profile.data.js foi ligada no mesmo movimento. As duas
+-- precisam concordar: a fixture e o que o baseline de snapshot mede, e esta linha e o que a
+-- producao serve. Divergir faz o oraculo medir uma pagina que nao existe.
+--
+-- Depois de rodar, republicar: o payload publicado e uma copia, e nao uma consulta.
+--   do $$ declare r record; begin
+--     for r in select portfolio_id from myportifolio.portfolio_publications where is_live loop
+--       perform myportifolio.publicar_interno(r.portfolio_id);
+--     end loop; end $$;
+
+update myportifolio.portfolios set socials_icons = true where slug = 'helio';

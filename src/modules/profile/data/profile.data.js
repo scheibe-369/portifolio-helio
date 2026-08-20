@@ -26,6 +26,15 @@ export const profile = {
     en: 'AI automation specialist and full-stack developer with 3+ years of experience building AI agents, automations and SaaS platforms end to end. I lead the technical side of an AI and automation agency, from multi-tenant SaaS to AI-powered CRMs, and I teach a community of 30+ students at ION Academy. Self-taught and results-driven, I am open to new opportunities.',
   },
   email: 'heliomonteiroprofissional@gmail.com',
+  // O SIMBOLO ENTROU AQUI TAMBEM. Ele nasceu desligado no apex, de proposito, porque ligar
+  // mexeria na pagina do dono por efeito colateral de uma feature pedida para os outros. O
+  // motivo caiu quando o cartao perdeu o texto de apoio: sem "1000+" ao lado e sem desenho, o
+  // cartao vira a palavra "Instagram" sozinha num retangulo. O simbolo nao e enfeite aqui, e o
+  // que substitui a informacao que saiu.
+  socialsIcons: true,
+  // O `value` PERMANECE NA FIXTURE e nao e mais lido por ninguem. Ele fica como registro do
+  // que a linha real do Helio ainda tem no banco: esta fixture e o espelho dela, e apagar aqui
+  // o que continua la faria o baseline mentir sobre o payload de producao.
   socials: [
     { label: 'Instagram', value: '1000+', href: 'https://www.instagram.com/heliomonteir0.ia/' },
     { label: 'TikTok', value: '2800+', href: 'https://www.tiktok.com/@heliomonteir0' },
