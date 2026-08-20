@@ -83,6 +83,7 @@ export function perfilDaLinha(pf) {
     hero_url: url(pf.hero_path),
     hero_object_position: pf.hero_object_position ?? '50% 36%',
     show_online_dot: Boolean(pf.show_online_dot),
+    socials_icons: pf.socials_icons !== false,
     badge_label: pf.badge_label ?? '',
     registro_profissional: pf.registro_profissional ?? '',
     endereco: pf.endereco ?? '',
@@ -139,6 +140,7 @@ export function patchDoPerfil(v, pf, { temCustom = false } = {}) {
     hero_path: ouNulo(v.hero_path),
     hero_object_position: v.hero_object_position || '50% 36%',
     show_online_dot: Boolean(v.show_online_dot),
+    socials_icons: Boolean(v.socials_icons),
     cta_url: ouNulo(v.cta_url),
     socials: (v.socials || [])
       .filter((s) => s.label && s.extra)

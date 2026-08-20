@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "verificar:auth": "node scripts/conferir-auth.mjs",
     "verificar:no-ar": "node scripts/testar-no-ar.mjs",
-    "verificar": "node scripts/snapshot.mjs --saida out && node scripts/dom-diff.mjs snapshot/pt.html out/pt.html --allow scripts/expected-diffs.pt.json && node scripts/dom-diff.mjs snapshot/en.html out/en.html --allow scripts/expected-diffs.en.json && node scripts/import-graph.mjs --config scripts/boundary.config.json && node scripts/testar-rotas.mjs && node scripts/testar-youtube.mjs && node scripts/testar-tenant.mjs && node scripts/testar-icones.mjs && node scripts/testar-presets.mjs && node scripts/testar-paleta-editor.mjs && node scripts/medir-render.mjs",
+    "verificar": "node scripts/snapshot.mjs --saida out && node scripts/dom-diff.mjs snapshot/pt.html out/pt.html --allow scripts/expected-diffs.pt.json && node scripts/dom-diff.mjs snapshot/en.html out/en.html --allow scripts/expected-diffs.en.json && node scripts/import-graph.mjs --config scripts/boundary.config.json && node scripts/testar-rotas.mjs && node scripts/testar-youtube.mjs && node scripts/testar-tenant.mjs && node scripts/testar-icones.mjs && node scripts/testar-redes.mjs && node scripts/testar-presets.mjs && node scripts/testar-paleta-editor.mjs && node scripts/medir-render.mjs",
+    "verificar:imagem": "node scripts/testar-imagem.mjs",
     "migrations:validar": "node scripts/validar-migrations.mjs",
     "migrations:aplicar": "node scripts/validar-migrations.mjs --aplicar"
   },

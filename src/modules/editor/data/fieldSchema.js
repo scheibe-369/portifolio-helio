@@ -126,6 +126,7 @@ export const CAMPOS_PERFIL = [
   { key: 'endereco', tipo: 'texto', label: 'Endereço', help: 'Se você atende num lugar. Ex: "Rua das Palmeiras, 340, Contagem, MG".', maxLength: 160, passo: 2 },
   { key: 'horario', tipo: 'textarea', label: 'Horário de atendimento', help: 'Como você quiser escrever. Ex: "Seg a sex, 8h às 18h. Sábado até meio-dia."', maxLength: 160, passo: 2 },
   { key: 'socials', tipo: 'pares', label: 'Suas redes', help: 'Uma por linha, no formato: rótulo | texto ao lado | https://link', maxLength: 8, passo: 2 },
+  { key: 'socials_icons', tipo: 'switch', label: 'Mostrar o símbolo de cada rede', help: 'O símbolo sai do próprio link: wa.me vira WhatsApp. Rede que a gente não reconhece fica só com o nome.', passo: 2 },
   { key: 'stats', tipo: 'pares', label: 'Números da capa', help: 'Um por linha, no formato: rótulo | valor', maxLength: 6, passo: 2 },
 
   // "Stacks" so faz sentido para quem escreve codigo. O campo continua sendo a mesma lista, e

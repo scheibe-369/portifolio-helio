@@ -1,6 +1,7 @@
 import { t, tui } from '../../../app/i18n.js';
 import { esc, safeUrl } from '../../portfolio/lib/sanitize.js';
 import { iconeSeloValido } from '../lib/iconesSelo.js';
+import { redeDoLink, svgRede } from '../lib/iconesRede.js';
 import { rotulo as rotuloSecao } from '../../../app/rotulos.js';
 
 // UM NUMERO DA CAPA.
@@ -47,6 +48,25 @@ const statItem = (s, lang) => {
 //
 // Sem rotulo, o selo NAO SAI. Um botao vazio no card seria pior que a ausencia dele, e o
 // espaco e cedido de volta para as estatisticas.
+// QUANTAS COLUNAS A FAIXA DE NUMEROS USA.
+//
+// Classe literal por quantidade, e nao montada com template: o Tailwind v4 varre o fonte em
+// busca de nomes de classe inteiros e nao gera `grid-cols-${n}` (risco R11). Uma classe que o
+// scanner nao ve nao existe no CSS, e a faixa cairia numa coluna so, em silencio.
+const COLUNAS_FAIXA = {
+  4: 'grid-cols-2 sm:grid-cols-4',
+  5: 'grid-cols-2 sm:grid-cols-3',
+  6: 'grid-cols-2 sm:grid-cols-3',
+};
+const colunasFaixa = (n) => COLUNAS_FAIXA[n] || 'grid-cols-2 sm:grid-cols-3';
+
+const COLUNAS_REDES = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-3',
+};
+const colunasRedes = (n) => COLUNAS_REDES[n] || 'grid-cols-1 sm:grid-cols-3';
+
 const renderSelo = (profile, lang) => {
   const rotulo = String(t(profile.badgeLabel, lang) ?? '').trim();
   if (!rotulo) return '';
@@ -97,11 +117,11 @@ const renderAvatar = (profile) => {
 // E o botao SO SAI SE HOUVER LINK: sem `cta_url`, `safeUrl` devolvia vazio e o `<a href="">`
 // aponta para a propria pagina. Um comprador que ainda nao pos a agenda dele publicava um
 // botao grande e chamativo que recarrega a pagina.
-const renderCta = (profile, lang) => {
+const renderCta = (profile, lang, margem = 'mt-2') => {
   if (!profile.ctaUrl) return '';
   const rotulo = String(t(profile.ctaLabel, lang) ?? '').trim() || tui('bookCall', lang);
   return `
-        <a href="${safeUrl(profile.ctaUrl)}" target="_blank" rel="noopener noreferrer" class="bookmarkBtn mt-2">
+        <a href="${safeUrl(profile.ctaUrl)}" target="_blank" rel="noopener noreferrer" class="bookmarkBtn${margem ? ` ${margem}` : ''}">
           <span class="IconContainer">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
           </span>
@@ -121,11 +141,26 @@ const renderCta = (profile, lang) => {
 // "Instagram@renata.trabalhista", sem espaco, e "LinkedIn" colado num usuario de 22
 // caracteres. O conserto e o `gap` minimo garantido, o rotulo que nao encolhe, e o valor
 // cedendo espaco com reticencia por ser o texto secundario. A altura nao muda.
-const socialItem = ({ label, value, href }, lang) => `
-            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="flex-1 max-h-16 flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
-              <span class="shrink-0">${esc(label)}</span>
-              <span class="min-w-0 truncate text-right text-white/40 font-normal">${esc(t(value, lang))}</span>
+// O VALOR COMPRIDO DESCE UMA LINHA EM VEZ DE SER CORTADO. O cartao das redes tem 128px de
+// texto util, e ate agora o que nao coubesse virava reticencia: "Tavares Negocios Imobil...",
+// "@rafaxime..." e "(51) 99612...". Telefone cortado ao meio nao e um texto encurtado, e um
+// numero errado, e foi por isso que este item entrou. `basis-full` aproveita o `flex-wrap`
+// que ja existe no `<a>`: o valor desce e passa a ter o cartao inteiro para ele.
+//
+// `flex-1` FICA, e isso e deliberado: e ele que faz as redes dividirem a altura da coluna e
+// acompanharem o cartao "Sobre" ao lado, que e o desenho do layout. Some quando as redes
+// deixam de morar numa coluna e viram fileira, porque ai nao ha altura para dividir.
+const socialItem = ({ label, value, href }, lang, opcoes = {}) => {
+  const texto = String(t(value, lang) ?? '');
+  const longo = texto.length > 12;
+  const icone = opcoes.icones ? svgRede(redeDoLink(href, label)) : '';
+  const altura = opcoes.esticar === false ? '' : `flex-1 ${longo ? 'max-h-20' : 'max-h-16'} `;
+  return `
+            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}flex flex-wrap items-center justify-between gap-x-3 rounded-xl glass-button px-4 py-2.5">
+              ${icone ? `<span class="shrink-0 flex items-center gap-2">${icone}${esc(label)}</span>` : `<span class="shrink-0">${esc(label)}</span>`}
+              <span class="${longo ? 'basis-full break-words' : 'min-w-0 truncate'} text-right text-white/40 font-normal">${esc(texto)}</span>
             </a>`;
+};
 
 // Coluna direita (topo): card de perfil + bio + sociais.
 //
@@ -135,13 +170,46 @@ const socialItem = ({ label, value, href }, lang) => `
 // saiu impresso na vertical em producao, uma letra embaixo da outra. A largura minima da
 // identidade, mais o flex-wrap no pai, sao o que garante que quem desce para a linha de baixo
 // e a fileira de numeros, nunca o nome da pessoa.
-// QUATRO NUMEROS NAO CABEM NUMA FILEIRA, e com `flex-wrap` + `justify-end` o quarto caia
-// sozinho numa segunda linha, colado na direita, parecendo sobra. Um professor de concursos
-// tem "aprovados", "anos", "turmas" e "horas de aula", e e o quarto que ele mais quer mostrar.
 //
-// Ate tres, fileira. De quatro em diante, duas colunas: 2x2 fica equilibrado, 3x2 tambem, e
-// nenhum numero vira orfao. O Helio tem tres e continua exatamente como estava.
+// SO QUE QUEM DESCIA DESCIA PARA O LUGAR ERRADO, e este e o defeito que esta rodada conserta.
+// Medido na pagina de um corretor, em 1440: o card tem 528px e os quatro numeros ocupavam de
+// 756 a 1016, deixando 218px de preto solido a direita deles. O motivo e que a coluna dos
+// numeros, sozinha na segunda linha, e alinhada pela ESQUERDA (com um item so, o
+// `justify-between` do pai vira `flex-start`), enquanto o `sm:items-end` dela alinha os
+// filhos DENTRO da coluna e nao a coluna. O resultado e um bloco estreito encostado num canto
+// e um vao do tamanho de metade do card.
+//
+// Ate tres numeros, a fileira continua onde sempre esteve, ao lado do nome. De quatro em
+// diante ela deixa de ser coluna e vira FAIXA: linha propria, largura inteira do card,
+// separada por um fio, uma coluna de grade por numero. O vao acaba porque a faixa ocupa
+// exatamente o que antes sobrava.
+//
+// E OS NUMEROS VOLTAM A SE ALINHAR. `items-end` estava so no ramo de fileira; o ramo de grade
+// nasceu sem ele, e ai bastava um rotulo quebrar em duas linhas para o numero afundar:
+// "Bairros que eu atendo / 5" saiu 12px abaixo de "Ticket medio / R$ 1,9 mi", lado a lado.
+// Com `items-end` na grade, cada celula e alinhada pela base da propria linha, e todos os
+// numeros voltam para a mesma altura, tenha o rotulo uma, duas ou tres linhas.
 export function renderProfilePanel(profile, lang, ui = {}) {
+  const stats = profile.stats;
+  const socials = profile.socials;
+  const emFaixa = stats.length > 3;
+  const selo = renderSelo(profile, lang);
+  const cta = renderCta(profile, lang);
+  const icones = profile.socialsIcons === true;
+
+  // AS REDES SO GANHAM A COLUNA ESTREITA QUANDO SAO MUITAS.
+  //
+  // A coluna vale 40% da largura e a mesma ALTURA do cartao "Sobre", porque os dois sao
+  // celulas da mesma grade. Com bio longa e poucas redes essa altura nao tem com que ser
+  // preenchida: no corretor deram 238px de vao entre a ultima rede e o botao, com a bio de
+  // 722 caracteres espremida numa coluna de 310px do lado. Duas coisas ruins pelo mesmo
+  // motivo.
+  //
+  // Com menos de quatro redes elas descem para uma faixa embaixo da bio, e a bio passa a usar
+  // a largura inteira. O vao some porque deixa de existir altura a preencher, e a bio ganha o
+  // dobro de linha util. O Helio tem quatro e continua exatamente como estava.
+  const aoLado = socials.length >= 4;
+
   return `
     <!-- Card de Perfil -->
     <!-- Card de Perfil -->
@@ -168,16 +236,36 @@ export function renderProfilePanel(profile, lang, ui = {}) {
           }
         </div>
       </div>
-      <div class="flex flex-col gap-3 sm:items-end">
-        <div class="${profile.stats.length > 3 ? 'grid grid-cols-2 justify-items-center sm:justify-items-end' : 'flex flex-wrap items-end justify-start sm:justify-end'} gap-x-5 gap-y-3 text-xs text-white/80">${profile.stats.map((s) => statItem(s, lang)).join('')}
-        </div>
-        ${renderSelo(profile, lang)}
-      </div>
+      ${
+        // Com a fileira virando faixa, esta coluna fica so com o selo. Sem selo ela nao sai:
+        // uma div vazia entre a identidade e a faixa so serviria para somar o `gap` do pai
+        // duas vezes.
+        emFaixa && !selo
+          ? ''
+          : `<div class="flex flex-col gap-3 sm:items-end">
+        ${
+          emFaixa
+            ? ''
+            : `<div class="flex flex-wrap items-end justify-start sm:justify-end gap-x-5 gap-y-3 text-xs text-white/80">${stats.map((s) => statItem(s, lang)).join('')}
+        </div>`
+        }
+        ${selo}
+      </div>`
+      }
+      ${
+        // `w-full` e nao so `basis-full`: no celular o card e `flex-col`, e ali o flex-basis
+        // governa a ALTURA. `basis-full` sozinho pediria uma faixa com a altura inteira do
+        // card, que e o oposto do que se quer.
+        emFaixa
+          ? `<div class="w-full sm:basis-full pt-5 border-t border-white/10 grid ${colunasFaixa(stats.length)} items-end gap-x-4 gap-y-5 text-xs text-white/80">${stats.map((s) => statItem(s, lang)).join('')}
+      </div>`
+          : ''
+      }
     </div>
 
     <!-- Bio + Sociais -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-      <div class="md:col-span-3 flex flex-col gap-3 glass-card rounded-3xl p-6">
+      <div class="${aoLado ? 'md:col-span-3' : 'md:col-span-5'} flex flex-col gap-3 glass-card rounded-3xl p-6">
         <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotuloSecao(ui, 'about', lang))}</h2>
         <p class="text-sm text-white/80 leading-relaxed font-medium whitespace-pre-line">${esc(t(profile.bio, lang))}</p>
         ${
@@ -200,11 +288,26 @@ export function renderProfilePanel(profile, lang, ui = {}) {
         }
       </div>
 
-      <div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">
-        <div class="flex-1 flex flex-col gap-2 text-[11px] font-semibold text-white">${profile.socials.map((s) => socialItem(s, lang)).join('')}
+      ${
+        aoLado
+          ? `<div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">
+        <div class="flex-1 flex flex-col gap-2 text-[11px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones })).join('')}
         </div>
 
-        ${renderCta(profile, lang)}
-      </div>
+        ${cta}
+      </div>`
+          : socials.length || cta
+            ? `<div class="md:col-span-5 flex flex-col gap-3 glass-card rounded-3xl p-5">
+        ${socials.length ? `<div class="grid ${colunasRedes(socials.length)} gap-2 text-[11px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones, esticar: false })).join('')}
+        </div>` : ''}
+        ${
+          // O BOTAO EM LINHA PROPRIA, e nao ao lado das redes. Ao lado ele levava 224px dos
+          // 488 do cartao e sobravam 84px por rede, onde "WhatsApp" ja nao cabia inteiro:
+          // trocar um vao vazio por tres nomes cortados nao e conserto.
+          renderCta(profile, lang, '')
+        }
+      </div>`
+            : ''
+      }
     </div>`;
 }

@@ -290,3 +290,71 @@ aparecer.
   foi rodar dez perfis diferentes contra o mesmo produto: o mesmo defeito apareceu com sintomas
   completamente diferentes (chip sumindo, switch travado, data errada publicada), e nenhum dos
   tres sozinho apontaria para a causa.
+
+---
+
+## O baseline visual apodreceu por uma semana e ninguem soube (20/08/2026)
+
+**O sintoma:** depois de mexer no card de perfil, rodei `shot-diff --compare` contra producao
+para provar que a pagina do dono nao tinha mudado. Ele reprovou nas tres larguras, e nao por
+alguns pixels: **a pagina inteira estava mais alta** (+216px em 1440, +357px em 360). A
+conclusao obvia era que a minha mudanca tinha crescido a pagina.
+
+**A causa:** os PNG de `snapshot/shots` sao de **13/08**, do commit da fase 0. Entre 13 e 20 de
+agosto o produto ganhou doze paletas, oito fundos, galeria por trabalho, ordem de secoes,
+destaque, endereco, depoimento, e o portfolio do Helio foi republicado varias vezes. A pagina
+cresceu por dezenas de motivos legitimos, e nenhum deles era o de hoje.
+
+**Por que ninguem soube:** `shot-diff` nao esta em `npm run verificar` (ele precisa de URL no
+ar), e nao esta em `verificar:no-ar` (ele nao e Playwright de asserção, e print). Ou seja: ele
+so roda quando alguem lembra de digitar o comando. **Um oraculo que nao esta dentro de um
+comando que alguem digita todo dia nao e um oraculo, e um script.** Ele passou sete dias
+morrendo em silencio, e a primeira vez que serviu para alguma coisa foi para acusar um crime
+que nao aconteceu.
+
+**O que fiz no lugar:** como o baseline nao servia, montei o A/B honesto: renderizei a pagina
+do Helio com o codigo de ANTES (`git checkout` dos tres arquivos), tirei print, voltei o codigo
+de DEPOIS, tirei print de novo, e comparei os dois. Resposta: 361 pixels, todos no rotulo de um
+botao, e nenhuma mudanca de altura. So entao regravei o baseline.
+
+**A armadilha de dentro da armadilha:** a primeira comparacao A/A (mesmo codigo contra ele
+mesmo) deu **0,35% de pixels diferentes**. O `.metallic-silver` e uma animacao infinita de
+sete segundos, e dois prints tirados em fases diferentes do brilho nao batem. O `shot-diff.mjs`
+do projeto ja congela animacao com `addStyleTag`; o meu script de A/B nao congelava, e por isso
+media o brilho em vez de medir o codigo. Com `reducedMotion: 'reduce'`, A/A passou a dar
+**exatamente 0**.
+
+**Regra pra proxima vez:**
+- **Check que falha depois de muito tempo sem rodar: a primeira hipotese e o baseline velho,
+  nao o codigo novo.** Confira a data do arquivo de baseline ANTES de investigar a mudanca.
+- **Print so vira oraculo se for deterministico.** Congele animacao e transicao, e force o lazy
+  loading rolando a pagina antes. Sem as duas coisas, o piso de ruido fica acima da tolerancia
+  e o teste vira moeda.
+- **Prove A/A antes de acreditar em A/B.** Se o mesmo codigo contra ele mesmo nao da zero, o
+  numero do A/B nao quer dizer nada.
+- **Baseline que nao roda sozinho envelhece.** Ou entra num comando de rotina, ou a data dele
+  precisa ser conferida a cada uso.
+
+
+## "Tem valor" nao e "mudou" (20/08/2026)
+
+**O sintoma:** depois de consertar o pipeline de imagem, subi de novo a foto da placa de uma
+experiencia para provar o conserto na pagina no ar. O script leu a previa, achou `256x256`, e
+imprimiu "placa depois: 256x256". Sucesso. So que a pagina publicada continuou servindo o
+arquivo com o **mesmo hash de antes**: o upload nunca aconteceu.
+
+**A causa:** o script esperava a previa ter `naturalWidth`. Ela ja tinha, desde antes de eu
+tocar em nada, porque a imagem antiga estava na tela. A condicao de parada era verdadeira no
+primeiro laco, e o script saiu comemorando um estado que ele mesmo nao produziu.
+
+**O que salvou:** o nome do arquivo no Storage carrega o hash do conteudo
+(`nome-<hash8>.webp`). Comparar o `src` antes e depois responde "mudou?" sem ambiguidade, e foi
+o que mostrou que o primeiro run tinha sido um falso positivo.
+
+**Regra pra proxima vez:**
+- **Quando o resultado esperado e uma MUDANCA, a assercao tem que ser sobre a diferenca, nunca
+  sobre a presenca.** Guarde o valor de antes e compare. "Existe" e a assercao errada em
+  qualquer tela que ja vem preenchida.
+- **Endereco por conteudo e o melhor oraculo de upload que existe no produto.** Se o hash nao
+  mudou, o arquivo nao mudou, ponto. Prefira ele a qualquer leitura de dimensao ou de texto de
+  status.

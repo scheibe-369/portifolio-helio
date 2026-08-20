@@ -174,6 +174,7 @@ export function montarPayloadDoRascunho() {
       bio: { pt: perfilAtual().bio },
       email: pf.show_contact_email ? pf.contact_email : undefined,
       socials: pf.socials || [],
+      socialsIcons: pf.socials_icons !== false,
       stats: pf.stats || [],
     },
     stacks: pf.stacks || [],

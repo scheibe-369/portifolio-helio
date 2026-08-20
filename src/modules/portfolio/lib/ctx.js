@@ -82,6 +82,11 @@ function montarPortfolio(cfg, payload, { origem }) {
       endereco: perfil.endereco || '',
       horario: perfil.horario || '',
       socials: perfil.socials || [],
+      // Icone de marca ao lado do nome da rede. Comparacao com `true` de proposito, e nao
+      // `!== false`: quem le este ctx tambem e o snapshot do Helio, montado a partir do
+      // fixture estatico, onde a chave nao existe. Com `!== false` o `undefined` de la ligaria
+      // os icones e mudaria o oraculo visual do produto sem ninguem pedir.
+      socialsIcons: perfil.socialsIcons === true,
     },
     // Os titulos que o dono da pagina reescreveu. Objeto vazio significa "usa os de hoje", e
     // e o estado de todo tenant publicado antes da migration 0015.

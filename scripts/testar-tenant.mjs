@@ -309,6 +309,92 @@ const checar = (nome, condicao, detalhe) => {
   checar('o projeto do tenant aparece', html.includes('Bolo de festa'));
 }
 
+// ---------------------------------------------------------------- o card de identidade
+//
+// Estes casos existem porque o defeito foi medido, e nao imaginado: na pagina de um corretor,
+// em 1440, os quatro numeros da capa ocupavam de x=756 a x=1016 num card que ia ate x=1234,
+// e "5" ficava 12px abaixo de "R$ 1,9 mi" na mesma fileira. Sao dois defeitos com a mesma
+// origem, o ramo de grade que nasceu sem `items-end` e a coluna que descia alinhada a
+// esquerda, e por isso os dois sao afirmados aqui juntos.
+{
+  const tres = [
+    { label: 'Projetos', value: '30+' },
+    { label: 'Experiência', value: '3+ anos' },
+    { label: 'Idiomas', value: 'PT/EN' },
+  ];
+  const quatro = [
+    { label: 'Anos de CRECI', value: '19' },
+    { label: 'Imóveis vendidos', value: '340' },
+    { label: 'Bairros que eu atendo', value: '5' },
+    { label: 'Ticket médio', value: 'R$ 1,9 mi' },
+  ];
+
+  const a = render({ profile: { ...RECEM_COMPRADO.profile, stats: tres } });
+  checar('ate tres numeros, a fileira fica ao lado do nome', a.includes('sm:justify-end'),
+    'o layout de quem tem poucos numeros nao pode mudar');
+  checar('ate tres numeros, nao existe faixa', !a.includes('sm:basis-full'));
+
+  const b = render({ profile: { ...RECEM_COMPRADO.profile, stats: quatro } });
+  checar('de quatro em diante vira faixa de largura inteira', b.includes('sm:basis-full'),
+    'sem a faixa, sobravam 218px de card vazio a direita dos numeros');
+  checar('a faixa tem uma coluna por numero', b.includes('sm:grid-cols-4'));
+  checar('a faixa alinha os numeros pela base', /sm:basis-full[^"]*items-end|items-end[^"]*sm:basis-full/.test(b),
+    'sem items-end, rotulo de duas linhas empurra o proprio numero para baixo e a fileira sai escadinha');
+  checar('a faixa nao repete os numeros', b.split('Ticket médio').length === 2,
+    'a fileira e a faixa sao exclusivas; emitir as duas duplicaria a capa inteira');
+
+  // O selo sobrevive a faixa, e sem selo a coluna dele nao sai.
+  const c = render({ profile: { ...RECEM_COMPRADO.profile, stats: quatro, badgeLabel: 'Corretor CRECI-SP' } });
+  checar('com faixa, o selo continua na primeira linha', c.includes('Corretor CRECI-SP'));
+  checar('com faixa e sem selo, nao sobra div vazia', !b.includes('sm:items-end'),
+    'div vazia entre a identidade e a faixa so somaria o gap do pai duas vezes');
+}
+
+// ---------------------------------------------------------------- as redes
+{
+  const tres = [
+    { label: 'WhatsApp', value: '(11) 98214-7730', href: 'https://wa.me/5511982147730' },
+    { label: 'Instagram', value: '@wilsontavares.imoveis', href: 'https://instagram.com/wilsontavares.imoveis' },
+    { label: 'Imobiliária', value: 'Tavares Negócios Imobiliários', href: 'https://maps.google.com/?q=x' },
+  ];
+  const quatro = [
+    { label: 'Instagram', value: '1000+', href: 'https://instagram.com/a' },
+    { label: 'TikTok', value: '2800+', href: 'https://tiktok.com/@a' },
+    { label: 'LinkedIn', value: 'Perfil', href: 'https://linkedin.com/in/a' },
+    { label: 'YouTube', value: 'Canal', href: 'https://youtube.com/@a' },
+  ];
+
+  const poucas = render({ profile: { ...RECEM_COMPRADO.profile, socials: tres, bio: { pt: 'x'.repeat(700) } } });
+  checar('com menos de quatro redes, a bio usa a largura inteira', poucas.includes('md:col-span-5'),
+    '722 caracteres numa coluna de 310px, com 238px de vao vazio do lado, era o pior dos dois mundos');
+  checar('com menos de quatro redes, elas viram fileira', poucas.includes('sm:grid-cols-3'));
+  checar('na fileira as redes nao esticam', !poucas.includes('max-h-16'),
+    'flex-1 existe para dividir a altura de uma coluna; em fileira nao ha altura a dividir');
+
+  const muitas = render({ profile: { ...RECEM_COMPRADO.profile, socials: quatro } });
+  checar('com quatro redes, a coluna estreita continua', muitas.includes('md:col-span-2'),
+    'o Helio tem quatro e a pagina dele nao pode mudar');
+  checar('com quatro redes, as redes ainda esticam', muitas.includes('max-h-16'));
+
+  // Valor comprido: descer uma linha em vez de virar reticencia.
+  checar('valor curto continua na mesma linha', muitas.includes('min-w-0 truncate'));
+  checar('valor comprido ganha a linha inteira', poucas.includes('basis-full break-words'),
+    'meio telefone nao e um texto encurtado, e um numero errado');
+
+  // O simbolo da marca.
+  checar('sem o interruptor, nenhum simbolo entra', !muitas.includes('<svg viewBox="0 0 24 24" fill="currentColor"'),
+    'o padrao do render protege o oraculo visual: quem nao pediu nao ganha');
+  const comIcone = render({ profile: { ...RECEM_COMPRADO.profile, socials: quatro, socialsIcons: true } });
+  checar('com o interruptor, o simbolo sai no primeiro byte', comIcone.includes('fill="currentColor"'),
+    'nada de data-lucide aqui: no HTML da borda ele seria uma tag vazia');
+  checar('o simbolo herda a cor do cartao', !comIcone.includes('#25D366'),
+    'verde do WhatsApp e vermelho do YouTube brigariam entre si e com as doze paletas');
+
+  const semMarca = render({ profile: { ...RECEM_COMPRADO.profile, socials: tres, socialsIcons: true } });
+  checar('rede desconhecida fica so com o nome', semMarca.split('fill="currentColor"').length === 3,
+    'WhatsApp e Instagram sim, "Imobiliária" apontando para o Google Maps nao');
+}
+
 if (falhas) {
   console.error(`\n${falhas} falha(s) no render de tenant`);
   process.exit(1);

@@ -126,3 +126,33 @@ acha na lista de dez áreas.
 **O que saiu dessas três:** registro profissional ligado de ponta a ponta, endereço e horário,
 depoimento por trabalho, quebras de linha preservadas, esconder trabalho sem apagar, redução de
 imagem antes de recusar, e a correção de uma regressão minha que matava a paleta ao trocá-la.
+
+
+## O card de identidade, refeito (20/08/2026)
+
+Você olhou a página do corretor e disse que o primeiro card estava com letra cortada, número
+fora do lugar e um monte de espaço vazio. Estava mesmo, e dava para medir. Em 1440, o card tem
+528px e os quatro números ocupavam de x=756 a x=1016: **218px de preto liso à direita deles**.
+O "5" de "Bairros que eu atendo" saía **12px abaixo** do "R$ 1,9 mi" ao lado, porque o rótulo
+dele quebrava em duas linhas e empurrava o próprio número. "Tavares Negócios Imobil…" e
+"FALAR NO WHATS…" eram cortados por 18px e por 7px. E entre a última rede e o botão havia
+**238px de vão vazio**, com a bio de 722 caracteres espremida numa coluna de 310px ao lado.
+
+| O que era | O que é |
+|---|---|
+| Quatro números viravam uma coluna estreita encostada à esquerda | de quatro em diante viram faixa de largura inteira, com um fio separando |
+| Rótulo de duas linhas afundava o próprio número | `items-end` na grade: todos os números na mesma base |
+| Valor da rede cortado com reticência | desce uma linha e aparece inteiro |
+| Rótulo do botão cortado no meio da palavra | cabe, e quebra em duas linhas se precisar |
+| Bio numa coluna de 310px com 238px de vão do lado | com menos de quatro redes, a bio ocupa a largura inteira e as redes viram fileira |
+| Rede era só texto | símbolo da marca, tirado do próprio link |
+| Logo da trajetória recortada em quadrado no upload | encaixada inteira; foto preenche a placa |
+
+**Medido nas oito páginas, em 360, 768 e 1440:** nenhum valor cortado, nenhum número fora de
+linha, nenhuma barra de rolagem horizontal.
+
+**A sua página não mudou**, e isso foi verificado e não suposto: 0 diferenças de DOM, e no
+teste de pixel só 361 pixels em 5 milhões, todos no rótulo do botão "Agendar Call", que subiu
+1px e passou a ficar no centro exato do botão. O símbolo das redes **está desligado na sua**;
+é um interruptor no editor ("Mostrar o símbolo de cada rede"), ligado por padrão só para quem
+comprar daqui pra frente.

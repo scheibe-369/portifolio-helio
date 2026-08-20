@@ -84,7 +84,18 @@ export const DESTINOS = {
   // A placa da experiencia e quadrada (w-14 h-14) e NAO tem padding no CSS, de proposito: o
   // respiro vem assado no WebP, igual em todas as logos. Padding por cima reintroduziria a
   // margem dobrada que fazia cada logo aparecer num tamanho diferente na fileira.
-  experience: { pasta: 'experience', proporcao: 1, lado: 256, orcamento: 90 * 1024, margem: 0.8 },
+  // SEM CORTE AQUI TAMBEM, e pelo mesmo motivo do project: `proporcao: 1` recortava um
+  // quadrado central do ARQUIVO. Logo de empresa quase nunca e quadrada, e uma delas e sempre
+  // um wordmark deitado: "Tavares Negocios Imobiliarios" chegou 1400x400 e foi guardada
+  // 256x256, com as duas pontas do nome jogadas fora para sempre. O card mostrava tres
+  // silabas do meio de um nome, e o dono nao tinha o que ajustar, porque o que sobrou do
+  // arquivo ja nao continha o resto.
+  //
+  // A placa continua QUADRADA, e e isto que faz a troca ser invisivel para quem ja subiu:
+  // a arte inteira e encaixada dentro do quadrado de 256 (letterbox), em vez de o quadrado ser
+  // recortado de dentro dela. Arte que ja era quadrada sai byte a byte igual, arte deitada
+  // passa a sair inteira e menor. O render nao muda nem uma classe.
+  experience: { pasta: 'experience', proporcao: null, lado: 256, orcamento: 90 * 1024, margem: 0.8, quadrar: true },
   // Documento nao e cortado: cortar certificado corta assinatura e rodape, que e o oposto do
   // que a pessoa quer. E o orcamento e outro porque o teste aqui e "da para ler", nao
   // "carrega rapido": o arquivo nem entra na pagina, entra atras de um clique.
@@ -200,6 +211,33 @@ export function montarCaminho({ portfolioId, pasta, nome, hash, ext }) {
  * Converte o arquivo escolhido pelo comprador no blob que vai subir.
  * Devolve { blob, mime, largura, altura, caminho, previewUrl }.
  */
+// A ARTE TEM SILHUETA PROPRIA, OU E UMA FOTO?
+//
+// A placa da experiencia mede 56px e nasceu para logo de empresa: fundo transparente, respiro
+// em volta, tudo alinhado na fileira. Foi assim que um corretor subiu a FOTO da imobiliaria
+// ali, e a foto ganhou o tratamento de logo: encolhida a 80%, sobre canvas transparente, com
+// o fundo branco do JPEG virando uma moldura clara em volta de uma sala de estar de 43px, ao
+// lado de duas placas de monograma limpas. Ninguem faria isso de proposito.
+//
+// A pergunta que separa os dois casos nao e a extensao do arquivo (PNG opaco existe), e sim se
+// a imagem tem transparencia. Se tem, e arte recortada e o respiro faz sentido. Se nao tem, e
+// foto, e foto preenche a placa inteira, que e o que ela faz em todo outro lugar do produto.
+//
+// A sonda e de 64x64 e nao a imagem inteira: varrer 9 milhoes de pixels de uma foto de celular
+// para responder a uma pergunta binaria custaria mais que todo o resto do pipeline, e area
+// transparente de logo nunca e pequena o bastante para escapar de uma amostra desse tamanho.
+function temTransparencia(bitmap) {
+  const lado = 64;
+  const c = document.createElement('canvas');
+  c.width = lado;
+  c.height = lado;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(bitmap, 0, 0, lado, lado);
+  const d = x.getImageData(0, 0, lado, lado).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+  return false;
+}
+
 export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
   const cfg = DESTINOS[destino];
   if (!cfg) throw new ErroDeImagem(`destino desconhecido: ${destino}`);
@@ -241,7 +279,14 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
     }
   }
 
-  const escala = Math.min(1, cfg.lado / Math.max(recorte.l, recorte.a));
+  // O respiro so vale para arte com silhueta. Foto na placa preenche a placa.
+  const comRespiro = Boolean(cfg.margem) && temTransparencia(bitmap);
+
+  // Com margem assada, o limite de reducao ja e o lado DE DENTRO da margem. Reduzir para 256
+  // e depois desenhar a 205 encolheria de novo, no `drawImage`, sem os degraus: duas reducoes,
+  // a segunda sem suavizacao boa. Assim ha uma so, e ela e a boa.
+  const limite = comRespiro ? Math.round(cfg.lado * cfg.margem) : cfg.lado;
+  const escala = Math.min(1, limite / Math.max(recorte.l, recorte.a));
   const lAlvo = Math.max(1, Math.round(recorte.l * escala));
   const aAlvo = Math.max(1, Math.round(recorte.a * escala));
 
@@ -252,22 +297,23 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
 
   const reduzido = reduzirEmDegraus(recortado, recorte.l, recorte.a, lAlvo, aAlvo);
 
+  // A margem assada: a arte ocupa 80% do quadrado, sobre canvas TRANSPARENTE. Isto e o que
+  // mantem a fileira de logos alinhada sem tocar no CSS da placa e sem inventar coluna. Quem
+  // subir arte sangrando na borda continua com respiro; quem subir com respiro proprio
+  // perde um pouco de tamanho, que e o preco menor dos dois.
+  //
+  // O QUADRADO E DO CANVAS, NAO DA ARTE. Antes o codigo assumia que a entrada ja era quadrada
+  // (desenhava `dentro x dentro`, o mesmo numero nos dois eixos) porque o corte 1:1 vinha
+  // logo acima. Sem o corte, essa mesma linha esticaria um wordmark deitado ate ele virar um
+  // quadrado deformado. Agora a arte entra com a proporcao dela e e centrada nos dois eixos.
+  const lCanvas = cfg.quadrar && comRespiro ? cfg.lado : lAlvo;
+  const aCanvas = cfg.quadrar && comRespiro ? cfg.lado : aAlvo;
   let saida = document.createElement('canvas');
-  saida.width = lAlvo;
-  saida.height = aAlvo;
+  saida.width = lCanvas;
+  saida.height = aCanvas;
   const ctx = saida.getContext('2d');
   ctx.imageSmoothingQuality = 'high';
-  if (cfg.margem) {
-    // A margem assada: a arte ocupa 80% do quadrado, sobre canvas TRANSPARENTE. Isto e o que
-    // mantem a fileira de logos alinhada sem tocar no CSS da placa e sem inventar coluna. Quem
-    // subir arte sangrando na borda continua com respiro; quem subir com respiro proprio
-    // perde um pouco de tamanho, que e o preco menor dos dois.
-    const dentro = Math.round(lAlvo * cfg.margem);
-    const off = Math.round((lAlvo - dentro) / 2);
-    ctx.drawImage(reduzido, off, off, dentro, dentro);
-  } else {
-    ctx.drawImage(reduzido, 0, 0, lAlvo, aAlvo);
-  }
+  ctx.drawImage(reduzido, Math.round((lCanvas - lAlvo) / 2), Math.round((aCanvas - aAlvo) / 2), lAlvo, aAlvo);
 
   // ANTES DE RECUSAR, REDUZ. Se as tres qualidades nao couberem no orcamento, a saida obvia e
   // diminuir a imagem, e nao devolver o problema para quem so queria subir uma foto.
@@ -280,9 +326,12 @@ export async function prepararImagem(arquivo, { destino, portfolioId, nome }) {
   //
   // Dois degraus de 80% cobrem o caso real sem virar um laco: cada um corta ~36% da area, e
   // depois disso a imagem ja estaria pequena demais para o lugar onde vai aparecer.
+  // As medidas que seguem sao as do CANVAS, e nao as da arte dentro dele: com letterbox os
+  // dois numeros deixam de ser o mesmo, e reduzir pelo lado da arte encolheria o canvas
+  // quadrado por um fator do eixo errado, deformando a logo no degrau de reducao.
   let blob = await codificarDentroDoOrcamento(saida, cfg.orcamento);
-  let larguraFinal = lAlvo;
-  let alturaFinal = aAlvo;
+  let larguraFinal = lCanvas;
+  let alturaFinal = aCanvas;
   for (let tentativa = 0; !blob && tentativa < 2; tentativa += 1) {
     larguraFinal = Math.max(1, Math.round(larguraFinal * 0.8));
     alturaFinal = Math.max(1, Math.round(alturaFinal * 0.8));

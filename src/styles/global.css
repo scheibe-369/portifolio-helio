@@ -55,7 +55,9 @@ body {
 /* ===== EFEITO SHIMMER SINCRONIZADO ===== */
 .bookmarkBtn {
   width: 100%;
-  height: 44px;
+  /* Altura por conteudo, com piso: o rotulo de duas linhas cresce o botao em vez de ser
+     amputado. Com uma linha, que e o caso de "Agendar Call", o piso manda e nada muda. */
+  min-height: 44px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background-color: rgba(15, 15, 15, 0.8);
@@ -151,18 +153,33 @@ body {
 }
 
 .btn-text {
-  height: 100%;
+  height: auto;
   /* O rotulo vem do comprador (cta_label), e "Chamar no WhatsApp" nao cabe nos 160px do
      botao. Com display:flex o texto anonimo nao recebe text-overflow, entao ele era cortado
      no meio da palavra: a pagina publicava "CHAMAR NO WHATSA". Em bloco, com line-height
      igual a altura do botao, a centralizacao optica e a mesma e o texto que nao cabe ganha
      reticencia em vez de amputacao. */
   display: block;
-  line-height: 44px;
-  max-width: calc(100% - 60px);
+  /* DUAS LINHAS EM VEZ DE RETICENCIA. A reticencia consertou a amputacao mas nao o problema:
+     "Falar no WhatsApp" precisa de 105px e tinha 98, entao a pagina de um corretor publicava
+     "FALAR NO WHATS...". Sete pixels a menos viravam um botao que nao diz o que faz. O texto
+     agora quebra, e o botao cresce com ele.
+     Os 50px descontados sao o que fica a esquerda do texto: 6 de margem do icone, 32 do
+     icone e 12 de margem do proprio texto. Eram 60, sem que 10 deles fossem de coisa
+     nenhuma. */
+  /* 22px, e nao 1.25, e o numero e escolhido: duas linhas de 22 somam exatamente os 44px do
+     botao, entao um rotulo longo passa a caber sem o botao mudar de tamanho.
+     O QUE MUDA NA PAGINA DE QUEM NAO PEDIU NADA: um pixel. Com `height:100%` a caixa de texto
+     media 42px (o botao tem 44 menos as duas bordas) e a linha de 44px comecava no topo dela,
+     deixando o texto 1px ABAIXO do centro real do botao. Centralizado pelo flex do pai, ele
+     sobe esse 1px e passa a ficar no centro de verdade. Medido: 361 pixels de 5 milhoes na
+     pagina do apex, e nenhum outro ponto da pagina se move. Fica registrado porque mudanca
+     na pagina do dono, por menor que seja, e sempre deliberada aqui. */
+  line-height: 22px;
+  max-width: calc(100% - 50px);
+  max-height: 44px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   color: white;
   z-index: 1;
   transition-duration: 0.3s;
