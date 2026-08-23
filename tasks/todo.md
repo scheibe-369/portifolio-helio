@@ -71,10 +71,13 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       migration derruba o AI Block junto
 - [x] Criar os SKUs na Hubla. Links prontos: principal (com o order bump dentro)
       `pay.hub.la/U9cuWxeCOsTvt4urY5vS`, facilitação `pay.hub.la/q7IxDLHWM6OI8EBmrreo`
-- [ ] Pegar os `productId` reais no painel da Hubla para o `PRODUCT_FLAG_MAP`. **Não é o
+- [x] Pegar os `productId` reais no painel da Hubla para o `PRODUCT_FLAG_MAP`. **Não é o
       slug da URL de pagamento**, é o id que vem no corpo do evento. Confundir os dois faz
-      todo evento chegar sem casar flag, ou seja, pagou e não entrou
-- [ ] **Criar a regra de webhook do MyPortifolio no painel da Hubla.** Descoberto em
+      todo evento chegar sem casar flag, ou seja, pagou e não entrou.
+      **Resolvido, e o modelo era outro:** o mapa passou a ser por OFERTA, não por produto
+      (item do id do bump, mais abaixo). Fechado pela venda real que entrou com as duas flags
+- [x] **Criar a regra de webhook do MyPortifolio no painel da Hubla.** Feita pelo dono, e
+      a primeira venda real entrou depois dela (item mais abaixo). Descoberto em
       14/08/2026, na marra: a primeira compra real foi feita e a Hubla **não chamou uma vez
       sequer** (zero linha no log de acesso da função). A regra de webhook na Hubla é por
       **produto**, e a única que existe é a do AI Block, com 2 produtos e 1 evento. Os
@@ -101,3 +104,43 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] **Preço do bump corrigido de R$ 37,00 para R$ 37,90**, lido da nota da venda real
       (`totalCents: 8580` menos os R$ 47,90 do principal). A página `/comprar` estava no ar
       com o valor errado
+
+## O que as catorze personas deixaram em aberto (20/08/2026)
+
+Tudo aqui saiu de defeito visto numa página publicada, e não de ideia. A ordem é por
+quanto custa, e não por quanto dá trabalho.
+
+- [ ] **O wizard só oferece dez áreas, e três das três últimas personas não se acharam.**
+      Corretor, cerimonialista e funileiro chegaram e escolheram "o mais parecido": o
+      corretor pegou Arquitetura e pagou com dezessete itens de outra profissão para
+      desfazer. O kit é o que decide se a pessoa cai num editor montado ou em branco, então
+      não ter a área dela é o pior minuto do produto acontecendo de novo, com outro nome
+- [ ] **Áudio não toca.** Só existe embed de YouTube. Spotify, SoundCloud e Bandcamp são
+      recusados com "não reconheci este link do YouTube", e o trabalho de uma produtora
+      musical É o áudio. Ela tem seis redes e nenhuma faixa na página
+- [ ] **A galeria de fotos reintroduz o corte que o card já não faz.** `aspect-[3/2]` fixo
+      com `object-cover` e sem `object-position` (projectModal.js:105). Um retrato 2:3
+      perde 56% ali dentro, que é exatamente o defeito que o tatuador reportou no card e
+      que foi corrigido só no card
+- [ ] **Foto de galeria não tem legenda.** É o que torna o antes/depois do funileiro
+      ilegível: como ele mesmo escreveu, "um cliente olha e vê duas fotos de carros
+      diferentes"
+- [ ] **Foto não amplia.** Nada é clicável: o maior tamanho que uma foto alcança é 336x208
+      no card e 295x196 na galeria. Para fotógrafo, tatuador e arquiteta, a página inteira
+      existe para mostrar imagem, e a imagem nunca passa de um selo
+- [ ] **Tema claro.** É a premissa inteira da arquiteta. Custo medido: 4 tokens novos, ~84
+      classes `text-white*`, ~39 `bg-white/` e `border-white/` em 5 módulos de render,
+      variantes claras de `.glass-card`, `.glass-button`, `.vibecoder-btn` e
+      `.metallic-silver` (esta some no claro, porque o gradiente dela inclui branco), e um
+      `plate` claro por preset, porque ele viaja inline no HTML
+- [ ] **Campos que a profissão pede e não existem**: banca do concurso (professor), ficha
+      técnica de área/ano/programa (arquiteta), cicatrizado ou fresco (tatuador), e preço,
+      m² e quartos como CAMPOS e não como texto livre (corretor)
+- [ ] **O `value` das redes virou dado morto.** O cartão deixou de mostrar o segundo texto,
+      e a coluna continua preenchida em todo portfólio publicado antes de 20/08. Some
+      sozinho no primeiro salvamento de cada um, mas até lá é dado que ninguém lê
+- [ ] **O `shot-diff` não está dentro de nenhum comando que alguém digita.** Foi por isso
+      que ele passou sete dias medindo um baseline de 13/08 sem ninguém saber. Ou entra num
+      `verificar:visual`, ou a data do baseline precisa ser conferida a cada uso
+- [ ] **As catorze demos moram em produção.** Ocupam catorze endereços e entram em qualquer
+      contagem de portfólios. `node scripts/limpar-demos.mjs --aplicar` apaga
