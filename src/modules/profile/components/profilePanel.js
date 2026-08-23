@@ -60,12 +60,26 @@ const COLUNAS_FAIXA = {
 };
 const colunasFaixa = (n) => COLUNAS_FAIXA[n] || 'grid-cols-2 sm:grid-cols-3';
 
-const COLUNAS_REDES = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-1 sm:grid-cols-2',
-  3: 'grid-cols-1 sm:grid-cols-3',
+// A LARGURA DE CADA CONTATO, ESCOLHIDA PELA QUANTIDADE.
+//
+// Nao e para preencher espaco, e para a fileira fechar certo. Com `flex-wrap` mais
+// `justify-center`, a base define quantos cabem por linha e a linha incompleta fica
+// CENTRADA, em vez de encostar na esquerda deixando um buraco na direita. Cinco contatos
+// viram 3+2 centrado, sete viram 3+3+1 centrado, e nenhum arranjo fica torto.
+//
+// DUAS POR LINHA NO CELULAR, sempre. Uma pastilha de 316px para escrever "Instagram" e
+// larga demais para o que ela diz, e foi assim que ela ficou nas catorze paginas.
+//
+// Os valores sao literais porque o Tailwind v4 varre o fonte em busca de nomes de classe
+// inteiros e nao gera nada montado com template (risco R11). O desconto de 0,25rem e de
+// 0,34rem e a parte do `gap-2` que cabe a cada pastilha.
+const BASE_CONTATO = {
+  1: 'basis-full',
+  2: 'basis-[calc(50%-0.25rem)]',
+  3: 'basis-[calc(50%-0.25rem)] sm:basis-[calc(33.333%-0.34rem)]',
+  4: 'basis-[calc(50%-0.25rem)]',
 };
-const colunasRedes = (n) => COLUNAS_REDES[n] || 'grid-cols-1 sm:grid-cols-3';
+const baseContato = (n) => BASE_CONTATO[n] || 'basis-[calc(50%-0.25rem)] sm:basis-[calc(33.333%-0.34rem)]';
 
 const renderSelo = (profile, lang) => {
   const rotulo = String(t(profile.badgeLabel, lang) ?? '').trim();
@@ -160,12 +174,12 @@ const renderCta = (profile, lang, margem = 'mt-2') => {
 const socialItem = ({ label, value, href, icon }, lang, opcoes = {}) => {
   void value;
   const icone = opcoes.icones ? svgRede(iconeDoContato({ label, href, icon })) : '';
-  // Na coluna estreita os cartoes sao uma lista, e lista se le pela margem esquerda. Na
-  // fileira eles sao pastilhas largas lado a lado, e ai o conteudo centrado e o que faz as
-  // tres parecerem tres, em vez de tres retangulos com texto encostado num canto.
-  const altura = opcoes.esticar === false ? 'justify-center ' : 'flex-1 max-h-16 ';
+  // Conteudo centrado, e largura vinda de fora. As duas coisas juntas sao o que faz a fileira
+  // parecer uma fileira: pastilhas do mesmo tamanho, com o texto no meio de cada uma, em vez
+  // de retangulos de larguras diferentes com o texto encostado num canto.
+  const largura = `${opcoes.base ? opcoes.base + ' ' : ''}justify-center `;
   return `
-            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${altura}flex items-center gap-2.5 rounded-xl glass-button px-4 py-3">
+            <a href="${safeUrl(href)}" target="_blank" rel="noopener noreferrer" class="${largura}flex items-center gap-2.5 rounded-xl glass-button px-4 py-3">
               ${icone}<span class="min-w-0 truncate">${esc(label)}</span>
             </a>`;
 };
@@ -205,19 +219,6 @@ export function renderProfilePanel(profile, lang, ui = {}) {
   const cta = renderCta(profile, lang);
   const icones = profile.socialsIcons === true;
 
-  // AS REDES SO GANHAM A COLUNA ESTREITA QUANDO SAO MUITAS.
-  //
-  // A coluna vale 40% da largura e a mesma ALTURA do cartao "Sobre", porque os dois sao
-  // celulas da mesma grade. Com bio longa e poucas redes essa altura nao tem com que ser
-  // preenchida: no corretor deram 238px de vao entre a ultima rede e o botao, com a bio de
-  // 722 caracteres espremida numa coluna de 310px do lado. Duas coisas ruins pelo mesmo
-  // motivo.
-  //
-  // Com menos de quatro redes elas descem para uma faixa embaixo da bio, e a bio passa a usar
-  // a largura inteira. O vao some porque deixa de existir altura a preencher, e a bio ganha o
-  // dobro de linha util. O Helio tem quatro e continua exatamente como estava.
-  const aoLado = socials.length >= 4;
-
   return `
     <!-- Card de Perfil -->
     <!-- Card de Perfil -->
@@ -250,7 +251,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
         // duas vezes.
         emFaixa && !selo
           ? ''
-          : `<div class="flex flex-col gap-3 sm:items-end">
+          : `<div class="flex flex-col items-start gap-3 sm:items-end">
         ${
           emFaixa
             ? ''
@@ -273,7 +274,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
 
     <!-- Bio + Sociais -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-      <div class="${aoLado ? 'md:col-span-3' : 'md:col-span-5'} flex flex-col gap-3 glass-card rounded-3xl p-6">
+      <div class="md:col-span-5 flex flex-col gap-3 glass-card rounded-3xl p-6">
         <h2 class="text-[10px] font-bold uppercase tracking-widest text-white/30 metallic-silver w-fit">${esc(rotuloSecao(ui, 'about', lang))}</h2>
         <p class="text-sm text-white/80 leading-relaxed font-medium whitespace-pre-line">${esc(t(profile.bio, lang))}</p>
         ${
@@ -297,25 +298,33 @@ export function renderProfilePanel(profile, lang, ui = {}) {
       </div>
 
       ${
-        aoLado
-          ? `<div class="md:col-span-2 flex flex-col gap-2 glass-card rounded-3xl p-5">
-        <div class="flex-1 flex flex-col gap-2 text-[11px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones })).join('')}
-        </div>
-
-        ${cta}
-      </div>`
-          : socials.length || cta
-            ? `<div class="md:col-span-5 flex flex-col gap-3 glass-card rounded-3xl p-5">
-        ${socials.length ? `<div class="grid ${colunasRedes(socials.length)} gap-2 text-[12.5px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones, esticar: false })).join('')}
+        // OS CONTATOS FICAM NUMA FILEIRA, SEMPRE, e a coluna estreita ao lado da bio deixou
+        // de existir. Ela so parecia certa quando a lista era comprida o bastante para encher
+        // a altura do cartao "Sobre" ao lado, e essa altura nao e escolha de ninguem: ela vem
+        // do tamanho da bio.
+        //
+        // Medido nas catorze paginas, pelo vao que sobrava entre o ultimo contato e o botao:
+        // 10px no Helio (bio de 377 caracteres), 46px num personal trainer (468), 115px numa
+        // arquiteta e 226px num professor de concursos. QUATRO CONTATOS NOS QUATRO. Quem
+        // decidia o tamanho do buraco era o texto da bio, e nao a lista, e por isso nao existe
+        // numero de contatos que conserte isso para todo mundo.
+        //
+        // Esticar a pastilha para tapar o buraco foi o que se fez ate aqui, e e o contrario do
+        // que se quer: vira um retangulo de 64px para escrever "TikTok". Na fileira cada uma
+        // tem a altura do que ela diz, a largura vem da quantidade, e a bio ganha a largura
+        // inteira, o que de quebra tira a coluna de 36 caracteres por linha.
+        socials.length || cta
+          ? `<div class="md:col-span-5 flex flex-col gap-3 glass-card rounded-3xl p-5">
+        ${socials.length ? `<div class="flex flex-wrap justify-center gap-2 text-[12.5px] font-semibold text-white">${socials.map((s) => socialItem(s, lang, { icones, base: baseContato(socials.length) })).join('')}
         </div>` : ''}
         ${
-          // O BOTAO EM LINHA PROPRIA, e nao ao lado das redes. Ao lado ele levava 224px dos
-          // 488 do cartao e sobravam 84px por rede, onde "WhatsApp" ja nao cabia inteiro:
+          // O BOTAO EM LINHA PROPRIA, e nao ao lado dos contatos. Ao lado ele levava 224px dos
+          // 488 do cartao e sobravam 84px por contato, onde "WhatsApp" ja nao cabia inteiro:
           // trocar um vao vazio por tres nomes cortados nao e conserto.
           renderCta(profile, lang, '')
         }
       </div>`
-            : ''
+          : ''
       }
     </div>`;
 }

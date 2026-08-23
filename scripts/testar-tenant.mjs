@@ -364,18 +364,34 @@ const checar = (nome, condicao, detalhe) => {
     { label: 'YouTube', value: 'Canal', href: 'https://youtube.com/@a' },
   ];
 
+  // OS CONTATOS SAO UMA FILEIRA, INDEPENDENTE DA QUANTIDADE, e a bio sempre tem a largura
+  // inteira. A coluna estreita ao lado da bio saiu porque o buraco que ela abria nao era
+  // decidido pela lista de contatos e sim pelo tamanho da BIO: com quatro contatos, o vao
+  // medido foi de 10px no Helio, 46px num personal trainer, 115px numa arquiteta e 226px num
+  // professor. Nao existe numero de contatos que conserte isso para todo mundo.
   const poucas = render({ profile: { ...RECEM_COMPRADO.profile, socials: tres, bio: { pt: 'x'.repeat(700) } } });
-  checar('com menos de quatro redes, a bio usa a largura inteira', poucas.includes('md:col-span-5'),
-    '722 caracteres numa coluna de 310px, com 238px de vao vazio do lado, era o pior dos dois mundos');
-  checar('com menos de quatro redes, elas viram fileira', poucas.includes('sm:grid-cols-3'));
-  checar('na fileira as redes nao esticam', !poucas.includes('max-h-16'),
-    'flex-1 existe para dividir a altura de uma coluna; em fileira nao ha altura a dividir');
-  checar('na fileira o conteudo fica centrado', poucas.includes('justify-center'));
-
   const muitas = render({ profile: { ...RECEM_COMPRADO.profile, socials: quatro } });
-  checar('com quatro redes, a coluna estreita continua', muitas.includes('md:col-span-2'),
-    'o Helio tem quatro e a pagina dele nao pode mudar');
-  checar('com quatro redes, as redes ainda esticam', muitas.includes('max-h-16'));
+
+  for (const [nome, html] of [['tres', poucas], ['quatro', muitas]]) {
+    checar(`${nome} contatos: a bio usa a largura inteira`, !html.includes('md:col-span-3'),
+      '722 caracteres numa coluna de 310px, com vao vazio do lado, era o pior dos dois mundos');
+    checar(`${nome} contatos: nao existe coluna estreita`, !html.includes('md:col-span-2'));
+    checar(`${nome} contatos: a pastilha nao estica`, !html.includes('max-h-16'),
+      'esticar para tapar buraco vira um retangulo de 64px para escrever "TikTok"');
+    checar(`${nome} contatos: o conteudo fica centrado`, html.includes('justify-center'));
+  }
+
+  // A LARGURA VEM DA QUANTIDADE, para a fileira fechar certo.
+  checar('tres contatos: duas por linha no celular, tres no desktop',
+    poucas.includes('basis-[calc(50%-0.25rem)] sm:basis-[calc(33.333%-0.34rem)]'));
+  checar('quatro contatos: duas por linha sempre, que fecha 2x2',
+    muitas.includes('basis-[calc(50%-0.25rem)]') && !muitas.includes('sm:basis-[calc(33.333%'),
+    'quatro em uma linha da 116px por pastilha, e "Instagram" precisa de 135');
+  const uma = render({ profile: { ...RECEM_COMPRADO.profile, socials: [quatro[0]] } });
+  checar('um contato so ocupa a linha inteira', uma.includes('basis-full'));
+  const cinco = render({ profile: { ...RECEM_COMPRADO.profile, socials: [...quatro, tres[0]] } });
+  checar('cinco contatos: tres por linha, e a linha de baixo fica centrada',
+    cinco.includes('sm:basis-[calc(33.333%-0.34rem)]') && cinco.includes('justify-center'));
 
   // O SEGUNDO TEXTO NAO EXISTE MAIS. Ele era o defeito: telefone, arroba e razao social nao
   // cabem em 128px, e ou eram cortados ou desciam uma linha e desalinhavam o cartao.
