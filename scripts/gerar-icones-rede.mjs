@@ -43,7 +43,7 @@ const LINHA = {
 const MARCAS = [
   'whatsapp', 'instagram', 'facebook', 'tiktok', 'linkedin', 'youtube', 'x', 'telegram',
   'spotify', 'soundcloud', 'behance', 'dribbble', 'pinterest', 'threads', 'twitch', 'vimeo',
-  'github',
+  'github', 'flickr',
 ];
 
 const pastaMarcas = resolve(process.cwd(), 'scripts/_icones');

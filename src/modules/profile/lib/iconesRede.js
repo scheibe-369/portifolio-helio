@@ -51,6 +51,8 @@ const HOSTS = {
   'twitch.tv': 'twitch',
   'vimeo.com': 'vimeo',
   'github.com': 'github',
+  'flickr.com': 'flickr',
+  'flic.kr': 'flickr',
   'maps.google.com': 'mapa',
   'goo.gl': 'mapa',
   'maps.app.goo.gl': 'mapa',
@@ -127,7 +129,18 @@ export function redeDoLink(href, label) {
   // inverte, porque ai o host e a informacao mais confiavel: "Zap" apontando para instagram.com
   // e um rotulo desatualizado, nao uma escolha.
   if (rotulo && ICONES_REDE[rotulo] && ICONES_REDE[rotulo].m === 0) return rotulo;
-  return host || rotulo;
+  // O GLOBO NO FIM DA FILA, para link que aponta para algum lugar que a gente nao conhece.
+  //
+  // Aqui a regra virou ao contrario do que era, e o motivo e a mudanca do cartao: enquanto ele
+  // tinha um segundo texto ao lado do nome, quem nao fosse reconhecido continuava se
+  // explicando por escrito, e um icone generico so somaria ruido. Sem esse texto, o cartao sem
+  // desenho vira uma palavra solta ao lado de irmaos desenhados, e parece que faltou carregar.
+  // Aconteceu com "ArchDaily" e "Flickr", que sao servicos legitimos e nao estao em biblioteca
+  // de marca nenhuma.
+  //
+  // O globo nao inventa nada: ele diz exatamente o que se sabe da linha, que e ser um link
+  // para um site. Rotulo sem link nenhum continua sem desenho, porque ai nem isso se sabe.
+  return host || rotulo || (hostDo(href) ? 'site' : null);
 }
 
 // A regra completa, do jeito que o render precisa dela.

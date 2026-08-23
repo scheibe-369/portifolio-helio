@@ -87,6 +87,16 @@ checar('entrada nula nao quebra', redeDoLink(null, undefined) === null);
 checar('texto que nao e link nao quebra', redeDoLink('rua sao geraldo, 412', 'Endereço') === 'mapa',
   'o texto nao e URL nenhuma, entao quem responde e o rotulo, e ele diz alfinete');
 
+// O GLOBO NO FIM DA FILA. Sem o texto de apoio, cartao sem desenho vira palavra solta ao lado
+// de irmaos desenhados. "ArchDaily" e "Flickr" sao servicos de verdade e nao estao em
+// biblioteca de marca nenhuma: aconteceu com uma arquiteta e com um fotografo.
+checar('link desconhecido vira globo', redeDoLink('https://www.archdaily.com.br', 'ArchDaily') === 'site');
+checar('link desconhecido sem rotulo util tambem', redeDoLink('https://sitequalquer.com.br/x', 'Meu trabalho') === 'site');
+checar('sem link, nao inventa globo', redeDoLink('', 'ArchDaily') === null,
+  'sem URL nao se sabe nem que e um site');
+checar('texto que nao e URL nao vira globo', redeDoLink('rua sao geraldo, 412', 'Bla') === null);
+checar('o globo nao rouba marca conhecida', redeDoLink('https://www.flickr.com/photos/x', 'Flickr') === 'flickr');
+
 // O SVG.
 checar('rede desconhecida nao emite svg', svgRede(null) === '' && svgRede('orkut') === '');
 const svg = svgRede('whatsapp');
