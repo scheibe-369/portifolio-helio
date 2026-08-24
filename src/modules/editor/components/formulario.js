@@ -1,6 +1,7 @@
 import { esc } from '../../portfolio/lib/sanitize.js';
 import { camposDoPasso, resolver } from '../data/fieldSchema.js';
 import { renderCampo, lerMudanca, validarCampo } from '../fields/primitivos.js';
+import { conferirVideo, URL_MINIATURA } from '../lib/conferirVideo.js';
 import { renderCampoImagem } from '../fields/imagemField.js';
 import { renderCampoCertificado } from '../fields/certificado.js';
 import { parseYoutubeId } from '../../projects/lib/youtube.js';
@@ -84,11 +85,45 @@ export function ligarFormulario(raiz, { campos, valores, aoMudar, aoArquivo, aoC
     // Feedback do YouTube na hora: o parser aceita shorts, live, link curto, ID solto e URL
     // com parametro antes do `v`. Dizer "reconheci" e o que impede o comprador colar o link do
     // canal e so descobrir que nao era video quando ninguem viu o case.
+    //
+    // "RECONHECIDO" ERA MEIA VERDADE, e a outra metade custava caro. O parser responde se o
+    // texto tem a FORMA de um link do YouTube, e `AAAAAAAAAAA` tem: onze caracteres do
+    // alfabeto certo. O campo entao dizia "video reconhecido (AAAAAAAAAAA)" e deixava
+    // publicar um tocador morto. Agora, depois de a forma passar, a miniatura e carregada, e
+    // e ela quem diz se o video existe. O MINIATURA APARECE na tela, porque ver o quadro do
+    // video responde "e este mesmo?", que e uma pergunta melhor do que "existe algum video
+    // com esse codigo".
     const nota = caixa?.querySelector('[data-nota-youtube]');
     if (nota) {
       const r = lido.valor ? parseYoutubeId(lido.valor) : { id: null };
-      nota.textContent = lido.valor ? (r.id ? `vídeo reconhecido (${r.id})` : 'não reconheci este link') : '';
-      nota.classList.toggle('e-ok', Boolean(r.id));
+      nota.classList.toggle('e-ok', false);
+      nota.classList.toggle('e-ruim', false);
+      if (!lido.valor) {
+        nota.textContent = '';
+      } else if (!r.id) {
+        nota.textContent = 'não reconheci este link';
+        nota.classList.add('e-ruim');
+      } else {
+        nota.textContent = 'conferindo no YouTube…';
+        const id = r.id;
+        conferirVideo(id).then((estado) => {
+          // A pessoa continua digitando enquanto a rede responde. Se o campo ja mudou de
+          // video, esta resposta e sobre outro assunto e nao pode pintar a tela.
+          const agora = parseYoutubeId(valores[lido.key] || '');
+          if (!agora || agora.id !== id) return;
+          if (estado === 'existe') {
+            nota.innerHTML = `<img class="ed-nota-thumb" src="${URL_MINIATURA(id)}" alt="" referrerpolicy="no-referrer"><span>é este vídeo?</span>`;
+            nota.classList.add('e-ok');
+          } else if (estado === 'nao-existe') {
+            nota.textContent = 'não achei este vídeo no YouTube. Confira o link, ou veja se ele não ficou privado';
+            nota.classList.add('e-ruim');
+          } else {
+            // Indeterminado: sem rede, atras de proxy, dominio bloqueado. Nao acusa ninguem.
+            nota.textContent = `formato certo (${id}), mas não consegui conferir no YouTube agora`;
+          }
+          marcarErro(lido.key, validarCampo(campo, valores[lido.key], valores));
+        });
+      }
     }
 
     if (campo) marcarErro(lido.key, validarCampo(campo, lido.valor, valores));

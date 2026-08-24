@@ -31,10 +31,14 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] **Case do Falow (24/08/2026), 21º projeto.** Entrou no grupo `websites`, na sexta
       posição, e a primeira página passou a ser BrasilDTF, MaternaForte, Previa, Geração de
       Leads, AI Block e Falow. O AI Block subiu da nona posição e Site Growth Hub e
-      Damascena Films desceram para a segunda página. Miniatura em quadrado 1080 com o fundo
-      `#030505` medido no PNG de origem, que é a convenção das outras marcas do acervo
-      (`token-logo`, `agents-logo`): quadrado é o único formato em que o `object-cover` não
-      corta um logotipo deitado no card de 2 colunas do celular
+      Damascena Films desceram para a segunda página. Miniatura recortada rente à assinatura
+      (1400x444) sobre `#030505`, a cor de fundo medida no PNG de origem, e **sem `fit`**:
+      logo é `contain`. A primeira versão saiu com `fit: 'cover'` e o dono reprovou na hora,
+      com razão. `cover` não é "preencher a placa", é a declaração de que a imagem é FOTO:
+      é ele que liga o `capaGrande` do `projectModal.js`, e a marca virou um quadrado
+      gigante dentro da janela em vez do selo de 64px ao lado do título. Na grade o efeito
+      era o mesmo, a assinatura encostando nas bordas enquanto os cinco vizinhos da primeira
+      página têm o respiro do `p-5`
 - [x] **`scripts/publicar-helio.mjs`.** O seed escreve nas tabelas, e o Worker lê a linha
       `is_live` de `portfolio_publications`: sem publicar, o banco fica com o case novo e o
       site continua servindo o payload antigo, sem erro em lugar nenhum

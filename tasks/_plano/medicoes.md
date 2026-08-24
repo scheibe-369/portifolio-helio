@@ -82,23 +82,6 @@ fazer. Com S15 de pé, o `max-age` da cópia de socorro pode continuar em 24 hor
 semana de um lugar diferente sempre vai dar miss. O cache protege o tenant com tráfego, não
 a cauda longa.
 
-### Render da página, medido em Node (2026-08-24)
-
-50 execuções de aquecimento e 300 de medição, por idioma, sobre o
-portfólio do Helio (21 projetos, 5 experiências).
-
-| Idioma | Mediana | p95 | Bytes de HTML |
-|---|---|---|---|
-| PT | 0.131 ms | 0.309 ms | 60707 |
-| EN | 0.112 ms | 0.323 ms | 60468 |
-
-Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
-Resultado: **dentro do orçamento**.
-
-Este número é de Node, não do isolate do Worker, então ele **não** prova que cabe no teto de
-CPU da plataforma. Ele serve para detectar regressão. A prova real é a segunda metade do
-critério 12: 500 requisições em miss forçado contra o Worker publicado, todas devolvendo o
-nosso corpo. Isso só existe a partir da fase 1.
 
 ### Cinco suposições fechadas em produção (2026-08-23)
 
@@ -110,14 +93,30 @@ Medidas no produto no ar, e não em spike, contra `demo-arquiteta` e o apex, do 
 | S25 | `/cdn-cgi/*` é reservado pela plataforma e nunca chega ao Worker | `curl .../cdn-cgi/trace` devolveu o corpo da plataforma (`fl=`, `h=`, `ip=`, `ts=`), e não o nosso HTML | **confirmada** |
 | S26 | Workers tem versões e `wrangler rollback` sem rebuild | `deployments list` lista as versões com o tráfego em 100%, e `rollback [version-id]` existe no CLI | **confirmada** |
 | S22 | Dá para ler CPU por invocação (e o plano B, que é o que importa) | 100 requisições em **miss forçado** contra o apex, que é o tenant mais pesado (20 projetos): **100 responderam 200 e as 100 traziam o nosso corpo**. Nenhuma resposta de erro de plataforma | **plano B satisfeito**: o render está dentro do teto de CPU |
-| S27 | A thumb de um ID inexistente devolve um placeholder cinza, e não `404` | `https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg` devolveu **`HTTP 404`** com 1097 bytes | **REFUTADA** |
+| S27 | A thumb de um ID inexistente devolve um placeholder cinza, e não `404` | Os dois ao mesmo tempo: `HTTP 404`, e o corpo desse 404 são 1097 bytes de um JPEG **válido**, o retângulo cinza de 120x90. Ver a correção abaixo | **confirmada** |
 
-**S27 estava errada, e isso é bom.** O plano assumia que imagem quebrada no card não era
-sinal de ID errado, e por isso a checagem do editor teria que passar pelo oEmbed. Como a
-thumb devolve 404 de verdade, o status dela serve de checagem barata, e o oEmbed passa a ser
-redundância em vez de único caminho. Nada muda no código hoje: o `parseYoutubeId` já valida a
-forma do ID, e a defesa continua desenhada como estava. O que muda é que a suposição virou
-fato, e o fato é o contrário do que estava escrito.
+**S27: eu declarei refutada e estava errado, e a correção vale mais que o erro.**
+
+Li o status com `curl`, vi `HTTP 404`, e escrevi aqui que a suposição do placeholder cinza
+tinha caído. As duas coisas são verdade ao mesmo tempo: o status é 404 **e** o corpo é o
+retângulo cinza de 120x90, um JPEG perfeitamente válido de 1097 bytes.
+
+A diferença não é acadêmica, porque o navegador não vê status nenhum. Escrevi a primeira
+versão de `conferirVideo.js` usando `onload` contra `onerror` de um `new Image()`, apoiado na
+minha própria conclusão errada, e ela não separava nada: os sete ids do teste responderam
+"existe", inclusive os três inventados. O navegador decodifica o cinza, acha uma imagem
+legítima e dispara `onload`.
+
+**Quem separa é o tamanho**, medido nos mesmos sete ids:
+
+| | miniatura |
+|---|---|
+| `K4DyBUG242c`, `4D-ZGYFUxyM`, `nE1K4U8VSBQ`, `_LGj734-vew` (reais) | 480x360 |
+| `AAAAAAAAAAA`, `zzzzzzzzzzz`, `11111111111` (inventados) | 120x90 |
+
+O corte ficou em 200px de largura, e `scripts/testar-video.mjs` afirma os dois lados, para o
+dia em que o cinza crescer ou a miniatura encolher. E `onerror` passou a significar só falha
+de rede, que é a resposta `indeterminado`: vídeo ausente nunca chega por ali.
 
 **S18 saiu da lista, e não por ter sido medida.** Ela pergunta o tamanho da faixa gratuita e
 o preço por hostname do Cloudflare for SaaS. O produto não usa Cloudflare for SaaS: ele serve
@@ -125,3 +124,21 @@ subdomínios da PRÓPRIA zona, por rota curinga (`*.myportifolio.com.br/*` em `w
 cobertos pelo certificado curinga da zona. Custom hostname só entra em cena no dia em que um
 comprador quiser apontar o domínio dele, que não é o produto de hoje. Enquanto isso, ela é
 pergunta de uma feature futura, e não pendência da atual.
+
+### Render da página, medido em Node (2026-08-24)
+
+50 execuções de aquecimento e 300 de medição, por idioma, sobre o
+portfólio do Helio (21 projetos, 5 experiências).
+
+| Idioma | Mediana | p95 | Bytes de HTML |
+|---|---|---|---|
+| PT | 0.129 ms | 0.319 ms | 60713 |
+| EN | 0.116 ms | 0.344 ms | 60474 |
+
+Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
+Resultado: **dentro do orçamento**.
+
+Este número é de Node, não do isolate do Worker, então ele **não** prova que cabe no teto de
+CPU da plataforma. Ele serve para detectar regressão. A prova real é a segunda metade do
+critério 12: 500 requisições em miss forçado contra o Worker publicado, todas devolvendo o
+nosso corpo. Isso só existe a partir da fase 1.

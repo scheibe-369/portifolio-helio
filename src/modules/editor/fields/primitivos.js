@@ -1,6 +1,7 @@
 import { esc, safeColor } from '../../portfolio/lib/sanitize.js';
 import { resolver } from '../data/fieldSchema.js';
 import { parseYoutubeId } from '../../projects/lib/youtube.js';
+import { videoSumido } from '../lib/conferirVideo.js';
 import { periodoValido, periodoCoerente } from '../../experience/lib/periodoChave.js';
 
 // Os primitivos de formulario do editor. Zona [browser].
@@ -251,6 +252,11 @@ export function validarCampo(campo, valor, valores) {
   if (campo.tipo === 'youtube' && valor) {
     const r = parseYoutubeId(valor);
     if (!r.id) return 'não reconheci este link. Cole o endereço do vídeo no YouTube';
+    // O FORMATO ESTAR CERTO NAO QUER DIZER QUE O VIDEO EXISTE, e o campo dizia "reconhecido"
+    // para `AAAAAAAAAAA`. Quem responde aqui e a conferencia da miniatura, que roda em rede
+    // e por isso escreve o resultado num conjunto que esta consulta le sem esperar. Silencio
+    // da rede nao chega aqui: so o 404 confirmado entra no conjunto.
+    if (videoSumido(r.id)) return 'não achei este vídeo no YouTube. Confira o link, ou veja se ele não ficou privado';
   }
   if (campo.key === 'link' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa começar com https://';
   if (campo.key === 'cta_url' && valor && !/^https:\/\//i.test(String(valor))) return 'o link precisa começar com https://';

@@ -1087,3 +1087,16 @@ details[open] > .ed-passo-titulo::before {
   color: #fff;
 }
 .ed-icone-svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* A NOTA DO CAMPO DE VIDEO, quando ela vira miniatura. Ver o quadro do video responde "é este
+   mesmo?", que é a pergunta que o comprador tem, e não "existe algum vídeo com esse código". */
+.ed-nota { display: flex; align-items: center; gap: 8px; }
+.ed-nota-thumb {
+  width: 64px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+.ed-nota.e-ruim { color: #ff9d9d; }

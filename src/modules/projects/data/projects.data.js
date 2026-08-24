@@ -161,7 +161,6 @@ export const projects = [
     year: '2026',
     accent: '#32E875',
     plateBg: '#030505',
-    fit: 'cover',
     image: '/projects/falow.webp',
     videoId: 'wzn6z6ytWxI',
     link: 'https://falow.app.br',

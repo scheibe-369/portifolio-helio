@@ -358,3 +358,33 @@ o que mostrou que o primeiro run tinha sido um falso positivo.
 - **Endereco por conteudo e o melhor oraculo de upload que existe no produto.** Se o hash nao
   mudou, o arquivo nao mudou, ponto. Prefira ele a qualquer leitura de dimensao ou de texto de
   status.
+
+## O `curl` viu 404, o navegador viu uma imagem, e eu escrevi a conclusão errada (23/08/2026)
+
+**O contexto:** o editor dizia "vídeo reconhecido (AAAAAAAAAAA)" com um polegar verde, porque
+`parseYoutubeId` responde se o texto tem a FORMA de um link do YouTube, e onze caracteres do
+alfabeto certo têm. Quem colasse o link errado publicava um card com um tocador morto.
+
+**O erro:** fui medir a suposição S27 do plano, que dizia que a miniatura de um id inexistente
+devolve um retângulo cinza. Rodei `curl -sI`, li `HTTP 404`, e escrevi em `medicoes.md` que a
+suposição estava **refutada**. Escrevi com números e com ar de fato.
+
+**As duas coisas eram verdade ao mesmo tempo.** O status é 404 **e** o corpo desse 404 são
+1097 bytes de um JPEG válido, o cinza de 120x90. Eu li metade da resposta e chamei de resposta.
+
+**O que isso custou:** escrevi `conferirVideo.js` usando `onload` contra `onerror` de um
+`new Image()`, apoiado na minha própria conclusão. O navegador decodifica o cinza, acha uma
+imagem legítima e dispara `onload`: os sete ids do teste responderam "existe", inclusive os
+três inventados. O módulo inteiro não separava nada. Só não foi para produção porque eu tinha
+escrito o teste antes.
+
+**Regra pra próxima vez:**
+- **Meça no ambiente onde o código roda.** `curl` lê status; `new Image()` lê pixels. Uma
+  suposição sobre o que o NAVEGADOR vê não se fecha com uma requisição de linha de comando.
+- **Status HTTP não é o conteúdo.** `404` com corpo de imagem válida é rotina em CDN de
+  terceiro, e o corpo é o que o navegador usa.
+- **Conclusão que vira código no mesmo dia precisa do teste no mesmo dia.** O que salvou aqui
+  foi ter escrito `testar-video.mjs` antes de acreditar em mim mesmo.
+- **Corrigir o registro faz parte.** A linha errada em `medicoes.md` foi reescrita com o que
+  aconteceu, e não apagada: o próximo a ler precisa saber que a leitura por status já enganou
+  alguém uma vez.
