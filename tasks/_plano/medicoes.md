@@ -18,11 +18,13 @@ porque a comparação ao longo do tempo é metade do valor.
 | Medição | Comando | Origem no plano |
 |---|---|---|
 | Render: mediana, p95 e bytes do HTML | `scripts/medir-render.mjs` | Fase 0, item 12 |
-| CPU por invocação do Worker | `wrangler tail` no Worker publicado, 50 requisições em miss forçado | S22 |
-| `cf-cache-status` e `X-Portfolio-Cache` num deploy real | Spike 2, fase 0 | S24 |
 | Limites lidos no painel do projeto Supabase novo | Leitura no dia da migração | S6 |
-| Cloudflare for SaaS: tamanho da faixa gratuita e preço por hostname | Tela de billing da conta | S18 |
 | Precedência de `run_worker_first: false` | Arquivo de sonda no primeiro deploy | S23 |
+| Taxa da Hubla, percentual e parcela fixa | Painel da Hubla, e só o dono entra | S29 |
+| Extrato de vendas conciliável linha a linha | Painel da Hubla, e só o dono entra | S16 |
+
+S22, S24, S25, S26 e S27 foram fechadas em 23/08/2026, e S18 saiu de pauta. Ver a seção
+"Cinco suposições fechadas em produção", no fim deste arquivo.
 
 ## Já medido
 
@@ -83,12 +85,12 @@ a cauda longa.
 ### Render da página, medido em Node (2026-08-24)
 
 50 execuções de aquecimento e 300 de medição, por idioma, sobre o
-portfólio do Helio (20 projetos, 5 experiências).
+portfólio do Helio (21 projetos, 5 experiências).
 
 | Idioma | Mediana | p95 | Bytes de HTML |
 |---|---|---|---|
-| PT | 0.144 ms | 0.437 ms | 59151 |
-| EN | 0.130 ms | 0.366 ms | 58912 |
+| PT | 0.131 ms | 0.309 ms | 60707 |
+| EN | 0.112 ms | 0.323 ms | 60468 |
 
 Tetos de regressão: mediana abaixo de 6 ms e p95 abaixo de 12 ms.
 Resultado: **dentro do orçamento**.
@@ -97,3 +99,29 @@ Este número é de Node, não do isolate do Worker, então ele **não** prova qu
 CPU da plataforma. Ele serve para detectar regressão. A prova real é a segunda metade do
 critério 12: 500 requisições em miss forçado contra o Worker publicado, todas devolvendo o
 nosso corpo. Isso só existe a partir da fase 1.
+
+### Cinco suposições fechadas em produção (2026-08-23)
+
+Medidas no produto no ar, e não em spike, contra `demo-arquiteta` e o apex, do colo **GIG**.
+
+| # | O que dizia a suposição | O que foi medido | Veredito |
+|---|---|---|---|
+| S24 | O cache de resposta funciona no deploy real | 1ª chamada `X-Portfolio-Cache: miss`; 2ª e 3ª `hit`, com `CF-Cache-Status: HIT` | **confirmada** |
+| S25 | `/cdn-cgi/*` é reservado pela plataforma e nunca chega ao Worker | `curl .../cdn-cgi/trace` devolveu o corpo da plataforma (`fl=`, `h=`, `ip=`, `ts=`), e não o nosso HTML | **confirmada** |
+| S26 | Workers tem versões e `wrangler rollback` sem rebuild | `deployments list` lista as versões com o tráfego em 100%, e `rollback [version-id]` existe no CLI | **confirmada** |
+| S22 | Dá para ler CPU por invocação (e o plano B, que é o que importa) | 100 requisições em **miss forçado** contra o apex, que é o tenant mais pesado (20 projetos): **100 responderam 200 e as 100 traziam o nosso corpo**. Nenhuma resposta de erro de plataforma | **plano B satisfeito**: o render está dentro do teto de CPU |
+| S27 | A thumb de um ID inexistente devolve um placeholder cinza, e não `404` | `https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg` devolveu **`HTTP 404`** com 1097 bytes | **REFUTADA** |
+
+**S27 estava errada, e isso é bom.** O plano assumia que imagem quebrada no card não era
+sinal de ID errado, e por isso a checagem do editor teria que passar pelo oEmbed. Como a
+thumb devolve 404 de verdade, o status dela serve de checagem barata, e o oEmbed passa a ser
+redundância em vez de único caminho. Nada muda no código hoje: o `parseYoutubeId` já valida a
+forma do ID, e a defesa continua desenhada como estava. O que muda é que a suposição virou
+fato, e o fato é o contrário do que estava escrito.
+
+**S18 saiu da lista, e não por ter sido medida.** Ela pergunta o tamanho da faixa gratuita e
+o preço por hostname do Cloudflare for SaaS. O produto não usa Cloudflare for SaaS: ele serve
+subdomínios da PRÓPRIA zona, por rota curinga (`*.myportifolio.com.br/*` em `wrangler.jsonc`),
+cobertos pelo certificado curinga da zona. Custom hostname só entra em cena no dia em que um
+comprador quiser apontar o domínio dele, que não é o produto de hoje. Enquanto isso, ela é
+pergunta de uma feature futura, e não pendência da atual.

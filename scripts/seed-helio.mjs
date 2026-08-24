@@ -187,7 +187,7 @@ if (MODO === 'verify') {
 // policies e triggers de cota se comportam como se ele fosse de alguem sem compra.
 console.log('\naplicando...');
 
-// quota_code 'interno' e nao 'padrao': o Helio tem 20 projetos hoje e o teto padrao e 24,
+// quota_code 'interno' e nao 'padrao': o Helio tem 21 projetos hoje e o teto padrao e 24,
 // entao ele passaria raspando e qualquer case novo dele derrubaria o proprio seed.
 await sql(`
   insert into myportifolio.member_access (email, has_main, quota_code, source, main_granted_at)

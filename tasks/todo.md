@@ -28,6 +28,16 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
 - [x] 5 logos normalizadas para WebP com a arte ocupando 80% do quadrado
 - [x] Portfólio publicado em `myportifolio.com.br` e `www`, com o domínio antigo
       `helioportifolio.methodgrowthhub.com.br` continuando no ar
+- [x] **Case do Falow (24/08/2026), 21º projeto.** Entrou no grupo `websites`, na sexta
+      posição, e a primeira página passou a ser BrasilDTF, MaternaForte, Previa, Geração de
+      Leads, AI Block e Falow. O AI Block subiu da nona posição e Site Growth Hub e
+      Damascena Films desceram para a segunda página. Miniatura em quadrado 1080 com o fundo
+      `#030505` medido no PNG de origem, que é a convenção das outras marcas do acervo
+      (`token-logo`, `agents-logo`): quadrado é o único formato em que o `object-cover` não
+      corta um logotipo deitado no card de 2 colunas do celular
+- [x] **`scripts/publicar-helio.mjs`.** O seed escreve nas tabelas, e o Worker lê a linha
+      `is_live` de `portfolio_publications`: sem publicar, o banco fica com o case novo e o
+      site continua servindo o payload antigo, sem erro em lugar nenhum
 
 ### Infra (bloqueios que não são código)
 
@@ -56,8 +66,9 @@ paga, cria login por código no e-mail, e edita o próprio portfólio em
       de envio, chave com permissão só de envio guardada em `.env.local`. Dois e-mails
       reais entregues no Gmail. O SPF e o DMARC do apex **não** foram tocados, e isso está
       certo: o envio sai do subdomínio e o DKIM alinha por domínio organizacional
-- [ ] Confirmar que o e-mail de teste caiu na **caixa de entrada** e não no spam. É a
-      única parte que eu não consigo verificar daqui
+- [x] Confirmar que o e-mail de teste caiu na **caixa de entrada** e não no spam. É a
+      única parte que eu não consigo verificar daqui. **Confirmado pelo dono em
+      23/08/2026**
 - [x] **Supabase: resolvido compartilhando o projeto do AI Block** (decisão do dono, o
       limite de 2 projetos free é por pessoa e já estava esgotado). Schema `myportifolio`
       criado e isolado. Motivo do isolamento, medido e não suposto: `public` já tem
