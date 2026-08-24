@@ -346,6 +346,18 @@ const checar = (nome, condicao, detalhe) => {
   // O selo sobrevive a faixa, e sem selo a coluna dele nao sai.
   const c = render({ profile: { ...RECEM_COMPRADO.profile, stats: quatro, badgeLabel: 'Corretor CRECI-SP' } });
   checar('com faixa, o selo continua na primeira linha', c.includes('Corretor CRECI-SP'));
+
+  // O SELO SOZINHO SE ALINHA COM O NOME, no celular. Com a faixa, ele fica sozinho numa linha
+  // inteira do cartao: encostado na esquerda vira uma pastilha de 174px com 134px de vazio ao
+  // lado, e cartao que nao preenche a propria linha parece defeito de carregamento.
+  checar('selo sozinho recua ate a coluna do nome', c.includes('ml-[4.5rem]') && c.includes('sm:ml-0'),
+    'o recuo e a largura da foto mais o gap da fileira');
+  const oval = render({ profile: { ...RECEM_COMPRADO.profile, stats: quatro, badgeLabel: 'X', avatarShape: 'oval' } });
+  checar('com foto oval o recuo acompanha a largura', oval.includes('ml-[4rem]'),
+    'foto oval tem 48px e nao 56: recuo fixo desalinharia por 8px');
+  const comFileira = render({ profile: { ...RECEM_COMPRADO.profile, stats: tres, badgeLabel: 'Corretor CRECI-SP' } });
+  checar('selo depois da fileira de numeros nao recua', !comFileira.includes('ml-[4.5rem]'),
+    'ali ele vem DEPOIS dos numeros, e recuar so ele o desalinharia do que esta em cima');
   checar('com faixa e sem selo, nao sobra div vazia', !b.includes('sm:items-end'),
     'div vazia entre a identidade e a faixa so somaria o gap do pai duas vezes');
 }

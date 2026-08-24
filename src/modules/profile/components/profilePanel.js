@@ -81,12 +81,28 @@ const BASE_CONTATO = {
 };
 const baseContato = (n) => BASE_CONTATO[n] || 'basis-[calc(50%-0.25rem)] sm:basis-[calc(33.333%-0.34rem)]';
 
-const renderSelo = (profile, lang) => {
+const renderSelo = (profile, lang, sozinho = false) => {
   const rotulo = String(t(profile.badgeLabel, lang) ?? '').trim();
   if (!rotulo) return '';
   const icone = iconeSeloValido(profile.badgeIcon);
+  // NO CELULAR ELE ENCOSTA NO NOME, quando esta sozinho na propria fileira.
+  //
+  // Com quatro numeros ou mais, os numeros descem para a faixa e o selo fica sozinho numa
+  // linha inteira do cartao. Esticado, ele virava uma pilula de 308px para escrever tres
+  // palavras; encostado na esquerda do cartao, ele vira uma pastilha de 174px com 134px de
+  // vazio do lado, e um cartao que nao preenche a propria linha parece defeito de carregamento.
+  //
+  // Alinhado com o nome e com a profissao, ele deixa de ser uma linha propria e passa a ser a
+  // ultima linha do bloco de identidade, que e o que ele diz. O vazio a direita continua la, e
+  // ai ele le como fim de paragrafo, e nao como buraco.
+  //
+  // Com tres numeros ou menos nada disso vale: o selo vem DEPOIS da fileira de numeros, e
+  // recuar so ele o desalinharia do que esta em cima.
+  const recuo = sozinho
+    ? `${FORMAS_AVATAR[formaAvatarValida(profile.avatarShape)].recuo} -mt-2.5 sm:ml-0 sm:mt-0 `
+    : '';
   return `
-        <button class="inline-flex vibecoder-btn text-[11px] font-bold text-white rounded-full py-1.5 px-5 gap-2 items-center justify-center">
+        <button class="${recuo}inline-flex vibecoder-btn text-[11px] font-bold text-white rounded-full py-1.5 px-5 gap-2 items-center justify-center">
           ${icone ? `<i data-lucide="${esc(icone)}" class="h-3.5 w-3.5 text-white"></i>` : ''}
           ${esc(rotulo)}
         </button>`;
@@ -105,15 +121,19 @@ const renderSelo = (profile, lang) => {
 // Como forma deliberada, com medida fixa, ele e uma opcao legitima e o dono pediu para manter
 // as duas. `shrink-0` fica nos dois casos: quem decide a forma e o campo, nunca o acaso do
 // texto ao lado.
+// O RECUO ANDA JUNTO DA LARGURA, e por isso ele mora aqui. Ele e a largura da foto mais o
+// `gap-4` da fileira, e serve para o selo se alinhar com o nome no celular (ver renderSelo).
+// Fora daqui, os dois numeros teriam como divergir em silencio no dia em que a foto mudar de
+// tamanho, e o alinhamento sairia por um dedo sem ninguem entender por que.
 const FORMAS_AVATAR = {
-  circulo: 'w-14 h-14 rounded-full',
-  oval: 'w-12 h-16 rounded-[50%]',
+  circulo: { classe: 'w-14 h-14 rounded-full', recuo: 'ml-[4.5rem]' },
+  oval: { classe: 'w-12 h-16 rounded-[50%]', recuo: 'ml-[4rem]' },
 };
 export const formaAvatarValida = (v) => (v === 'oval' ? 'oval' : 'circulo');
 
 const renderAvatar = (profile) => {
   const nome = String(profile.name || '').trim();
-  const forma = FORMAS_AVATAR[formaAvatarValida(profile.avatarShape)];
+  const forma = FORMAS_AVATAR[formaAvatarValida(profile.avatarShape)].classe;
   if (!profile.avatar) {
     const iniciais = nome.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
     return `<div class="${forma} shrink-0 ring-white/10 ring-2 bg-white/10 flex items-center justify-center text-sm font-bold text-white/70" aria-label="${esc(nome)}">${esc(iniciais || '?')}</div>`;
@@ -215,7 +235,7 @@ export function renderProfilePanel(profile, lang, ui = {}) {
   const stats = profile.stats;
   const socials = profile.socials;
   const emFaixa = stats.length > 3;
-  const selo = renderSelo(profile, lang);
+  const selo = renderSelo(profile, lang, emFaixa);
   const cta = renderCta(profile, lang);
   const icones = profile.socialsIcons === true;
 

@@ -400,4 +400,27 @@ export const projectsEn = {
     stack: ['Next.js 16', 'React 19', 'TypeScript', 'SQL Server', 'Tailwind CSS v4', 'On-premise deploy (PM2)'],
     linkNote: 'Navigable demo, placeholder data (any username and password works)',
   },
+  falow: {
+    category: 'Website',
+    tagline:
+      'The launch site for Falow, software that answers Instagram DMs and comments by keyword. The page does not show screenshots of the product, it assembles the product in front of the reader.',
+    summary:
+      'A landing page for a conversational automation tool walking into a market that already has an established name. The sequence builder and the dashboard were rebuilt in HTML and CSS and assemble themselves on scroll, node by node, stitched together by a green stroke lifted from the brand itself. A three-act narrative, a preloader that is the signature drawing itself, and Lighthouse 94 for performance with 100 for accessibility, best practices and SEO.',
+    problem:
+      'Falow was born to compete on ManyChat ground, an incumbent with a name and years of market behind it. And it was born with nothing to lean on: no clients, no testimonials, no numbers. An institutional page with three bullets and a screenshot does not carry that difference, because a first-time visitor has to understand what the tool does in seconds and feel that it is good before creating an account.',
+    solution:
+      'I built the entire landing page, from the design system to publishing, and answered the missing social proof by turning the page itself into the demo. Instead of screenshots, the sequence builder and the dashboard were rebuilt in HTML and CSS and assemble on scroll, node by node, with the brand green wires and yellow triggers. The reading follows three acts (the pain in the dark, the product in the light, the invitation in the dark) tied together by the Falow Path, a custom effect that draws the brand stroke as the visitor scrolls and lights a trigger for every card that comes in. The mark was not drawn by eye: the geometry of the ring and the dot came from measuring the official vector, fitting a circle over the outline, and the preloader is that signature assembling itself on screen.',
+    features: [
+      'A three-act narrative: the pain in the dark, the product in the light, the invitation in the dark',
+      'Sequence builder and dashboard rebuilt in HTML and CSS, no screenshots',
+      'Two cinematic sticky sections, with the flow assembling itself on scroll',
+      'Falow Path: a custom effect that draws the brand stroke and lights the triggers',
+      'A preloader that is the brand signature assembling, with the ring measured on the official vector',
+      'Ink-blot menu and anchor transitions by wipe, with focus trapping and Escape',
+      'Reveal with no content flash and real respect for prefers-reduced-motion',
+      'Lighthouse: 94 performance, 100 accessibility, best practices and SEO',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'Vanilla JavaScript', 'GSAP (ScrollTrigger)', 'Feature-Sliced architecture', 'Cloudflare Pages'],
+    linkNote: 'Site is live. Sign-up opens when the platform ships',
+  },
 };

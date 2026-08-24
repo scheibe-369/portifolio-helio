@@ -122,6 +122,71 @@ export const projects = [
     linkNote: 'Demo navegável, dados fictícios (qualquer usuário e senha entra)',
   },
   {
+    slug: 'ai-block',
+    name: 'AI Block',
+    client: 'CIPHER',
+    category: 'Plataforma / Infoproduto',
+    year: '2026',
+    accent: '#2563FF',
+    plateBg: '#0b0d12',
+    image: '/projects/ai-block.webp',
+    videoId: 'kpDD93zu6f8',
+    link: 'https://aiblock.methodcipher.com',
+    linkNote: 'Área de membros, acesso restrito',
+    tagline:
+      'Hub de conhecimento em IA por assinatura: prompts, skills, plugins, artifacts e repositórios curados e verificados, num só lugar.',
+    summary:
+      'Área de membros que reúne 430 prompts prontos em 8 categorias e mais 437 itens curados sobre IA (skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas), com liberação automática de acesso na compra, paywall por tier no banco e painel admin que publica conteúdo novo sem redeploy.',
+    problem:
+      'Quem usa IA no dia a dia perde horas garimpando prompt, skill, plugin e repositório em threads soltas, e boa parte do que circula é link morto, conteúdo genérico ou material inventado por outra IA. Faltava um acervo único, verificado item a item e fácil de navegar.',
+    solution:
+      'Construí o produto inteiro, do acervo à infraestrutura. O conteúdo não é escrito, é garimpado e verificado: um pipeline de agentes de IA em paralelo varre ângulos diferentes de busca, um revisor adversarial reabre cada link e confere título, autor, data e estrelas contra a página real, e a montagem final roda em script determinista, nunca em agente. Em cima disso, uma área de membros com login, três SKUs liberados automaticamente pelo webhook de compra, paywall de verdade em RLS no banco (esconder aba no front é conveniência de UI, não proteção) e painel admin para publicar conteúdo sem novo deploy.',
+    features: [
+      '430 prompts em 8 categorias, cada um com fonte real e IA recomendada',
+      '437 itens curados: skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas',
+      'Pipeline de curadoria com agentes em paralelo e revisor adversarial que reabre cada link',
+      'Validador que barra link morto, duplicata e item fora do schema antes de publicar',
+      'Liberação automática de acesso na compra, via webhook',
+      'Paywall por tier em RLS no banco, não apenas escondido na interface',
+      'Painel admin de membros e de conteúdo, publica sem novo deploy',
+      'Aba de guia com aula de onboarding e suporte direto',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Supabase (Auth, RLS, Edge Functions)', 'PostgreSQL', 'Cloudflare Pages'],
+  },
+  {
+    slug: 'falow',
+    name: 'Falow',
+    client: 'Falow',
+    category: 'Website',
+    year: '2026',
+    accent: '#32E875',
+    plateBg: '#030505',
+    fit: 'cover',
+    image: '/projects/falow.webp',
+    videoId: 'wzn6z6ytWxI',
+    link: 'https://falow.app.br',
+    linkNote: 'Site no ar. O cadastro abre quando a plataforma for publicada',
+    tagline:
+      'Site de lançamento do Falow, software que responde DM e comentário do Instagram por palavra-chave. A página não mostra print do produto, ela monta o produto na frente de quem lê.',
+    summary:
+      'Landing page de um software de automação conversacional que entra num mercado com referência consolidada. O builder de sequências e o dashboard foram remontados em HTML e CSS e se montam por scroll, nó a nó, costurados por um traço verde da própria marca. Narrativa em três atos, preloader que é a assinatura se desenhando, e Lighthouse 94 de performance com 100 em acessibilidade, boas práticas e SEO.',
+    problem:
+      'O Falow nasceu para disputar o terreno do ManyChat, um concorrente que já tem nome e anos de mercado. E nasceu sem nada em que se apoiar: nenhum cliente, nenhum depoimento, nenhum número. Um institucional com três bullets e um print de tela não sustenta essa diferença, porque quem chega precisa entender em segundos o que a ferramenta faz e sentir que ela é boa antes de criar conta.',
+    solution:
+      'Construí a landing inteira, do design system à publicação, e resolvi a falta de prova social transformando a própria página em demonstração. Em vez de screenshot, o builder de sequências e o dashboard foram reconstruídos em HTML e CSS e se montam por scroll, nó a nó, com os fios verdes e os gatilhos amarelos da marca. A leitura segue três atos (a dor no escuro, o produto no claro, o convite no escuro) amarrados pelo Falow Path, um efeito próprio que desenha o traço da marca conforme a pessoa desce e acende um gatilho a cada card que entra. A marca não foi desenhada de olho: a geometria do anel e do ponto saiu de medição no vetor oficial, por ajuste de círculo sobre o traçado, e o preloader é essa assinatura se montando na tela.',
+    features: [
+      'Narrativa em três atos: a dor no escuro, o produto no claro, o convite no escuro',
+      'Builder de sequências e dashboard remontados em HTML e CSS, sem print de tela',
+      'Duas seções cinematográficas em sticky, com o fluxo se montando por scroll',
+      'Falow Path: efeito próprio que desenha o traço da marca e acende os gatilhos',
+      'Preloader que é a assinatura da marca se montando, com o anel medido no vetor oficial',
+      'Menu em mancha de tinta e transição de âncora por wipe, com foco preso e Escape',
+      'Reveal sem piscada de conteúdo e respeito real a prefers-reduced-motion',
+      'Lighthouse: 94 de performance, 100 em acessibilidade, boas práticas e SEO',
+    ],
+    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'GSAP (ScrollTrigger)', 'Arquitetura Feature-Sliced', 'Cloudflare Pages'],
+  },
+  {
     slug: 'growth-hub-site',
     name: 'Site Growth Hub',
     client: 'Growth Hub',
@@ -236,38 +301,6 @@ export const projects = [
     stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Cloudflare Pages'],
     link: 'https://apresentacao.methodgrowthhub.com.br',
     linkNote: 'Proposta modelo (dados fictícios)',
-  },
-  {
-    slug: 'ai-block',
-    name: 'AI Block',
-    client: 'CIPHER',
-    category: 'Plataforma / Infoproduto',
-    year: '2026',
-    accent: '#2563FF',
-    plateBg: '#0b0d12',
-    image: '/projects/ai-block.webp',
-    videoId: 'kpDD93zu6f8',
-    link: 'https://aiblock.methodcipher.com',
-    linkNote: 'Área de membros, acesso restrito',
-    tagline:
-      'Hub de conhecimento em IA por assinatura: prompts, skills, plugins, artifacts e repositórios curados e verificados, num só lugar.',
-    summary:
-      'Área de membros que reúne 430 prompts prontos em 8 categorias e mais 437 itens curados sobre IA (skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas), com liberação automática de acesso na compra, paywall por tier no banco e painel admin que publica conteúdo novo sem redeploy.',
-    problem:
-      'Quem usa IA no dia a dia perde horas garimpando prompt, skill, plugin e repositório em threads soltas, e boa parte do que circula é link morto, conteúdo genérico ou material inventado por outra IA. Faltava um acervo único, verificado item a item e fácil de navegar.',
-    solution:
-      'Construí o produto inteiro, do acervo à infraestrutura. O conteúdo não é escrito, é garimpado e verificado: um pipeline de agentes de IA em paralelo varre ângulos diferentes de busca, um revisor adversarial reabre cada link e confere título, autor, data e estrelas contra a página real, e a montagem final roda em script determinista, nunca em agente. Em cima disso, uma área de membros com login, três SKUs liberados automaticamente pelo webhook de compra, paywall de verdade em RLS no banco (esconder aba no front é conveniência de UI, não proteção) e painel admin para publicar conteúdo sem novo deploy.',
-    features: [
-      '430 prompts em 8 categorias, cada um com fonte real e IA recomendada',
-      '437 itens curados: skills, plugins, artifacts, artigos, notícias, repositórios e bibliotecas',
-      'Pipeline de curadoria com agentes em paralelo e revisor adversarial que reabre cada link',
-      'Validador que barra link morto, duplicata e item fora do schema antes de publicar',
-      'Liberação automática de acesso na compra, via webhook',
-      'Paywall por tier em RLS no banco, não apenas escondido na interface',
-      'Painel admin de membros e de conteúdo, publica sem novo deploy',
-      'Aba de guia com aula de onboarding e suporte direto',
-    ],
-    stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Supabase (Auth, RLS, Edge Functions)', 'PostgreSQL', 'Cloudflare Pages'],
   },
   {
     slug: 'indicacao-marcos',
@@ -592,6 +625,7 @@ export const projectGroups = {
   'geracao-leads-previa': ['sistemas', 'automacao'],
   'ai-agents-playground': ['agentes-ia'],
   'growth-hub-site': ['websites'],
+  falow: ['websites'],
   'token-cost-calculator': ['sistemas'],
   'sistema-goat': ['sistemas', 'agentes-ia'],
   'pipeline-video-ia': ['automacao', 'agentes-ia'],
