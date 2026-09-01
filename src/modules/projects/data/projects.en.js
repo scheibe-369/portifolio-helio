@@ -423,4 +423,25 @@ export const projectsEn = {
     stack: ['Vite', 'Tailwind CSS v4', 'Vanilla JavaScript', 'GSAP (ScrollTrigger)', 'Feature-Sliced architecture', 'Cloudflare Pages'],
     linkNote: 'Site is live. Sign-up opens when the platform ships',
   },
+  'safe-group': {
+    category: 'Website',
+    linkNote: 'Temporary domain, the final version moves to safegroup.pt',
+    tagline:
+      'Institutional site for a growth, commercial intelligence and technology company operating in the automotive, financial and software sectors, on high ticket deals.',
+    summary:
+      'A multi-page website presenting the full positioning of Safe Group: a 360 diagnostic of each client operation, the fronts it can structure (traffic, automation, software, AI and commercial consulting, combined based on the real problem) and a catalog of real cases, ending in a qualified commercial diagnostic form.',
+    problem:
+      'Safe Group operates on high ticket deals in the automotive, financial and software sectors, but that offering did not fit a generic agency site: reducing the positioning to "traffic, automation or consulting" hid what actually sets the company apart, which is diagnosing the whole operation and structuring only the front needed to capture the biggest leverage point.',
+    solution:
+      'I built the multi-page institutional site from scratch: a Home with the 360 diagnostic, fronts and method, plus dedicated pages for About, Solutions, Method, a case catalog (with its own template per case) and Contact with a qualified diagnostic form. Visual identity in deep black, graphite and Safe red, with Space Grotesk in headings and a red-lines video as the main movement gesture. Deployed on Cloudflare Workers via OpenNext, published automatically on every push.',
+    features: [
+      '360 diagnostic of the client operation, on the Home',
+      'Dedicated pages: About, Solutions, Method and Contact',
+      'Case catalog with its own template per case',
+      'Qualified commercial diagnostic form',
+      'Visual identity in deep black, graphite and Safe red',
+      'Automatic deploy on every push, via GitHub Actions and Cloudflare Workers',
+    ],
+    stack: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS 4', 'Framer Motion', 'OpenNext', 'Cloudflare Workers'],
+  },
 };

@@ -154,6 +154,36 @@ export const projects = [
     stack: ['Vite', 'Tailwind CSS v4', 'JavaScript vanilla', 'Supabase (Auth, RLS, Edge Functions)', 'PostgreSQL', 'Cloudflare Pages'],
   },
   {
+    slug: 'safe-group',
+    name: 'Safe Group',
+    client: 'Safe Group',
+    category: 'Website',
+    year: '2026',
+    accent: '#DB0E19',
+    plateBg: '#000000',
+    image: '/projects/safe-group.webp',
+    videoId: '9TMGiFVMHb0',
+    link: 'https://safe.methodgrowthhub.com.br',
+    linkNote: 'Domínio provisório, a versão final vai para safegroup.pt',
+    tagline:
+      'Site institucional de uma empresa de crescimento, inteligência comercial e tecnologia que atua nos setores automóvel, financeiro e software, em operações de alto ticket.',
+    summary:
+      'Website multipágina que apresenta o posicionamento completo da Safe Group: diagnóstico 360 de cada operação do cliente, as frentes que ela pode estruturar (tráfego, automação, software, IA e consultoria comercial, combinadas conforme o problema real) e um catálogo de cases reais, terminando num formulário de diagnóstico comercial qualificado.',
+    problem:
+      'A Safe Group atua em operações de alto ticket nos setores automóvel, financeiro e software, mas essa entrega não cabia num institucional genérico de agência: reduzir o posicionamento a "tráfego, automação ou consultoria" escondia o que de fato diferencia a empresa, que é diagnosticar a operação inteira e estruturar só a frente necessária para capturar o maior ponto de alavancagem.',
+    solution:
+      'Construí o site institucional multipágina do zero: Home com diagnóstico 360, frentes e método, mais páginas dedicadas de Sobre, Soluções, Método, catálogo de Cases (com template próprio por case) e Contacto com formulário de diagnóstico qualificado. Identidade visual em preto profundo, grafite e vermelho Safe, com Space Grotesk nos títulos e um vídeo de linhas vermelhas como principal gesto de movimento. Deploy em Cloudflare Workers via OpenNext, publicado automaticamente a cada push.',
+    features: [
+      'Diagnóstico 360 da operação do cliente, na Home',
+      'Páginas dedicadas: Sobre, Soluções, Método e Contacto',
+      'Catálogo de cases com template próprio por case',
+      'Formulário de diagnóstico comercial qualificado',
+      'Identidade visual em preto profundo, grafite e vermelho Safe',
+      'Deploy automático a cada push, via GitHub Actions e Cloudflare Workers',
+    ],
+    stack: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS 4', 'Framer Motion', 'OpenNext', 'Cloudflare Workers'],
+  },
+  {
     slug: 'falow',
     name: 'Falow',
     client: 'Falow',
@@ -222,7 +252,7 @@ export const projects = [
     accent: '#2F6BFF',
     fit: 'cover',
     image: '/projects/damascena-films.webp',
-    videoId: '_LGj734-vew',
+    videoId: 'LGoLh7TmyJY',
     link: 'https://damascenafilms.com.br',
     linkNote: 'Em finalização (aguardando os ajustes finais do cliente)',
     tagline: 'Landing de um filmmaker da Região dos Lagos: vídeo com estética de cinema e cabeça de estratégia.',
@@ -625,6 +655,7 @@ export const projectGroups = {
   'ai-agents-playground': ['agentes-ia'],
   'growth-hub-site': ['websites'],
   falow: ['websites'],
+  'safe-group': ['websites'],
   'token-cost-calculator': ['sistemas'],
   'sistema-goat': ['sistemas', 'agentes-ia'],
   'pipeline-video-ia': ['automacao', 'agentes-ia'],
